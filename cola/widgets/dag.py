@@ -1210,6 +1210,10 @@ class GitDAG(standard.MainWindow):
         self.revtext = GitDagLineEdit(context)
         self.maxresults = standard.SpinBox(digits=None, maxi=9999999, wrap=True)
 
+        self.merge_source_label = QtWidgets.QLabel()
+        self.merge_source_label.setTextInteractionFlags(Qt.NoTextInteraction)
+        self.merge_source_label.hide()
+
         self.zoom_out = qtutils.create_action_button(
             tooltip=N_('Zoom Out'), icon=icons.zoom_out()
         )
@@ -1233,6 +1237,7 @@ class GitDAG(standard.MainWindow):
         self.graphview.commits_selected.connect(
             self.commits_selected, type=Qt.QueuedConnection
         )
+        self.graphview.merge_source_changed.connect(self._update_merge_source_label)
 
         self.commits_selected.connect(self.select_commits, type=Qt.QueuedConnection)
         self.commits_selected.connect(
@@ -1309,6 +1314,7 @@ class GitDAG(standard.MainWindow):
         self.graph_controls_layout = qtutils.hbox(
             defs.no_margin,
             defs.button_spacing,
+            self.merge_source_label,
             self.zoom_out,
             self.zoom_in,
             self.zoom_to_fit,
@@ -1536,6 +1542,15 @@ class GitDAG(standard.MainWindow):
         """Refresh the view when the model is updated"""
         self.display()
         self.update_window_title()
+
+    def _update_merge_source_label(self, source):
+        """Show or hide the "<branch> -> " hint while picking a merge target."""
+        if source:
+            self.merge_source_label.setText('%s →' % source)
+            self.merge_source_label.show()
+        else:
+            self.merge_source_label.clear()
+            self.merge_source_label.hide()
 
     def refresh(self):
         """Unconditionally refresh the DAG"""
@@ -2263,6 +2278,8 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
     commits_selected = Signal(object)
     diff_commits = Signal(object, object)
     search_line_range_in_oid = Signal(object)
+    # Emitted when merge-to mode is entered (source branch name) or exited (None).
+    merge_source_changed = Signal(object)
 
     x_adjust = int(Commit.commit_radius * 4 / 3)
     y_adjust = int(Commit.commit_radius * 4 / 3)
@@ -3013,14 +3030,14 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
 
     def enter_merge_mode(self, source_branch):
         self._merge_source = source_branch
-        self.viewport().setCursor(Qt.PointingHandCursor)
         self.setFocus(Qt.OtherFocusReason)
+        self.merge_source_changed.emit(source_branch)
 
     def exit_merge_mode(self):
         if self._merge_source is None:
             return
         self._merge_source = None
-        self.viewport().unsetCursor()
+        self.merge_source_changed.emit(None)
 
     def complete_merge(self, target_branch):
         source = self._merge_source
