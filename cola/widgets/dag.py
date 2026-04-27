@@ -2186,10 +2186,39 @@ class Label(QtWidgets.QGraphicsItem):
             pos = event.pos()
             for rect, text in self._label_hits:
                 if rect.contains(pos):
-                    qtutils.set_clipboard(text)
+                    agent_part = _agent_branch_part(text)
+                    if agent_part is None:
+                        qtutils.set_clipboard(text)
+                    else:
+                        self._show_agent_copy_menu(event, text, agent_part)
                     event.accept()
                     return
         super().mousePressEvent(event)
+
+    def _show_agent_copy_menu(self, event, full_name, agent_part):
+        menu = QtWidgets.QMenu()
+        copy_full = menu.addAction(N_('Copy "%s"') % full_name)
+        copy_part = menu.addAction(N_('Copy "%s"') % agent_part)
+        chosen = menu.exec_(event.screenPos())
+        if chosen is copy_full:
+            qtutils.set_clipboard(full_name)
+        elif chosen is copy_part:
+            qtutils.set_clipboard(agent_part)
+
+
+def _agent_branch_part(name):
+    """Return the agent name segment for branches starting with "agent_" or "agent/".
+
+    The returned segment is the text after the prefix up to (but not including) the
+    next "/", or the rest of the string if there is no "/". Returns None if name
+    does not start with one of the recognized agent prefixes.
+    """
+    for prefix in ('agent_', 'agent/'):
+        if name.startswith(prefix):
+            tail = name[len(prefix):]
+            slash = tail.find('/')
+            return tail if slash < 0 else tail[:slash]
+    return None
 
 
 class GraphView(QtWidgets.QGraphicsView, ViewerMixin):

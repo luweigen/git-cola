@@ -3912,19 +3912,572 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 57,
+      "timestamp": "2026-04-27T15:12:06.129Z",
+      "source": "user",
+      "message": "如果branch name以agent_或agent/开头，则弹出两个选项，一是拷贝整个name，二是拷贝agent_或agent/开头之后直到/之前（或结尾）的部分",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 58,
+      "timestamp": "2026-04-27T15:12:10.661Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 61106,
+        "completion_tokens": 374,
+        "cached_tokens": 61100,
+        "extra": {
+          "cache_creation_input_tokens": 432,
+          "cache_read_input_tokens": 61100,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 432,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 374,
+              "cache_read_input_tokens": 61100,
+              "cache_creation_input_tokens": 432,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 432
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 59,
+      "timestamp": "2026-04-27T15:12:11.154Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Read toolu_01LEe5Q9c6scCAddunbRaZRE",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01LEe5Q9c6scCAddunbRaZRE",
+          "function_name": "Read",
+          "arguments": {
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "offset": 2178,
+            "limit": 25
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01LEe5Q9c6scCAddunbRaZRE",
+            "content": "2178\t            painter.drawText(text_rect, Qt.TextSingleLine, display_tag)\n2179\t            hits.append((QRectF(box_rect), display_tag))\n2180\t            current_width += text_rect.width() + spacing\n2181\t\n2182\t        self._label_hits = hits\n2183\t\n2184\t    def mousePressEvent(self, event):\n2185\t        if event.button() == Qt.LeftButton:\n2186\t            pos = event.pos()\n2187\t            for rect, text in self._label_hits:\n2188\t                if rect.contains(pos):\n2189\t                    qtutils.set_clipboard(text)\n2190\t                    event.accept()\n2191\t                    return\n2192\t        super().mousePressEvent(event)\n2193\t\n2194\t\n2195\tclass GraphView(QtWidgets.QGraphicsView, ViewerMixin):\n2196\t    commits_selected = Signal(object)\n2197\t    diff_commits = Signal(object, object)\n2198\t    search_line_range_in_oid = Signal(object)\n2199\t\n2200\t    x_adjust = int(Commit.commit_radius * 4 / 3)\n2201\t    y_adjust = int(Commit.commit_radius * 4 / 3)\n2202\n\n[metadata] {\"type\": \"text\", \"file\": {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"content\": \"            painter.drawText(text_rect, Qt.TextSingleLine, display_tag)\\n            hits.append((QRectF(box_rect), display_tag))\\n            current_width += text_rect.width() + spacing\\n\\n        self._label_hits = hits\\n\\n    def mousePressEvent(self, event):\\n        if event.button() == Qt.LeftButton:\\n            pos = event.pos()\\n            for rect, text in self._label_hits:\\n                if rect.contains(pos):\\n                    qtutils.set_clipboard(text)\\n                    event.accept()\\n                    return\\n        super().mousePressEvent(event)\\n\\n\\nclass GraphView(QtWidgets.QGraphicsView, ViewerMixin):\\n    commits_selected = Signal(object)\\n    diff_commits = Signal(object, object)\\n    search_line_range_in_oid = Signal(object)\\n\\n    x_adjust = int(Commit.commit_radius * 4 / 3)\\n    y_adjust = int(Commit.commit_radius * 4 / 3)\\n\", \"numLines\": 25, \"startLine\": 2178, \"totalLines\": 2985}}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 61106,
+        "completion_tokens": 374,
+        "cached_tokens": 61100,
+        "extra": {
+          "cache_creation_input_tokens": 432,
+          "cache_read_input_tokens": 61100,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 432,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 374,
+              "cache_read_input_tokens": 61100,
+              "cache_creation_input_tokens": 432,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 432
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Read",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+              "content": "            painter.drawText(text_rect, Qt.TextSingleLine, display_tag)\n            hits.append((QRectF(box_rect), display_tag))\n            current_width += text_rect.width() + spacing\n\n        self._label_hits = hits\n\n    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    qtutils.set_clipboard(text)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)\n\n\nclass GraphView(QtWidgets.QGraphicsView, ViewerMixin):\n    commits_selected = Signal(object)\n    diff_commits = Signal(object, object)\n    search_line_range_in_oid = Signal(object)\n\n    x_adjust = int(Commit.commit_radius * 4 / 3)\n    y_adjust = int(Commit.commit_radius * 4 / 3)\n",
+              "numLines": 25,
+              "startLine": 2178,
+              "totalLines": 2985
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01LEe5Q9c6scCAddunbRaZRE",
+            "type": "tool_result",
+            "content": "2178\t            painter.drawText(text_rect, Qt.TextSingleLine, display_tag)\n2179\t            hits.append((QRectF(box_rect), display_tag))\n2180\t            current_width += text_rect.width() + spacing\n2181\t\n2182\t        self._label_hits = hits\n2183\t\n2184\t    def mousePressEvent(self, event):\n2185\t        if event.button() == Qt.LeftButton:\n2186\t            pos = event.pos()\n2187\t            for rect, text in self._label_hits:\n2188\t                if rect.contains(pos):\n2189\t                    qtutils.set_clipboard(text)\n2190\t                    event.accept()\n2191\t                    return\n2192\t        super().mousePressEvent(event)\n2193\t\n2194\t\n2195\tclass GraphView(QtWidgets.QGraphicsView, ViewerMixin):\n2196\t    commits_selected = Signal(object)\n2197\t    diff_commits = Signal(object, object)\n2198\t    search_line_range_in_oid = Signal(object)\n2199\t\n2200\t    x_adjust = int(Commit.commit_radius * 4 / 3)\n2201\t    y_adjust = int(Commit.commit_radius * 4 / 3)\n2202\t"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+              "content": "            painter.drawText(text_rect, Qt.TextSingleLine, display_tag)\n            hits.append((QRectF(box_rect), display_tag))\n            current_width += text_rect.width() + spacing\n\n        self._label_hits = hits\n\n    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    qtutils.set_clipboard(text)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)\n\n\nclass GraphView(QtWidgets.QGraphicsView, ViewerMixin):\n    commits_selected = Signal(object)\n    diff_commits = Signal(object, object)\n    search_line_range_in_oid = Signal(object)\n\n    x_adjust = int(Commit.commit_radius * 4 / 3)\n    y_adjust = int(Commit.commit_radius * 4 / 3)\n",
+              "numLines": 25,
+              "startLine": 2178,
+              "totalLines": 2985
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01LEe5Q9c6scCAddunbRaZRE",
+            "type": "tool_result",
+            "content": "2178\t            painter.drawText(text_rect, Qt.TextSingleLine, display_tag)\n2179\t            hits.append((QRectF(box_rect), display_tag))\n2180\t            current_width += text_rect.width() + spacing\n2181\t\n2182\t        self._label_hits = hits\n2183\t\n2184\t    def mousePressEvent(self, event):\n2185\t        if event.button() == Qt.LeftButton:\n2186\t            pos = event.pos()\n2187\t            for rect, text in self._label_hits:\n2188\t                if rect.contains(pos):\n2189\t                    qtutils.set_clipboard(text)\n2190\t                    event.accept()\n2191\t                    return\n2192\t        super().mousePressEvent(event)\n2193\t\n2194\t\n2195\tclass GraphView(QtWidgets.QGraphicsView, ViewerMixin):\n2196\t    commits_selected = Signal(object)\n2197\t    diff_commits = Signal(object, object)\n2198\t    search_line_range_in_oid = Signal(object)\n2199\t\n2200\t    x_adjust = int(Commit.commit_radius * 4 / 3)\n2201\t    y_adjust = int(Commit.commit_radius * 4 / 3)\n2202\t"
+          }
+        },
+        "raw_arguments": {
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "offset": 2178,
+          "limit": 25
+        }
+      }
+    },
+    {
+      "step_id": 60,
+      "timestamp": "2026-04-27T15:12:19.851Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01CeJnrjtTJYKEtgAcbvvgpw",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01CeJnrjtTJYKEtgAcbvvgpw",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    qtutils.set_clipboard(text)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)",
+            "new_string": "    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    agent_part = _agent_branch_part(text)\n                    if agent_part is None:\n                        qtutils.set_clipboard(text)\n                    else:\n                        self._show_agent_copy_menu(event, text, agent_part)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)\n\n    def _show_agent_copy_menu(self, event, full_name, agent_part):\n        menu = QtWidgets.QMenu()\n        copy_full = menu.addAction(N_('Copy \"%s\"') % full_name)\n        copy_part = menu.addAction(N_('Copy \"%s\"') % agent_part)\n        chosen = menu.exec_(event.screenPos())\n        if chosen is copy_full:\n            qtutils.set_clipboard(full_name)\n        elif chosen is copy_part:\n            qtutils.set_clipboard(agent_part)\n\n\ndef _agent_branch_part(name):\n    \"\"\"Return the agent name segment for branches starting with \"agent_\" or \"agent/\".\n\n    The returned segment is the text after the prefix up to (but not including) the\n    next \"/\", or the rest of the string if there is no \"/\". Returns None if name\n    does not start with one of the recognized agent prefixes.\n    \"\"\"\n    for prefix in ('agent_', 'agent/'):\n        if name.startswith(prefix):\n            tail = name[len(prefix):]\n            slash = tail.find('/')\n            return tail if slash < 0 else tail[:slash]\n    return None"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01CeJnrjtTJYKEtgAcbvvgpw",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully.\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"    def mousePressEvent(self, event):\\n        if event.button() == Qt.LeftButton:\\n            pos = event.pos()\\n            for rect, text in self._label_hits:\\n                if rect.contains(pos):\\n                    qtutils.set_clipboard(text)\\n                    event.accept()\\n                    return\\n        super().mousePressEvent(event)\", \"newString\": \"    def mousePressEvent(self, event):\\n        if event.button() == Qt.LeftButton:\\n            pos = event.pos()\\n            for rect, text in self._label_hits:\\n                if rect.contains(pos):\\n                    agent_part = _agent_branch_part(text)\\n                    if agent_part is None:\\n                        qtutils.set_clipboard(text)\\n                    else:\\n                        self._show_agent_copy_menu(event, text, agent_part)\\n                    event.accept()\\n                    return\\n        super().mousePressEvent(event)\\n\\n    def _show_agent_copy_menu(self, event, full_name, agent_part):\\n        menu = QtWidgets.QMenu()\\n        copy_full = menu.addAction(N_('Copy \\\"%s\\\"') % full_name)\\n        copy_part = menu.addAction(N_('Copy \\\"%s\\\"') % agent_part)\\n        chosen = menu.exec_(event.screenPos())\\n        if chosen is copy_full:\\n            qtutils.set_clipboard(full_name)\\n        elif chosen is copy_part:\\n            qtutils.set_clipboard(agent_part)\\n\\n\\ndef _agent_branch_part(name):\\n    \\\"\\\"\\\"Return the agent name segment for branches starting with \\\"agent_\\\" or \\\"agent/\\\".\\n\\n    The returned segment is the text after the prefix up to (but not including) the\\n    next \\\"/\\\", or the rest of the string if there is no \\\"/\\\". Returns None if name\\n    does not start with one of the recognized agent prefixes.\\n    \\\"\\\"\\\"\\n    for prefix in ('agent_', 'agent/'):\\n        if name.startswith(prefix):\\n            tail = name[len(prefix):]\\n            slash = tail.find('/')\\n            return tail if slash < 0 else tail[:slash]\\n    return None\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2186, \"oldLines\": 12, \"newStart\": 2186, \"newLines\": 41, \"lines\": [\"             pos = event.pos()\", \"             for rect, text in self._label_hits:\", \"                 if rect.contains(pos):\", \"-                    qtutils.set_clipboard(text)\", \"+                    agent_part = _agent_branch_part(text)\", \"+                    if agent_part is None:\", \"+                        qtutils.set_clipboard(text)\", \"+                    else:\", \"+                        self._show_agent_copy_menu(event, text, agent_part)\", \"                     event.accept()\", \"                     return\", \"         super().mousePressEvent(event)\", \" \", \"+    def _show_agent_copy_menu(self, event, full_name, agent_part):\", \"+        menu = QtWidgets.QMenu()\", \"+        copy_full = menu.addAction(N_('Copy \\\"%s\\\"') % full_name)\", \"+        copy_part = menu.addAction(N_('Copy \\\"%s\\\"') % agent_part)\", \"+        chosen = menu.exec_(event.screenPos())\", \"+        if chosen is copy_full:\", \"+            qtutils.set_clipboard(full_name)\", \"+        elif chosen is copy_part:\", \"+            qtutils.set_clipboard(agent_part)\", \" \", \"+\", \"+def _agent_branch_part(name):\", \"+    \\\"\\\"\\\"Return the agent name segment for branches starting with \\\"agent_\\\" or \\\"agent/\\\".\", \"+\", \"+    The returned segment is the text after the prefix up to (but not including) the\", \"+    next \\\"/\\\", or the rest of the string if there is no \\\"/\\\". Returns None if name\", \"+    does not start with one of the recognized agent prefixes.\", \"+    \\\"\\\"\\\"\", \"+    for prefix in ('agent_', 'agent/'):\", \"+        if name.startswith(prefix):\", \"+            tail = name[len(prefix):]\", \"+            slash = tail.find('/')\", \"+            return tail if slash < 0 else tail[:slash]\", \"+    return None\", \"+\", \"+\", \" class GraphView(QtWidgets.QGraphicsView, ViewerMixin):\", \"     commits_selected = Signal(object)\", \"     diff_commits = Signal(object, object)\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 61533,
+        "completion_tokens": 825,
+        "cached_tokens": 61532,
+        "extra": {
+          "cache_creation_input_tokens": 798,
+          "cache_read_input_tokens": 61532,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 798,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 825,
+              "cache_read_input_tokens": 61532,
+              "cache_creation_input_tokens": 798,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 798
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    qtutils.set_clipboard(text)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)",
+            "newString": "    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    agent_part = _agent_branch_part(text)\n                    if agent_part is None:\n                        qtutils.set_clipboard(text)\n                    else:\n                        self._show_agent_copy_menu(event, text, agent_part)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)\n\n    def _show_agent_copy_menu(self, event, full_name, agent_part):\n        menu = QtWidgets.QMenu()\n        copy_full = menu.addAction(N_('Copy \"%s\"') % full_name)\n        copy_part = menu.addAction(N_('Copy \"%s\"') % agent_part)\n        chosen = menu.exec_(event.screenPos())\n        if chosen is copy_full:\n            qtutils.set_clipboard(full_name)\n        elif chosen is copy_part:\n            qtutils.set_clipboard(agent_part)\n\n\ndef _agent_branch_part(name):\n    \"\"\"Return the agent name segment for branches starting with \"agent_\" or \"agent/\".\n\n    The returned segment is the text after the prefix up to (but not including) the\n    next \"/\", or the rest of the string if there is no \"/\". Returns None if name\n    does not start with one of the recognized agent prefixes.\n    \"\"\"\n    for prefix in ('agent_', 'agent/'):\n        if name.startswith(prefix):\n            tail = name[len(prefix):]\n            slash = tail.find('/')\n            return tail if slash < 0 else tail[:slash]\n    return None",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2186,
+                "oldLines": 12,
+                "newStart": 2186,
+                "newLines": 41,
+                "lines": [
+                  "             pos = event.pos()",
+                  "             for rect, text in self._label_hits:",
+                  "                 if rect.contains(pos):",
+                  "-                    qtutils.set_clipboard(text)",
+                  "+                    agent_part = _agent_branch_part(text)",
+                  "+                    if agent_part is None:",
+                  "+                        qtutils.set_clipboard(text)",
+                  "+                    else:",
+                  "+                        self._show_agent_copy_menu(event, text, agent_part)",
+                  "                     event.accept()",
+                  "                     return",
+                  "         super().mousePressEvent(event)",
+                  " ",
+                  "+    def _show_agent_copy_menu(self, event, full_name, agent_part):",
+                  "+        menu = QtWidgets.QMenu()",
+                  "+        copy_full = menu.addAction(N_('Copy \"%s\"') % full_name)",
+                  "+        copy_part = menu.addAction(N_('Copy \"%s\"') % agent_part)",
+                  "+        chosen = menu.exec_(event.screenPos())",
+                  "+        if chosen is copy_full:",
+                  "+            qtutils.set_clipboard(full_name)",
+                  "+        elif chosen is copy_part:",
+                  "+            qtutils.set_clipboard(agent_part)",
+                  " ",
+                  "+",
+                  "+def _agent_branch_part(name):",
+                  "+    \"\"\"Return the agent name segment for branches starting with \"agent_\" or \"agent/\".",
+                  "+",
+                  "+    The returned segment is the text after the prefix up to (but not including) the",
+                  "+    next \"/\", or the rest of the string if there is no \"/\". Returns None if name",
+                  "+    does not start with one of the recognized agent prefixes.",
+                  "+    \"\"\"",
+                  "+    for prefix in ('agent_', 'agent/'):",
+                  "+        if name.startswith(prefix):",
+                  "+            tail = name[len(prefix):]",
+                  "+            slash = tail.find('/')",
+                  "+            return tail if slash < 0 else tail[:slash]",
+                  "+    return None",
+                  "+",
+                  "+",
+                  " class GraphView(QtWidgets.QGraphicsView, ViewerMixin):",
+                  "     commits_selected = Signal(object)",
+                  "     diff_commits = Signal(object, object)"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01CeJnrjtTJYKEtgAcbvvgpw",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    qtutils.set_clipboard(text)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)",
+            "newString": "    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    agent_part = _agent_branch_part(text)\n                    if agent_part is None:\n                        qtutils.set_clipboard(text)\n                    else:\n                        self._show_agent_copy_menu(event, text, agent_part)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)\n\n    def _show_agent_copy_menu(self, event, full_name, agent_part):\n        menu = QtWidgets.QMenu()\n        copy_full = menu.addAction(N_('Copy \"%s\"') % full_name)\n        copy_part = menu.addAction(N_('Copy \"%s\"') % agent_part)\n        chosen = menu.exec_(event.screenPos())\n        if chosen is copy_full:\n            qtutils.set_clipboard(full_name)\n        elif chosen is copy_part:\n            qtutils.set_clipboard(agent_part)\n\n\ndef _agent_branch_part(name):\n    \"\"\"Return the agent name segment for branches starting with \"agent_\" or \"agent/\".\n\n    The returned segment is the text after the prefix up to (but not including) the\n    next \"/\", or the rest of the string if there is no \"/\". Returns None if name\n    does not start with one of the recognized agent prefixes.\n    \"\"\"\n    for prefix in ('agent_', 'agent/'):\n        if name.startswith(prefix):\n            tail = name[len(prefix):]\n            slash = tail.find('/')\n            return tail if slash < 0 else tail[:slash]\n    return None",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2186,
+                "oldLines": 12,
+                "newStart": 2186,
+                "newLines": 41,
+                "lines": [
+                  "             pos = event.pos()",
+                  "             for rect, text in self._label_hits:",
+                  "                 if rect.contains(pos):",
+                  "-                    qtutils.set_clipboard(text)",
+                  "+                    agent_part = _agent_branch_part(text)",
+                  "+                    if agent_part is None:",
+                  "+                        qtutils.set_clipboard(text)",
+                  "+                    else:",
+                  "+                        self._show_agent_copy_menu(event, text, agent_part)",
+                  "                     event.accept()",
+                  "                     return",
+                  "         super().mousePressEvent(event)",
+                  " ",
+                  "+    def _show_agent_copy_menu(self, event, full_name, agent_part):",
+                  "+        menu = QtWidgets.QMenu()",
+                  "+        copy_full = menu.addAction(N_('Copy \"%s\"') % full_name)",
+                  "+        copy_part = menu.addAction(N_('Copy \"%s\"') % agent_part)",
+                  "+        chosen = menu.exec_(event.screenPos())",
+                  "+        if chosen is copy_full:",
+                  "+            qtutils.set_clipboard(full_name)",
+                  "+        elif chosen is copy_part:",
+                  "+            qtutils.set_clipboard(agent_part)",
+                  " ",
+                  "+",
+                  "+def _agent_branch_part(name):",
+                  "+    \"\"\"Return the agent name segment for branches starting with \"agent_\" or \"agent/\".",
+                  "+",
+                  "+    The returned segment is the text after the prefix up to (but not including) the",
+                  "+    next \"/\", or the rest of the string if there is no \"/\". Returns None if name",
+                  "+    does not start with one of the recognized agent prefixes.",
+                  "+    \"\"\"",
+                  "+    for prefix in ('agent_', 'agent/'):",
+                  "+        if name.startswith(prefix):",
+                  "+            tail = name[len(prefix):]",
+                  "+            slash = tail.find('/')",
+                  "+            return tail if slash < 0 else tail[:slash]",
+                  "+    return None",
+                  "+",
+                  "+",
+                  " class GraphView(QtWidgets.QGraphicsView, ViewerMixin):",
+                  "     commits_selected = Signal(object)",
+                  "     diff_commits = Signal(object, object)"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01CeJnrjtTJYKEtgAcbvvgpw",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    qtutils.set_clipboard(text)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)",
+          "new_string": "    def mousePressEvent(self, event):\n        if event.button() == Qt.LeftButton:\n            pos = event.pos()\n            for rect, text in self._label_hits:\n                if rect.contains(pos):\n                    agent_part = _agent_branch_part(text)\n                    if agent_part is None:\n                        qtutils.set_clipboard(text)\n                    else:\n                        self._show_agent_copy_menu(event, text, agent_part)\n                    event.accept()\n                    return\n        super().mousePressEvent(event)\n\n    def _show_agent_copy_menu(self, event, full_name, agent_part):\n        menu = QtWidgets.QMenu()\n        copy_full = menu.addAction(N_('Copy \"%s\"') % full_name)\n        copy_part = menu.addAction(N_('Copy \"%s\"') % agent_part)\n        chosen = menu.exec_(event.screenPos())\n        if chosen is copy_full:\n            qtutils.set_clipboard(full_name)\n        elif chosen is copy_part:\n            qtutils.set_clipboard(agent_part)\n\n\ndef _agent_branch_part(name):\n    \"\"\"Return the agent name segment for branches starting with \"agent_\" or \"agent/\".\n\n    The returned segment is the text after the prefix up to (but not including) the\n    next \"/\", or the rest of the string if there is no \"/\". Returns None if name\n    does not start with one of the recognized agent prefixes.\n    \"\"\"\n    for prefix in ('agent_', 'agent/'):\n        if name.startswith(prefix):\n            tail = name[len(prefix):]\n            slash = tail.find('/')\n            return tail if slash < 0 else tail[:slash]\n    return None"
+        }
+      }
+    },
+    {
+      "step_id": 61,
+      "timestamp": "2026-04-27T15:12:22.101Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "确认 `N_` 已经导入：",
+      "metrics": {
+        "prompt_tokens": 62331,
+        "completion_tokens": 149,
+        "cached_tokens": 62330,
+        "extra": {
+          "cache_creation_input_tokens": 873,
+          "cache_read_input_tokens": 62330,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 873,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 149,
+              "cache_read_input_tokens": 62330,
+              "cache_creation_input_tokens": 873,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 873
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 62,
+      "timestamp": "2026-04-27T15:12:22.741Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01Ces7uKM8GWKX3GaoGWvYNa",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01Ces7uKM8GWKX3GaoGWvYNa",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "grep -n \"from ..i18n\\|N_\" /Users/luwei/work/git-cola/cola/widgets/dag.py | head -5",
+            "description": "Verify N_ import"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01Ces7uKM8GWKX3GaoGWvYNa",
+            "content": "24:from ..i18n import N_\n408:        menu = qtutils.create_menu(N_('Actions'), self)\n426:        reset_menu = menu.addMenu(N_('Reset'))\n488:                widget, N_('Diff this -> selected'), proxy.diff_this_selected\n494:                widget, N_('Diff selected -> this'), proxy.diff_selected_this\n\n[stdout]\n24:from ..i18n import N_\n408:        menu = qtutils.create_menu(N_('Actions'), self)\n426:        reset_menu = menu.addMenu(N_('Reset'))\n488:                widget, N_('Diff this -> selected'), proxy.diff_this_selected\n494:                widget, N_('Diff selected -> this'), proxy.diff_selected_this\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 62331,
+        "completion_tokens": 149,
+        "cached_tokens": 62330,
+        "extra": {
+          "cache_creation_input_tokens": 873,
+          "cache_read_input_tokens": 62330,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 873,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 149,
+              "cache_read_input_tokens": 62330,
+              "cache_creation_input_tokens": 873,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 873
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "24:from ..i18n import N_\n408:        menu = qtutils.create_menu(N_('Actions'), self)\n426:        reset_menu = menu.addMenu(N_('Reset'))\n488:                widget, N_('Diff this -> selected'), proxy.diff_this_selected\n494:                widget, N_('Diff selected -> this'), proxy.diff_selected_this",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01Ces7uKM8GWKX3GaoGWvYNa",
+            "type": "tool_result",
+            "content": "24:from ..i18n import N_\n408:        menu = qtutils.create_menu(N_('Actions'), self)\n426:        reset_menu = menu.addMenu(N_('Reset'))\n488:                widget, N_('Diff this -> selected'), proxy.diff_this_selected\n494:                widget, N_('Diff selected -> this'), proxy.diff_selected_this",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "24:from ..i18n import N_\n408:        menu = qtutils.create_menu(N_('Actions'), self)\n426:        reset_menu = menu.addMenu(N_('Reset'))\n488:                widget, N_('Diff this -> selected'), proxy.diff_this_selected\n494:                widget, N_('Diff selected -> this'), proxy.diff_selected_this",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01Ces7uKM8GWKX3GaoGWvYNa",
+            "type": "tool_result",
+            "content": "24:from ..i18n import N_\n408:        menu = qtutils.create_menu(N_('Actions'), self)\n426:        reset_menu = menu.addMenu(N_('Reset'))\n488:                widget, N_('Diff this -> selected'), proxy.diff_this_selected\n494:                widget, N_('Diff selected -> this'), proxy.diff_selected_this",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "grep -n \"from ..i18n\\|N_\" /Users/luwei/work/git-cola/cola/widgets/dag.py | head -5",
+          "description": "Verify N_ import"
+        }
+      }
+    },
+    {
+      "step_id": 63,
+      "timestamp": "2026-04-27T15:12:29.680Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "`N_` 已经导入。改动总结：\n\n- 新增模块级辅助函数 `_agent_branch_part(name)`：识别 `agent_` / `agent/` 前缀，并返回前缀后到下一个 `/`（或字符串末尾）的段；否则返回 `None`。\n- `Label.mousePressEvent`：命中后先调 `_agent_branch_part`；非 agent 分支保持原有\"直接复制\"行为；agent 分支则弹出菜单。\n- 新增 `_show_agent_copy_menu`：在事件屏幕坐标 (`event.screenPos()`) 弹出 `QMenu`，包含 `Copy \"完整名\"` / `Copy \"agent 段\"` 两项，按选择写入剪贴板。\n\n例：\n- `agent_foo/bar` → 选项 1 复制 `agent_foo/bar`，选项 2 复制 `foo`\n- `agent/foo/bar` → 选项 1 复制 `agent/foo/bar`，选项 2 复制 `foo`\n- `agent_foo` → 选项 2 复制 `foo`\n- 点击 `main` 等普通分支仍然直接复制，不弹菜单。\n\n重启 `./venv/bin/python -m cola dag` 验证即可。",
+      "metrics": {
+        "prompt_tokens": 63204,
+        "completion_tokens": 433,
+        "cached_tokens": 63203,
+        "extra": {
+          "cache_creation_input_tokens": 449,
+          "cache_read_input_tokens": 63203,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 449,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 433,
+              "cache_read_input_tokens": 63203,
+              "cache_creation_input_tokens": 449,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 449
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 2134749,
-    "total_completion_tokens": 40008,
-    "total_cached_tokens": 2134635,
-    "total_steps": 56,
+    "total_prompt_tokens": 2506360,
+    "total_completion_tokens": 42312,
+    "total_cached_tokens": 2506230,
+    "total_steps": 63,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 65258,
-      "total_cache_read_input_tokens": 2134635
+      "total_cache_creation_input_tokens": 69115,
+      "total_cache_read_input_tokens": 2506230
     }
   }
 }
