@@ -22,6 +22,7 @@ from .. import qtutils
 from .. import utils
 from ..compat import maxsize
 from ..i18n import N_
+from ..interaction import Interaction
 from ..models import dag
 from ..models import main
 from ..models import prefs
@@ -2150,7 +2151,9 @@ class Label(QtWidgets.QGraphicsItem):
         hits = []
         for tag in self.commit.tags:
             display_tag = tag
+            is_head = False
             if tag == HEAD:
+                is_head = True
                 painter.setPen(self.text_pen)
                 painter.setBrush(self.remote_color)
             elif tag.startswith(remotes_prefix):
@@ -2176,34 +2179,69 @@ class Label(QtWidgets.QGraphicsItem):
 
             painter.drawRoundedRect(box_rect, border, border)
             painter.drawText(text_rect, Qt.TextSingleLine, display_tag)
-            hits.append((QRectF(box_rect), display_tag))
+            hits.append((QRectF(box_rect), display_tag, is_head))
             current_width += text_rect.width() + spacing
 
         self._label_hits = hits
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            pos = event.pos()
-            for rect, text in self._label_hits:
-                if rect.contains(pos):
-                    agent_part = _agent_branch_part(text)
-                    if agent_part is None:
-                        qtutils.set_clipboard(text)
-                    else:
-                        self._show_agent_copy_menu(event, text, agent_part)
+        if event.button() != Qt.LeftButton:
+            super().mousePressEvent(event)
+            return
+        pos = event.pos()
+        for rect, text, is_head in self._label_hits:
+            if not rect.contains(pos):
+                continue
+            graph_view = self._graph_view()
+            if graph_view is not None and graph_view.is_in_merge_mode():
+                if is_head:
+                    # HEAD is not a valid merge target.
                     event.accept()
                     return
+                graph_view.complete_merge(text)
+                event.accept()
+                return
+            if is_head:
+                qtutils.set_clipboard(text)
+                event.accept()
+                return
+            self._show_branch_menu(event, text)
+            event.accept()
+            return
         super().mousePressEvent(event)
 
-    def _show_agent_copy_menu(self, event, full_name, agent_part):
+    def _graph_view(self):
+        scene = self.scene()
+        if scene is None:
+            return None
+        views = scene.views()
+        if not views:
+            return None
+        view = views[0]
+        if isinstance(view, GraphView):
+            return view
+        return None
+
+    def _show_branch_menu(self, event, full_name):
+        agent_part = _agent_branch_part(full_name)
         menu = QtWidgets.QMenu()
         copy_full = menu.addAction(N_('Copy "%s"') % full_name)
-        copy_part = menu.addAction(N_('Copy "%s"') % agent_part)
+        copy_part = None
+        if agent_part is not None:
+            copy_part = menu.addAction(N_('Copy "%s"') % agent_part)
+        menu.addSeparator()
+        merge_to = menu.addAction(N_('Merge to...'))
         chosen = menu.exec_(event.screenPos())
+        if chosen is None:
+            return
         if chosen is copy_full:
             qtutils.set_clipboard(full_name)
-        elif chosen is copy_part:
+        elif copy_part is not None and chosen is copy_part:
             qtutils.set_clipboard(agent_part)
+        elif chosen is merge_to:
+            graph_view = self._graph_view()
+            if graph_view is not None:
+                graph_view.enter_merge_mode(full_name)
 
 
 def _agent_branch_part(name):
@@ -2263,6 +2301,8 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         self.selecting = False
         self.last_mouse = [0, 0]
         self.zoom = 2
+        # Source branch name when in "merge to" mode; None when inactive.
+        self._merge_source = None
         self.setDragMode(QtWidgets.QGraphicsView.DragMode.RubberBandDrag)
 
         scene = QtWidgets.QGraphicsScene(self)
@@ -2945,11 +2985,57 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
             self.is_panning = True
             return
         if event.button() == Qt.RightButton:
+            if self._merge_source is not None:
+                self.exit_merge_mode()
+                event.accept()
+                return
             event.ignore()
             return
         if event.button() == Qt.LeftButton:
+            if self._merge_source is not None and not isinstance(
+                self.itemAt(event.pos()), Label
+            ):
+                self.exit_merge_mode()
+                event.accept()
+                return
             self.pressed = True
         self.handle_event(QtWidgets.QGraphicsView.mousePressEvent, event)
+
+    def keyPressEvent(self, event):
+        if self._merge_source is not None and event.key() == Qt.Key_Escape:
+            self.exit_merge_mode()
+            event.accept()
+            return
+        super().keyPressEvent(event)
+
+    def is_in_merge_mode(self):
+        return self._merge_source is not None
+
+    def enter_merge_mode(self, source_branch):
+        self._merge_source = source_branch
+        self.viewport().setCursor(Qt.PointingHandCursor)
+        self.setFocus(Qt.OtherFocusReason)
+
+    def exit_merge_mode(self):
+        if self._merge_source is None:
+            return
+        self._merge_source = None
+        self.viewport().unsetCursor()
+
+    def complete_merge(self, target_branch):
+        source = self._merge_source
+        self.exit_merge_mode()
+        if not source or not target_branch:
+            return
+        title = N_('Checkout and Merge')
+        text = N_('Checkout "%(target)s" and merge "%(source)s" into it?') % {
+            'target': target_branch,
+            'source': source,
+        }
+        if not Interaction.confirm(title, text, '', N_('Checkout && Merge')):
+            return
+        cmds.do(cmds.CheckoutBranch, self.context, target_branch)
+        cmds.do(cmds.MergeBranch, self.context, source)
 
     def mouseMoveEvent(self, event):
         if self.is_panning:
