@@ -2227,6 +2227,7 @@ class Label(QtWidgets.QGraphicsItem):
         tags_len = len(tags_prefix)
         heads_len = len(heads_prefix)
 
+        current_branch = self._current_branch_name()
         hits = []
         for tag in self.commit.tags:
             display_tag = tag
@@ -2245,8 +2246,12 @@ class Label(QtWidgets.QGraphicsItem):
                 painter.setBrush(self.remote_color)
             elif tag.startswith(heads_prefix):
                 display_tag = tag[heads_len:]
-                painter.setPen(self.head_pen)
-                painter.setBrush(self.head_color)
+                if current_branch and display_tag == current_branch:
+                    painter.setPen(self.text_pen)
+                    painter.setBrush(self.remote_color)
+                else:
+                    painter.setPen(self.head_pen)
+                    painter.setBrush(self.head_color)
             else:
                 painter.setPen(self.text_pen)
                 painter.setBrush(self.other_color)
@@ -2300,6 +2305,15 @@ class Label(QtWidgets.QGraphicsItem):
         if isinstance(view, GraphView):
             return view
         return None
+
+    def _current_branch_name(self):
+        view = self._graph_view()
+        if view is None or view.context is None:
+            return None
+        model = view.context.model
+        if model is None:
+            return None
+        return getattr(model, 'currentbranch', None) or None
 
     def _show_branch_menu(self, event, full_name):
         agent_part = _agent_branch_part(full_name)
