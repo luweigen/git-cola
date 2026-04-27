@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch",
+      "WebSearch"
+    ]
+  },
+  "autoMemoryEnabled": false,
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/luwei/work/sources/venv/bin/python /Users/luwei/work/sources/stop_hook.py -q"
+          }
+        ]
+      }
+    ]
+  }
+}
