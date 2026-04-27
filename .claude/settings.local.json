@@ -2,10 +2,10 @@
   "permissions": {
     "allow": [
       "WebFetch",
-      "WebSearch"
+      "WebSearch",
+      "Bash(./venv/bin/python *)"
     ]
   },
-  "autoMemoryEnabled": false,
   "hooks": {
     "Stop": [
       {
@@ -17,5 +17,6 @@
         ]
       }
     ]
-  }
+  },
+  "autoMemoryEnabled": false
 }

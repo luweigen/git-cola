@@ -196,6 +196,17 @@ class ViewerMixin:
         """Copy the current commit object ID to the clipboard"""
         self.with_oid_short(qtutils.set_clipboard)
 
+    def copy_commit_message_to_clipboard(self):
+        """Copy the full commit message of the current commit to the clipboard"""
+        self.with_oid(self._copy_commit_message)
+
+    def _copy_commit_message(self, oid):
+        status, out, _ = self.context.git.log(
+            '-1', '--format=%B', oid, _readonly=True
+        )
+        if status == 0 and out:
+            qtutils.set_clipboard(out.rstrip('\n'))
+
     def checkout_branch(self):
         """Checkout the clicked/selected branch"""
         branches = []
@@ -359,6 +370,9 @@ class ViewerMixin:
         self.menu_actions['copy_short'].setEnabled(
             has_single_selection_or_clicked and has_oid
         )
+        self.menu_actions['copy_message'].setEnabled(
+            has_single_selection_or_clicked and has_oid
+        )
         self.menu_actions['create_branch'].setEnabled(
             has_single_selection_or_clicked and has_oid
         )
@@ -438,6 +452,7 @@ class ViewerMixin:
         menu.addAction(self.menu_actions['save_blob_from_parent'])
         menu.addAction(self.menu_actions['copy_short'])
         menu.addAction(self.menu_actions['copy'])
+        menu.addAction(self.menu_actions['copy_message'])
         menu.exec_(self.mapToGlobal(event.pos()))
 
 
@@ -613,6 +628,14 @@ def viewer_actions(widget, proxy):
                 N_('Copy Commit'),
                 proxy.copy_to_clipboard,
                 hotkeys.COPY_COMMIT_ID,
+            ),
+        ),
+        'copy_message': set_icon(
+            icons.copy(),
+            qtutils.add_action(
+                widget,
+                N_('Copy Commit Message'),
+                proxy.copy_commit_message_to_clipboard,
             ),
         ),
         'copy_short': set_icon(
