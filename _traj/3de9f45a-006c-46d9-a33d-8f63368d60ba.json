@@ -2418,19 +2418,445 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 37,
+      "timestamp": "2026-04-27T15:03:16.497Z",
+      "source": "user",
+      "message": "这样改没有考虑代表commit的圆点的直径，应该减去直径再算1/3",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 38,
+      "timestamp": "2026-04-27T15:03:21.421Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 49725,
+        "completion_tokens": 367,
+        "cached_tokens": 49719,
+        "extra": {
+          "cache_creation_input_tokens": 220,
+          "cache_read_input_tokens": 49719,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 220,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 367,
+              "cache_read_input_tokens": 49719,
+              "cache_creation_input_tokens": 220,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 220
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 39,
+      "timestamp": "2026-04-27T15:03:22.420Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01TRyADDR1W8GoZtpNgB2kTL",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01TRyADDR1W8GoZtpNgB2kTL",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "grep -n \"commit_radius\\|item_radius\\|merge_radius\" /Users/luwei/work/git-cola/cola/widgets/dag.py | head -20",
+            "description": "Find commit_radius definition"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01TRyADDR1W8GoZtpNgB2kTL",
+            "content": "1952:    commit_radius = 12.0\n1953:    merge_radius = 18.0\n1957:        commit_radius / -2.0, commit_radius / -2.0, commit_radius, commit_radius\n1963:        commit_radius / -2.0 + 2.0,\n1964:        commit_radius / -2.0 + 2.0,\n1965:        commit_radius - 4.0,\n1966:        commit_radius - 4.0,\n1986:        xpos=commit_radius / 2.0 + 1.0,\n2003:            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2182:    x_adjust = int(Commit.commit_radius * 4 / 3)\n2183:    y_adjust = int(Commit.commit_radius * 4 / 3)\n\n[stdout]\n1952:    commit_radius = 12.0\n1953:    merge_radius = 18.0\n1957:        commit_radius / -2.0, commit_radius / -2.0, commit_radius, commit_radius\n1963:        commit_radius / -2.0 + 2.0,\n1964:        commit_radius / -2.0 + 2.0,\n1965:        commit_radius - 4.0,\n1966:        commit_radius - 4.0,\n1986:        xpos=commit_radius / 2.0 + 1.0,\n2003:            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2182:    x_adjust = int(Commit.commit_radius * 4 / 3)\n2183:    y_adjust = int(Commit.commit_radius * 4 / 3)\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 49725,
+        "completion_tokens": 367,
+        "cached_tokens": 49719,
+        "extra": {
+          "cache_creation_input_tokens": 220,
+          "cache_read_input_tokens": 49719,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 220,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 367,
+              "cache_read_input_tokens": 49719,
+              "cache_creation_input_tokens": 220,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 220
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "1952:    commit_radius = 12.0\n1953:    merge_radius = 18.0\n1957:        commit_radius / -2.0, commit_radius / -2.0, commit_radius, commit_radius\n1963:        commit_radius / -2.0 + 2.0,\n1964:        commit_radius / -2.0 + 2.0,\n1965:        commit_radius - 4.0,\n1966:        commit_radius - 4.0,\n1986:        xpos=commit_radius / 2.0 + 1.0,\n2003:            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2182:    x_adjust = int(Commit.commit_radius * 4 / 3)\n2183:    y_adjust = int(Commit.commit_radius * 4 / 3)",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01TRyADDR1W8GoZtpNgB2kTL",
+            "type": "tool_result",
+            "content": "1952:    commit_radius = 12.0\n1953:    merge_radius = 18.0\n1957:        commit_radius / -2.0, commit_radius / -2.0, commit_radius, commit_radius\n1963:        commit_radius / -2.0 + 2.0,\n1964:        commit_radius / -2.0 + 2.0,\n1965:        commit_radius - 4.0,\n1966:        commit_radius - 4.0,\n1986:        xpos=commit_radius / 2.0 + 1.0,\n2003:            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2182:    x_adjust = int(Commit.commit_radius * 4 / 3)\n2183:    y_adjust = int(Commit.commit_radius * 4 / 3)",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "1952:    commit_radius = 12.0\n1953:    merge_radius = 18.0\n1957:        commit_radius / -2.0, commit_radius / -2.0, commit_radius, commit_radius\n1963:        commit_radius / -2.0 + 2.0,\n1964:        commit_radius / -2.0 + 2.0,\n1965:        commit_radius - 4.0,\n1966:        commit_radius - 4.0,\n1986:        xpos=commit_radius / 2.0 + 1.0,\n2003:            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2182:    x_adjust = int(Commit.commit_radius * 4 / 3)\n2183:    y_adjust = int(Commit.commit_radius * 4 / 3)",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01TRyADDR1W8GoZtpNgB2kTL",
+            "type": "tool_result",
+            "content": "1952:    commit_radius = 12.0\n1953:    merge_radius = 18.0\n1957:        commit_radius / -2.0, commit_radius / -2.0, commit_radius, commit_radius\n1963:        commit_radius / -2.0 + 2.0,\n1964:        commit_radius / -2.0 + 2.0,\n1965:        commit_radius - 4.0,\n1966:        commit_radius - 4.0,\n1986:        xpos=commit_radius / 2.0 + 1.0,\n2003:            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2182:    x_adjust = int(Commit.commit_radius * 4 / 3)\n2183:    y_adjust = int(Commit.commit_radius * 4 / 3)",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "grep -n \"commit_radius\\|item_radius\\|merge_radius\" /Users/luwei/work/git-cola/cola/widgets/dag.py | head -20",
+          "description": "Find commit_radius definition"
+        }
+      }
+    },
+    {
+      "step_id": 40,
+      "timestamp": "2026-04-27T15:03:35.071Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 49940,
+        "completion_tokens": 1308,
+        "cached_tokens": 49939,
+        "extra": {
+          "cache_creation_input_tokens": 645,
+          "cache_read_input_tokens": 49939,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 645,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 1308,
+              "cache_read_input_tokens": 49939,
+              "cache_creation_input_tokens": 645,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 645
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 41,
+      "timestamp": "2026-04-27T15:03:37.012Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "你说得对。`commit_radius = 12.0` 实际上是节点的直径（看 `cola/widgets/dag.py:1957`：`QRectF(-r/2, -r/2, r, r)` 渲染尺寸是 `commit_radius × commit_radius`）。\n\n所以正确算法：\n- 原中心距 `|y_off| = 20`\n- 原可见间隙 = `20 − 12 = 8`\n- 新可见间隙 = `8 / 3 ≈ 2.67`\n- 新中心距 = `12 + 2.67 ≈ 14.67` → 取 -15",
+      "metrics": {
+        "prompt_tokens": 49940,
+        "completion_tokens": 1308,
+        "cached_tokens": 49939,
+        "extra": {
+          "cache_creation_input_tokens": 645,
+          "cache_read_input_tokens": 49939,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 645,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 1308,
+              "cache_read_input_tokens": 49939,
+              "cache_creation_input_tokens": 645,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 645
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 42,
+      "timestamp": "2026-04-27T15:03:37.904Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01NeCKfYPBpt5VUAbiDQotmd",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01NeCKfYPBpt5VUAbiDQotmd",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "    x_off = -18\n    y_off = -7",
+            "new_string": "    x_off = -18\n    y_off = -15"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01NeCKfYPBpt5VUAbiDQotmd",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully.\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"    x_off = -18\\n    y_off = -7\", \"newString\": \"    x_off = -18\\n    y_off = -15\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2183, \"oldLines\": 7, \"newStart\": 2183, \"newLines\": 7, \"lines\": [\"     y_adjust = int(Commit.commit_radius * 4 / 3)\", \" \", \"     x_off = -18\", \"-    y_off = -7\", \"+    y_off = -15\", \" \", \"     def __init__(self, context, parent):\", \"         QtWidgets.QGraphicsView.__init__(self, parent)\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 49940,
+        "completion_tokens": 1308,
+        "cached_tokens": 49939,
+        "extra": {
+          "cache_creation_input_tokens": 645,
+          "cache_read_input_tokens": 49939,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 645,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 1308,
+              "cache_read_input_tokens": 49939,
+              "cache_creation_input_tokens": 645,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 645
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "    x_off = -18\n    y_off = -7",
+            "newString": "    x_off = -18\n    y_off = -15",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2183,
+                "oldLines": 7,
+                "newStart": 2183,
+                "newLines": 7,
+                "lines": [
+                  "     y_adjust = int(Commit.commit_radius * 4 / 3)",
+                  " ",
+                  "     x_off = -18",
+                  "-    y_off = -7",
+                  "+    y_off = -15",
+                  " ",
+                  "     def __init__(self, context, parent):",
+                  "         QtWidgets.QGraphicsView.__init__(self, parent)"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01NeCKfYPBpt5VUAbiDQotmd",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "    x_off = -18\n    y_off = -7",
+            "newString": "    x_off = -18\n    y_off = -15",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2183,
+                "oldLines": 7,
+                "newStart": 2183,
+                "newLines": 7,
+                "lines": [
+                  "     y_adjust = int(Commit.commit_radius * 4 / 3)",
+                  " ",
+                  "     x_off = -18",
+                  "-    y_off = -7",
+                  "+    y_off = -15",
+                  " ",
+                  "     def __init__(self, context, parent):",
+                  "         QtWidgets.QGraphicsView.__init__(self, parent)"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01NeCKfYPBpt5VUAbiDQotmd",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "    x_off = -18\n    y_off = -7",
+          "new_string": "    x_off = -18\n    y_off = -15"
+        }
+      }
+    },
+    {
+      "step_id": 43,
+      "timestamp": "2026-04-27T15:03:41.501Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "改成 `y_off = -15`：保留 12 的直径，使节点间可见空隙从 8 缩到约 3（≈ 1/3）。重启 `python -m cola dag` 即可验证。",
+      "metrics": {
+        "prompt_tokens": 50585,
+        "completion_tokens": 72,
+        "cached_tokens": 50584,
+        "extra": {
+          "cache_creation_input_tokens": 1356,
+          "cache_read_input_tokens": 50584,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1356,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 72,
+              "cache_read_input_tokens": 50584,
+              "cache_creation_input_tokens": 1356,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1356
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 1172809,
-    "total_completion_tokens": 21830,
-    "total_cached_tokens": 1172733,
-    "total_steps": 36,
+    "total_prompt_tokens": 1472664,
+    "total_completion_tokens": 26560,
+    "total_cached_tokens": 1472572,
+    "total_steps": 43,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 45879,
-      "total_cache_read_input_tokens": 1172733
+      "total_cache_creation_input_tokens": 49610,
+      "total_cache_read_input_tokens": 1472572
     }
   }
 }
