@@ -1542,19 +1542,216 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 23,
+      "timestamp": "2026-04-27T14:55:36.193Z",
+      "source": "user",
+      "message": "保存到NOTE.md",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 24,
+      "timestamp": "2026-04-27T14:55:38.415Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 43885,
+        "completion_tokens": 1124,
+        "cached_tokens": 43879,
+        "extra": {
+          "cache_creation_input_tokens": 1094,
+          "cache_read_input_tokens": 43879,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1094,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 1124,
+              "cache_read_input_tokens": 43879,
+              "cache_creation_input_tokens": 1094,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1094
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 25,
+      "timestamp": "2026-04-27T14:55:46.180Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Write toolu_01KM1KF5KsoBhPyMPVwwpFRp",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01KM1KF5KsoBhPyMPVwwpFRp",
+          "function_name": "Write",
+          "arguments": {
+            "file_path": "/Users/luwei/work/git-cola/NOTE.md",
+            "content": "# 开发模式安装与代码变更生效说明\n\n## 问题\n\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n\n## 结论\n\n可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n\n## 注意事项\n\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n4. **两种等价启动方式**，二选一即可：\n   - `./venv/bin/python -m cola dag`\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n\n## 排查\"改了代码却没生效\"\n\n多半是以下三种情况：\n\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n\n```bash\nwhich git-cola\n./venv/bin/python -c \"import cola; print(cola.__file__)\"\n```\n\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01KM1KF5KsoBhPyMPVwwpFRp",
+            "content": "File created successfully at: /Users/luwei/work/git-cola/NOTE.md\n\n[metadata] {\"type\": \"create\", \"filePath\": \"/Users/luwei/work/git-cola/NOTE.md\", \"content\": \"# 开发模式安装与代码变更生效说明\\n\\n## 问题\\n\\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\\n\\n## 结论\\n\\n可以。`--editable`（即 `pip install -e`）会把项目以\\\"开发模式\\\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\\n\\n## 注意事项\\n\\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\\n4. **两种等价启动方式**，二选一即可：\\n   - `./venv/bin/python -m cola dag`\\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\\n\\n## 排查\\\"改了代码却没生效\\\"\\n\\n多半是以下三种情况：\\n\\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\\n\\n```bash\\nwhich git-cola\\n./venv/bin/python -c \\\"import cola; print(cola.__file__)\\\"\\n```\\n\\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\\n\", \"structuredPatch\": [], \"originalFile\": null, \"userModified\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 43885,
+        "completion_tokens": 1124,
+        "cached_tokens": 43879,
+        "extra": {
+          "cache_creation_input_tokens": 1094,
+          "cache_read_input_tokens": 43879,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1094,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 1124,
+              "cache_read_input_tokens": 43879,
+              "cache_creation_input_tokens": 1094,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1094
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Write",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "type": "create",
+            "filePath": "/Users/luwei/work/git-cola/NOTE.md",
+            "content": "# 开发模式安装与代码变更生效说明\n\n## 问题\n\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n\n## 结论\n\n可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n\n## 注意事项\n\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n4. **两种等价启动方式**，二选一即可：\n   - `./venv/bin/python -m cola dag`\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n\n## 排查\"改了代码却没生效\"\n\n多半是以下三种情况：\n\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n\n```bash\nwhich git-cola\n./venv/bin/python -c \"import cola; print(cola.__file__)\"\n```\n\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n",
+            "structuredPatch": [],
+            "originalFile": null,
+            "userModified": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01KM1KF5KsoBhPyMPVwwpFRp",
+            "type": "tool_result",
+            "content": "File created successfully at: /Users/luwei/work/git-cola/NOTE.md"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "type": "create",
+            "filePath": "/Users/luwei/work/git-cola/NOTE.md",
+            "content": "# 开发模式安装与代码变更生效说明\n\n## 问题\n\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n\n## 结论\n\n可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n\n## 注意事项\n\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n4. **两种等价启动方式**，二选一即可：\n   - `./venv/bin/python -m cola dag`\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n\n## 排查\"改了代码却没生效\"\n\n多半是以下三种情况：\n\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n\n```bash\nwhich git-cola\n./venv/bin/python -c \"import cola; print(cola.__file__)\"\n```\n\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n",
+            "structuredPatch": [],
+            "originalFile": null,
+            "userModified": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01KM1KF5KsoBhPyMPVwwpFRp",
+            "type": "tool_result",
+            "content": "File created successfully at: /Users/luwei/work/git-cola/NOTE.md"
+          }
+        },
+        "raw_arguments": {
+          "file_path": "/Users/luwei/work/git-cola/NOTE.md",
+          "content": "# 开发模式安装与代码变更生效说明\n\n## 问题\n\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n\n## 结论\n\n可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n\n## 注意事项\n\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n4. **两种等价启动方式**，二选一即可：\n   - `./venv/bin/python -m cola dag`\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n\n## 排查\"改了代码却没生效\"\n\n多半是以下三种情况：\n\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n\n```bash\nwhich git-cola\n./venv/bin/python -c \"import cola; print(cola.__file__)\"\n```\n\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n"
+        }
+      }
+    },
+    {
+      "step_id": 26,
+      "timestamp": "2026-04-27T14:55:47.648Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "已保存到 `/Users/luwei/work/git-cola/NOTE.md`。",
+      "metrics": {
+        "prompt_tokens": 44974,
+        "completion_tokens": 33,
+        "cached_tokens": 44973,
+        "extra": {
+          "cache_creation_input_tokens": 1169,
+          "cache_read_input_tokens": 44973,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1169,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 33,
+              "cache_read_input_tokens": 44973,
+              "cache_creation_input_tokens": 1169,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1169
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 613223,
-    "total_completion_tokens": 15827,
-    "total_cached_tokens": 613184,
-    "total_steps": 22,
+    "total_prompt_tokens": 745967,
+    "total_completion_tokens": 18108,
+    "total_cached_tokens": 745915,
+    "total_steps": 26,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 37967,
-      "total_cache_read_input_tokens": 613184
+      "total_cache_creation_input_tokens": 41324,
+      "total_cache_read_input_tokens": 745915
     }
   }
 }
