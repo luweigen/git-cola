@@ -1261,6 +1261,7 @@ class GitDAG(standard.MainWindow):
             self.commits_selected, type=Qt.QueuedConnection
         )
         self.graphview.merge_source_changed.connect(self._update_merge_source_label)
+        self.graphview.merge_finished.connect(self.refresh, type=Qt.QueuedConnection)
 
         self.commits_selected.connect(self.select_commits, type=Qt.QueuedConnection)
         self.commits_selected.connect(
@@ -2343,6 +2344,8 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
     search_line_range_in_oid = Signal(object)
     # Emitted when merge-to mode is entered (source branch name) or exited (None).
     merge_source_changed = Signal(object)
+    # Emitted after a merge-to operation finishes successfully.
+    merge_finished = Signal()
 
     x_adjust = int(Commit.commit_radius * 4 / 3)
     y_adjust = int(Commit.commit_radius * 4 / 3)
@@ -3153,6 +3156,7 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         if not result or result[0] != 0:
             return
         cmds.do(cmds.MergeBranch, self.context, source)
+        self.merge_finished.emit()
 
     def mouseMoveEvent(self, event):
         if self.is_panning:
