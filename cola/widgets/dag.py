@@ -2092,6 +2092,9 @@ class Label(QtWidgets.QGraphicsItem):
         QtWidgets.QGraphicsItem.__init__(self)
         self.setZValue(-1)
         self.commit = commit
+        # Hit-test rectangles populated during paint(): list of (QRectF, str).
+        self._label_hits = []
+        self.setCursor(Qt.PointingHandCursor)
 
     def type(self):
         return self.item_type
@@ -2144,20 +2147,22 @@ class Label(QtWidgets.QGraphicsItem):
         tags_len = len(tags_prefix)
         heads_len = len(heads_prefix)
 
+        hits = []
         for tag in self.commit.tags:
+            display_tag = tag
             if tag == HEAD:
                 painter.setPen(self.text_pen)
                 painter.setBrush(self.remote_color)
             elif tag.startswith(remotes_prefix):
-                tag = tag[remotes_len:]
+                display_tag = tag[remotes_len:]
                 painter.setPen(self.text_pen)
                 painter.setBrush(self.other_color)
             elif tag.startswith(tags_prefix):
-                tag = tag[tags_len:]
+                display_tag = tag[tags_len:]
                 painter.setPen(self.text_pen)
                 painter.setBrush(self.remote_color)
             elif tag.startswith(heads_prefix):
-                tag = tag[heads_len:]
+                display_tag = tag[heads_len:]
                 painter.setPen(self.head_pen)
                 painter.setBrush(self.head_color)
             else:
@@ -2165,13 +2170,26 @@ class Label(QtWidgets.QGraphicsItem):
                 painter.setBrush(self.other_color)
 
             text_rect = painter.boundingRect(
-                QRectF(current_width, 0, 0, 0), Qt.TextSingleLine, tag
+                QRectF(current_width, 0, 0, 0), Qt.TextSingleLine, display_tag
             )
             box_rect = text_rect.adjusted(-x_offset, -y_offset, x_offset, y_offset)
 
             painter.drawRoundedRect(box_rect, border, border)
-            painter.drawText(text_rect, Qt.TextSingleLine, tag)
+            painter.drawText(text_rect, Qt.TextSingleLine, display_tag)
+            hits.append((QRectF(box_rect), display_tag))
             current_width += text_rect.width() + spacing
+
+        self._label_hits = hits
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            pos = event.pos()
+            for rect, text in self._label_hits:
+                if rect.contains(pos):
+                    qtutils.set_clipboard(text)
+                    event.accept()
+                    return
+        super().mousePressEvent(event)
 
 
 class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
