@@ -1546,7 +1546,7 @@ class GitDAG(standard.MainWindow):
     def _update_merge_source_label(self, source):
         """Show or hide the "<branch> -> " hint while picking a merge target."""
         if source:
-            self.merge_source_label.setText('%s →' % source)
+            self.merge_source_label.setText('%s → ?' % source)
             self.merge_source_label.show()
         else:
             self.merge_source_label.clear()
