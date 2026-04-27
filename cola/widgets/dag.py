@@ -2018,7 +2018,7 @@ class Commit(QtWidgets.QGraphicsItem):
             label.setParentItem(self)
             label.setPos(xpos + 1, -self.commit_radius / 2.0)
         else:
-            self.label = None
+            self.label = _make_summary_label(commit, self, xpos)
 
         if len(commit.parents) > 1:
             self.brush = cached_merge_color
@@ -2082,6 +2082,25 @@ class Commit(QtWidgets.QGraphicsItem):
             return
         self.pressed = False
         self.dragged = False
+
+
+_SUMMARY_MAX_CHARS = 50
+
+
+def _make_summary_label(commit, parent_item, xpos):
+    """Show the first line of the commit message next to dots without branches."""
+    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''
+    summary = summary.strip()
+    if not summary:
+        return None
+    if len(summary) > _SUMMARY_MAX_CHARS:
+        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'
+    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)
+    text_item.setFont(Cache.label_font())
+    text_item.setBrush(QtWidgets.QApplication.palette().text())
+    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)
+    text_item.setZValue(-1)
+    return text_item
 
 
 class Label(QtWidgets.QGraphicsItem):

@@ -10527,19 +10527,919 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 134,
+      "timestamp": "2026-04-27T18:05:50.272Z",
+      "source": "user",
+      "message": "代表commit的点的右边如果没有branch要显示，就显示一行50字以内的commit message第一行",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 135,
+      "timestamp": "2026-04-27T18:05:55.870Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 99683,
+        "completion_tokens": 367,
+        "cached_tokens": 99677,
+        "extra": {
+          "cache_creation_input_tokens": 56,
+          "cache_read_input_tokens": 99677,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 56,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 367,
+              "cache_read_input_tokens": 99677,
+              "cache_creation_input_tokens": 56,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 56
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 136,
+      "timestamp": "2026-04-27T18:05:56.771Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_018W6PJeYMYsAY7Uj6zv9yyX",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_018W6PJeYMYsAY7Uj6zv9yyX",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "grep -n \"Label(\\|commit.tags\\|\\.tags\\b\\|commit\\.summary\\|\\.summary\\b\\|first_line\\|commit_msg\" /Users/luwei/work/git-cola/cola/widgets/dag.py | head -30",
+            "description": "Find Label instantiation and commit summary"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_018W6PJeYMYsAY7Uj6zv9yyX",
+            "content": "812:        if commit and commit.tags:\n815:                painter, mid_y, commit.tags, label_x, option.fontMetrics\n918:        if commit and commit.tags:\n919:            labels_width = self._labels_width(option.fontMetrics, commit.tags)\n945:        self.setText(self.SUMMARY, commit.summary)\n1113:            for tag in commit.tags:\n1213:        self.merge_source_label = QtWidgets.QLabel()\n1580:        refs = set(model.local_branches + model.remote_branches + model.tags)\n1622:            for tag in commit_obj.tags:\n2014:        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2016:        if commit.tags:\n2017:            self.label = label = Label(commit)\n2087:class Label(QtWidgets.QGraphicsItem):\n2136:        for tag in self.commit.tags:\n2167:        for tag in self.commit.tags:\n2659:            for ref in commit.tags:\n2929:            node.row = self.alloc_cell(node.column, node.tags)\n\n[stdout]\n812:        if commit and commit.tags:\n815:                painter, mid_y, commit.tags, label_x, option.fontMetrics\n918:        if commit and commit.tags:\n919:            labels_width = self._labels_width(option.fontMetrics, commit.tags)\n945:        self.setText(self.SUMMARY, commit.summary)\n1113:            for tag in commit.tags:\n1213:        self.merge_source_label = QtWidgets.QLabel()\n1580:        refs = set(model.local_branches + model.remote_branches + model.tags)\n1622:            for tag in commit_obj.tags:\n2014:        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2016:        if commit.tags:\n2017:            self.label = label = Label(commit)\n2087:class Label(QtWidgets.QGraphicsItem):\n2136:        for tag in self.commit.tags:\n2167:        for tag in self.commit.tags:\n2659:            for ref in commit.tags:\n2929:            node.row = self.alloc_cell(node.column, node.tags)\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 99683,
+        "completion_tokens": 367,
+        "cached_tokens": 99677,
+        "extra": {
+          "cache_creation_input_tokens": 56,
+          "cache_read_input_tokens": 99677,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 56,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 367,
+              "cache_read_input_tokens": 99677,
+              "cache_creation_input_tokens": 56,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 56
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "812:        if commit and commit.tags:\n815:                painter, mid_y, commit.tags, label_x, option.fontMetrics\n918:        if commit and commit.tags:\n919:            labels_width = self._labels_width(option.fontMetrics, commit.tags)\n945:        self.setText(self.SUMMARY, commit.summary)\n1113:            for tag in commit.tags:\n1213:        self.merge_source_label = QtWidgets.QLabel()\n1580:        refs = set(model.local_branches + model.remote_branches + model.tags)\n1622:            for tag in commit_obj.tags:\n2014:        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2016:        if commit.tags:\n2017:            self.label = label = Label(commit)\n2087:class Label(QtWidgets.QGraphicsItem):\n2136:        for tag in self.commit.tags:\n2167:        for tag in self.commit.tags:\n2659:            for ref in commit.tags:\n2929:            node.row = self.alloc_cell(node.column, node.tags)",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_018W6PJeYMYsAY7Uj6zv9yyX",
+            "type": "tool_result",
+            "content": "812:        if commit and commit.tags:\n815:                painter, mid_y, commit.tags, label_x, option.fontMetrics\n918:        if commit and commit.tags:\n919:            labels_width = self._labels_width(option.fontMetrics, commit.tags)\n945:        self.setText(self.SUMMARY, commit.summary)\n1113:            for tag in commit.tags:\n1213:        self.merge_source_label = QtWidgets.QLabel()\n1580:        refs = set(model.local_branches + model.remote_branches + model.tags)\n1622:            for tag in commit_obj.tags:\n2014:        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2016:        if commit.tags:\n2017:            self.label = label = Label(commit)\n2087:class Label(QtWidgets.QGraphicsItem):\n2136:        for tag in self.commit.tags:\n2167:        for tag in self.commit.tags:\n2659:            for ref in commit.tags:\n2929:            node.row = self.alloc_cell(node.column, node.tags)",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "812:        if commit and commit.tags:\n815:                painter, mid_y, commit.tags, label_x, option.fontMetrics\n918:        if commit and commit.tags:\n919:            labels_width = self._labels_width(option.fontMetrics, commit.tags)\n945:        self.setText(self.SUMMARY, commit.summary)\n1113:            for tag in commit.tags:\n1213:        self.merge_source_label = QtWidgets.QLabel()\n1580:        refs = set(model.local_branches + model.remote_branches + model.tags)\n1622:            for tag in commit_obj.tags:\n2014:        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2016:        if commit.tags:\n2017:            self.label = label = Label(commit)\n2087:class Label(QtWidgets.QGraphicsItem):\n2136:        for tag in self.commit.tags:\n2167:        for tag in self.commit.tags:\n2659:            for ref in commit.tags:\n2929:            node.row = self.alloc_cell(node.column, node.tags)",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_018W6PJeYMYsAY7Uj6zv9yyX",
+            "type": "tool_result",
+            "content": "812:        if commit and commit.tags:\n815:                painter, mid_y, commit.tags, label_x, option.fontMetrics\n918:        if commit and commit.tags:\n919:            labels_width = self._labels_width(option.fontMetrics, commit.tags)\n945:        self.setText(self.SUMMARY, commit.summary)\n1113:            for tag in commit.tags:\n1213:        self.merge_source_label = QtWidgets.QLabel()\n1580:        refs = set(model.local_branches + model.remote_branches + model.tags)\n1622:            for tag in commit_obj.tags:\n2014:        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2016:        if commit.tags:\n2017:            self.label = label = Label(commit)\n2087:class Label(QtWidgets.QGraphicsItem):\n2136:        for tag in self.commit.tags:\n2167:        for tag in self.commit.tags:\n2659:            for ref in commit.tags:\n2929:            node.row = self.alloc_cell(node.column, node.tags)",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "grep -n \"Label(\\|commit.tags\\|\\.tags\\b\\|commit\\.summary\\|\\.summary\\b\\|first_line\\|commit_msg\" /Users/luwei/work/git-cola/cola/widgets/dag.py | head -30",
+          "description": "Find Label instantiation and commit summary"
+        }
+      }
+    },
+    {
+      "step_id": 137,
+      "timestamp": "2026-04-27T18:05:59.538Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Read toolu_0179nHdz3hGgZivzVcjSoe9q",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_0179nHdz3hGgZivzVcjSoe9q",
+          "function_name": "Read",
+          "arguments": {
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "offset": 2008,
+            "limit": 40
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_0179nHdz3hGgZivzVcjSoe9q",
+            "content": "2008\t        self.commit = commit\n2009\t        self.selected = False\n2010\t\n2011\t        self.setZValue(0)\n2012\t        self.setFlag(selectable)\n2013\t        self.setCursor(cursor)\n2014\t        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2015\t\n2016\t        if commit.tags:\n2017\t            self.label = label = Label(commit)\n2018\t            label.setParentItem(self)\n2019\t            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2020\t        else:\n2021\t            self.label = None\n2022\t\n2023\t        if len(commit.parents) > 1:\n2024\t            self.brush = cached_merge_color\n2025\t        else:\n2026\t            self.brush = cached_commit_color\n2027\t\n2028\t        self.pressed = False\n2029\t        self.dragged = False\n2030\t        self.edges = {}\n2031\t\n2032\t    def itemChange(self, change, value):\n2033\t        if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:\n2034\t            # Cache the pen for use in paint()\n2035\t            if value:\n2036\t                self.brush = self.commit_selected_color\n2037\t                color = self.selected_outline_color\n2038\t            else:\n2039\t                if len(self.commit.parents) > 1:\n2040\t                    self.brush = self.merge_color\n2041\t                else:\n2042\t                    self.brush = self.commit_color\n2043\t                color = self.outline_color\n2044\t            commit_pen = QtGui.QPen()\n2045\t            commit_pen.setWidth(1)\n2046\t            commit_pen.setColor(color)\n2047\t            self.commit_pen = commit_pen\n\n[metadata] {\"type\": \"text\", \"file\": {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"content\": \"        self.commit = commit\\n        self.selected = False\\n\\n        self.setZValue(0)\\n        self.setFlag(selectable)\\n        self.setCursor(cursor)\\n        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\\n\\n        if commit.tags:\\n            self.label = label = Label(commit)\\n            label.setParentItem(self)\\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\\n        else:\\n            self.label = None\\n\\n        if len(commit.parents) > 1:\\n            self.brush = cached_merge_color\\n        else:\\n            self.brush = cached_commit_color\\n\\n        self.pressed = False\\n        self.dragged = False\\n        self.edges = {}\\n\\n    def itemChange(self, change, value):\\n        if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:\\n            # Cache the pen for use in paint()\\n            if value:\\n                self.brush = self.commit_selected_color\\n                color = self.selected_outline_color\\n            else:\\n                if len(self.commit.parents) > 1:\\n                    self.brush = self.merge_color\\n                else:\\n                    self.brush = self.commit_color\\n                color = self.outline_color\\n            commit_pen = QtGui.QPen()\\n            commit_pen.setWidth(1)\\n            commit_pen.setColor(color)\\n            self.commit_pen = commit_pen\", \"numLines\": 40, \"startLine\": 2008, \"totalLines\": 3117}}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 99734,
+        "completion_tokens": 134,
+        "cached_tokens": 99733,
+        "extra": {
+          "cache_creation_input_tokens": 748,
+          "cache_read_input_tokens": 99733,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 748,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 134,
+              "cache_read_input_tokens": 99733,
+              "cache_creation_input_tokens": 748,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 748
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Read",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+              "content": "        self.commit = commit\n        self.selected = False\n\n        self.setZValue(0)\n        self.setFlag(selectable)\n        self.setCursor(cursor)\n        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n\n        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = None\n\n        if len(commit.parents) > 1:\n            self.brush = cached_merge_color\n        else:\n            self.brush = cached_commit_color\n\n        self.pressed = False\n        self.dragged = False\n        self.edges = {}\n\n    def itemChange(self, change, value):\n        if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:\n            # Cache the pen for use in paint()\n            if value:\n                self.brush = self.commit_selected_color\n                color = self.selected_outline_color\n            else:\n                if len(self.commit.parents) > 1:\n                    self.brush = self.merge_color\n                else:\n                    self.brush = self.commit_color\n                color = self.outline_color\n            commit_pen = QtGui.QPen()\n            commit_pen.setWidth(1)\n            commit_pen.setColor(color)\n            self.commit_pen = commit_pen",
+              "numLines": 40,
+              "startLine": 2008,
+              "totalLines": 3117
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_0179nHdz3hGgZivzVcjSoe9q",
+            "type": "tool_result",
+            "content": "2008\t        self.commit = commit\n2009\t        self.selected = False\n2010\t\n2011\t        self.setZValue(0)\n2012\t        self.setFlag(selectable)\n2013\t        self.setCursor(cursor)\n2014\t        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2015\t\n2016\t        if commit.tags:\n2017\t            self.label = label = Label(commit)\n2018\t            label.setParentItem(self)\n2019\t            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2020\t        else:\n2021\t            self.label = None\n2022\t\n2023\t        if len(commit.parents) > 1:\n2024\t            self.brush = cached_merge_color\n2025\t        else:\n2026\t            self.brush = cached_commit_color\n2027\t\n2028\t        self.pressed = False\n2029\t        self.dragged = False\n2030\t        self.edges = {}\n2031\t\n2032\t    def itemChange(self, change, value):\n2033\t        if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:\n2034\t            # Cache the pen for use in paint()\n2035\t            if value:\n2036\t                self.brush = self.commit_selected_color\n2037\t                color = self.selected_outline_color\n2038\t            else:\n2039\t                if len(self.commit.parents) > 1:\n2040\t                    self.brush = self.merge_color\n2041\t                else:\n2042\t                    self.brush = self.commit_color\n2043\t                color = self.outline_color\n2044\t            commit_pen = QtGui.QPen()\n2045\t            commit_pen.setWidth(1)\n2046\t            commit_pen.setColor(color)\n2047\t            self.commit_pen = commit_pen"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+              "content": "        self.commit = commit\n        self.selected = False\n\n        self.setZValue(0)\n        self.setFlag(selectable)\n        self.setCursor(cursor)\n        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n\n        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = None\n\n        if len(commit.parents) > 1:\n            self.brush = cached_merge_color\n        else:\n            self.brush = cached_commit_color\n\n        self.pressed = False\n        self.dragged = False\n        self.edges = {}\n\n    def itemChange(self, change, value):\n        if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:\n            # Cache the pen for use in paint()\n            if value:\n                self.brush = self.commit_selected_color\n                color = self.selected_outline_color\n            else:\n                if len(self.commit.parents) > 1:\n                    self.brush = self.merge_color\n                else:\n                    self.brush = self.commit_color\n                color = self.outline_color\n            commit_pen = QtGui.QPen()\n            commit_pen.setWidth(1)\n            commit_pen.setColor(color)\n            self.commit_pen = commit_pen",
+              "numLines": 40,
+              "startLine": 2008,
+              "totalLines": 3117
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_0179nHdz3hGgZivzVcjSoe9q",
+            "type": "tool_result",
+            "content": "2008\t        self.commit = commit\n2009\t        self.selected = False\n2010\t\n2011\t        self.setZValue(0)\n2012\t        self.setFlag(selectable)\n2013\t        self.setCursor(cursor)\n2014\t        self.setToolTip(commit.oid[:12] + ': ' + commit.summary)\n2015\t\n2016\t        if commit.tags:\n2017\t            self.label = label = Label(commit)\n2018\t            label.setParentItem(self)\n2019\t            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n2020\t        else:\n2021\t            self.label = None\n2022\t\n2023\t        if len(commit.parents) > 1:\n2024\t            self.brush = cached_merge_color\n2025\t        else:\n2026\t            self.brush = cached_commit_color\n2027\t\n2028\t        self.pressed = False\n2029\t        self.dragged = False\n2030\t        self.edges = {}\n2031\t\n2032\t    def itemChange(self, change, value):\n2033\t        if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:\n2034\t            # Cache the pen for use in paint()\n2035\t            if value:\n2036\t                self.brush = self.commit_selected_color\n2037\t                color = self.selected_outline_color\n2038\t            else:\n2039\t                if len(self.commit.parents) > 1:\n2040\t                    self.brush = self.merge_color\n2041\t                else:\n2042\t                    self.brush = self.commit_color\n2043\t                color = self.outline_color\n2044\t            commit_pen = QtGui.QPen()\n2045\t            commit_pen.setWidth(1)\n2046\t            commit_pen.setColor(color)\n2047\t            self.commit_pen = commit_pen"
+          }
+        },
+        "raw_arguments": {
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "offset": 2008,
+          "limit": 40
+        }
+      }
+    },
+    {
+      "step_id": 138,
+      "timestamp": "2026-04-27T18:06:28.333Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 99734,
+        "completion_tokens": 2072,
+        "cached_tokens": 99733,
+        "extra": {
+          "cache_creation_input_tokens": 1473,
+          "cache_read_input_tokens": 99733,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1473,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 2072,
+              "cache_read_input_tokens": 99733,
+              "cache_creation_input_tokens": 1473,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1473
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 139,
+      "timestamp": "2026-04-27T18:06:28.978Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01EugjevWAHetxVmX5iqbhFR",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01EugjevWAHetxVmX5iqbhFR",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "grep -n \"label_font\\|class Cache\\b\" /Users/luwei/work/git-cola/cola/widgets/dag.py | head",
+            "description": "Find Cache.label_font for reuse"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01EugjevWAHetxVmX5iqbhFR",
+            "content": "1791:class Cache:\n1792:    _label_font = None\n1795:    def label_font(cls):\n1796:        font = cls._label_font\n1798:            font = cls._label_font = QtWidgets.QApplication.font()\n2129:        font = cache.label_font()\n2148:        font = cache.label_font()\n\n[stdout]\n1791:class Cache:\n1792:    _label_font = None\n1795:    def label_font(cls):\n1796:        font = cls._label_font\n1798:            font = cls._label_font = QtWidgets.QApplication.font()\n2129:        font = cache.label_font()\n2148:        font = cache.label_font()\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 99734,
+        "completion_tokens": 2072,
+        "cached_tokens": 99733,
+        "extra": {
+          "cache_creation_input_tokens": 1473,
+          "cache_read_input_tokens": 99733,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1473,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 2072,
+              "cache_read_input_tokens": 99733,
+              "cache_creation_input_tokens": 1473,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1473
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "1791:class Cache:\n1792:    _label_font = None\n1795:    def label_font(cls):\n1796:        font = cls._label_font\n1798:            font = cls._label_font = QtWidgets.QApplication.font()\n2129:        font = cache.label_font()\n2148:        font = cache.label_font()",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01EugjevWAHetxVmX5iqbhFR",
+            "type": "tool_result",
+            "content": "1791:class Cache:\n1792:    _label_font = None\n1795:    def label_font(cls):\n1796:        font = cls._label_font\n1798:            font = cls._label_font = QtWidgets.QApplication.font()\n2129:        font = cache.label_font()\n2148:        font = cache.label_font()",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "1791:class Cache:\n1792:    _label_font = None\n1795:    def label_font(cls):\n1796:        font = cls._label_font\n1798:            font = cls._label_font = QtWidgets.QApplication.font()\n2129:        font = cache.label_font()\n2148:        font = cache.label_font()",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01EugjevWAHetxVmX5iqbhFR",
+            "type": "tool_result",
+            "content": "1791:class Cache:\n1792:    _label_font = None\n1795:    def label_font(cls):\n1796:        font = cls._label_font\n1798:            font = cls._label_font = QtWidgets.QApplication.font()\n2129:        font = cache.label_font()\n2148:        font = cache.label_font()",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "grep -n \"label_font\\|class Cache\\b\" /Users/luwei/work/git-cola/cola/widgets/dag.py | head",
+          "description": "Find Cache.label_font for reuse"
+        }
+      }
+    },
+    {
+      "step_id": 140,
+      "timestamp": "2026-04-27T18:06:33.385Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01Pbsr4sgdp9ayF9JZReozz3",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01Pbsr4sgdp9ayF9JZReozz3",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = None",
+            "new_string": "        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = _make_summary_label(commit, self, xpos)"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01Pbsr4sgdp9ayF9JZReozz3",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully.\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"        if commit.tags:\\n            self.label = label = Label(commit)\\n            label.setParentItem(self)\\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\\n        else:\\n            self.label = None\", \"newString\": \"        if commit.tags:\\n            self.label = label = Label(commit)\\n            label.setParentItem(self)\\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\\n        else:\\n            self.label = _make_summary_label(commit, self, xpos)\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2018, \"oldLines\": 7, \"newStart\": 2018, \"newLines\": 7, \"lines\": [\"             label.setParentItem(self)\", \"             label.setPos(xpos + 1, -self.commit_radius / 2.0)\", \"         else:\", \"-            self.label = None\", \"+            self.label = _make_summary_label(commit, self, xpos)\", \" \", \"         if len(commit.parents) > 1:\", \"             self.brush = cached_merge_color\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 101207,
+        "completion_tokens": 322,
+        "cached_tokens": 101206,
+        "extra": {
+          "cache_creation_input_tokens": 2185,
+          "cache_read_input_tokens": 101206,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 2185,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 322,
+              "cache_read_input_tokens": 101206,
+              "cache_creation_input_tokens": 2185,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 2185
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = None",
+            "newString": "        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = _make_summary_label(commit, self, xpos)",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2018,
+                "oldLines": 7,
+                "newStart": 2018,
+                "newLines": 7,
+                "lines": [
+                  "             label.setParentItem(self)",
+                  "             label.setPos(xpos + 1, -self.commit_radius / 2.0)",
+                  "         else:",
+                  "-            self.label = None",
+                  "+            self.label = _make_summary_label(commit, self, xpos)",
+                  " ",
+                  "         if len(commit.parents) > 1:",
+                  "             self.brush = cached_merge_color"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01Pbsr4sgdp9ayF9JZReozz3",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = None",
+            "newString": "        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = _make_summary_label(commit, self, xpos)",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2018,
+                "oldLines": 7,
+                "newStart": 2018,
+                "newLines": 7,
+                "lines": [
+                  "             label.setParentItem(self)",
+                  "             label.setPos(xpos + 1, -self.commit_radius / 2.0)",
+                  "         else:",
+                  "-            self.label = None",
+                  "+            self.label = _make_summary_label(commit, self, xpos)",
+                  " ",
+                  "         if len(commit.parents) > 1:",
+                  "             self.brush = cached_merge_color"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01Pbsr4sgdp9ayF9JZReozz3",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = None",
+          "new_string": "        if commit.tags:\n            self.label = label = Label(commit)\n            label.setParentItem(self)\n            label.setPos(xpos + 1, -self.commit_radius / 2.0)\n        else:\n            self.label = _make_summary_label(commit, self, xpos)"
+        }
+      }
+    },
+    {
+      "step_id": 141,
+      "timestamp": "2026-04-27T18:06:35.606Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Now add the helper just above `Label`:",
+      "metrics": {
+        "prompt_tokens": 103392,
+        "completion_tokens": 523,
+        "cached_tokens": 103391,
+        "extra": {
+          "cache_creation_input_tokens": 370,
+          "cache_read_input_tokens": 103391,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 370,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 523,
+              "cache_read_input_tokens": 103391,
+              "cache_creation_input_tokens": 370,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 370
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 142,
+      "timestamp": "2026-04-27T18:06:39.450Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_013mchA9KfdKbzDgykCQurkc",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_013mchA9KfdKbzDgykCQurkc",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "class Label(QtWidgets.QGraphicsItem):",
+            "new_string": "_SUMMARY_MAX_CHARS = 50\n\n\ndef _make_summary_label(commit, parent_item, xpos):\n    \"\"\"Show the first line of the commit message next to dots without branches.\"\"\"\n    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''\n    summary = summary.strip()\n    if not summary:\n        return None\n    if len(summary) > _SUMMARY_MAX_CHARS:\n        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'\n    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)\n    text_item.setFont(Cache.label_font())\n    text_item.setBrush(QtWidgets.QApplication.palette().text())\n    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)\n    text_item.setZValue(-1)\n    return text_item\n\n\nclass Label(QtWidgets.QGraphicsItem):"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_013mchA9KfdKbzDgykCQurkc",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully.\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"class Label(QtWidgets.QGraphicsItem):\", \"newString\": \"_SUMMARY_MAX_CHARS = 50\\n\\n\\ndef _make_summary_label(commit, parent_item, xpos):\\n    \\\"\\\"\\\"Show the first line of the commit message next to dots without branches.\\\"\\\"\\\"\\n    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''\\n    summary = summary.strip()\\n    if not summary:\\n        return None\\n    if len(summary) > _SUMMARY_MAX_CHARS:\\n        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'\\n    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)\\n    text_item.setFont(Cache.label_font())\\n    text_item.setBrush(QtWidgets.QApplication.palette().text())\\n    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)\\n    text_item.setZValue(-1)\\n    return text_item\\n\\n\\nclass Label(QtWidgets.QGraphicsItem):\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2084, \"oldLines\": 6, \"newStart\": 2084, \"newLines\": 25, \"lines\": [\"         self.dragged = False\", \" \", \" \", \"+_SUMMARY_MAX_CHARS = 50\", \"+\", \"+\", \"+def _make_summary_label(commit, parent_item, xpos):\", \"+    \\\"\\\"\\\"Show the first line of the commit message next to dots without branches.\\\"\\\"\\\"\", \"+    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''\", \"+    summary = summary.strip()\", \"+    if not summary:\", \"+        return None\", \"+    if len(summary) > _SUMMARY_MAX_CHARS:\", \"+        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'\", \"+    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)\", \"+    text_item.setFont(Cache.label_font())\", \"+    text_item.setBrush(QtWidgets.QApplication.palette().text())\", \"+    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)\", \"+    text_item.setZValue(-1)\", \"+    return text_item\", \"+\", \"+\", \" class Label(QtWidgets.QGraphicsItem):\", \"     item_type = qtutils.graphics_item_type_value(3)\", \" \"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 103392,
+        "completion_tokens": 523,
+        "cached_tokens": 103391,
+        "extra": {
+          "cache_creation_input_tokens": 370,
+          "cache_read_input_tokens": 103391,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 370,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 523,
+              "cache_read_input_tokens": 103391,
+              "cache_creation_input_tokens": 370,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 370
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "class Label(QtWidgets.QGraphicsItem):",
+            "newString": "_SUMMARY_MAX_CHARS = 50\n\n\ndef _make_summary_label(commit, parent_item, xpos):\n    \"\"\"Show the first line of the commit message next to dots without branches.\"\"\"\n    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''\n    summary = summary.strip()\n    if not summary:\n        return None\n    if len(summary) > _SUMMARY_MAX_CHARS:\n        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'\n    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)\n    text_item.setFont(Cache.label_font())\n    text_item.setBrush(QtWidgets.QApplication.palette().text())\n    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)\n    text_item.setZValue(-1)\n    return text_item\n\n\nclass Label(QtWidgets.QGraphicsItem):",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2084,
+                "oldLines": 6,
+                "newStart": 2084,
+                "newLines": 25,
+                "lines": [
+                  "         self.dragged = False",
+                  " ",
+                  " ",
+                  "+_SUMMARY_MAX_CHARS = 50",
+                  "+",
+                  "+",
+                  "+def _make_summary_label(commit, parent_item, xpos):",
+                  "+    \"\"\"Show the first line of the commit message next to dots without branches.\"\"\"",
+                  "+    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''",
+                  "+    summary = summary.strip()",
+                  "+    if not summary:",
+                  "+        return None",
+                  "+    if len(summary) > _SUMMARY_MAX_CHARS:",
+                  "+        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'",
+                  "+    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)",
+                  "+    text_item.setFont(Cache.label_font())",
+                  "+    text_item.setBrush(QtWidgets.QApplication.palette().text())",
+                  "+    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)",
+                  "+    text_item.setZValue(-1)",
+                  "+    return text_item",
+                  "+",
+                  "+",
+                  " class Label(QtWidgets.QGraphicsItem):",
+                  "     item_type = qtutils.graphics_item_type_value(3)",
+                  " "
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_013mchA9KfdKbzDgykCQurkc",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "class Label(QtWidgets.QGraphicsItem):",
+            "newString": "_SUMMARY_MAX_CHARS = 50\n\n\ndef _make_summary_label(commit, parent_item, xpos):\n    \"\"\"Show the first line of the commit message next to dots without branches.\"\"\"\n    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''\n    summary = summary.strip()\n    if not summary:\n        return None\n    if len(summary) > _SUMMARY_MAX_CHARS:\n        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'\n    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)\n    text_item.setFont(Cache.label_font())\n    text_item.setBrush(QtWidgets.QApplication.palette().text())\n    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)\n    text_item.setZValue(-1)\n    return text_item\n\n\nclass Label(QtWidgets.QGraphicsItem):",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2084,
+                "oldLines": 6,
+                "newStart": 2084,
+                "newLines": 25,
+                "lines": [
+                  "         self.dragged = False",
+                  " ",
+                  " ",
+                  "+_SUMMARY_MAX_CHARS = 50",
+                  "+",
+                  "+",
+                  "+def _make_summary_label(commit, parent_item, xpos):",
+                  "+    \"\"\"Show the first line of the commit message next to dots without branches.\"\"\"",
+                  "+    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''",
+                  "+    summary = summary.strip()",
+                  "+    if not summary:",
+                  "+        return None",
+                  "+    if len(summary) > _SUMMARY_MAX_CHARS:",
+                  "+        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'",
+                  "+    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)",
+                  "+    text_item.setFont(Cache.label_font())",
+                  "+    text_item.setBrush(QtWidgets.QApplication.palette().text())",
+                  "+    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)",
+                  "+    text_item.setZValue(-1)",
+                  "+    return text_item",
+                  "+",
+                  "+",
+                  " class Label(QtWidgets.QGraphicsItem):",
+                  "     item_type = qtutils.graphics_item_type_value(3)",
+                  " "
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_013mchA9KfdKbzDgykCQurkc",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "class Label(QtWidgets.QGraphicsItem):",
+          "new_string": "_SUMMARY_MAX_CHARS = 50\n\n\ndef _make_summary_label(commit, parent_item, xpos):\n    \"\"\"Show the first line of the commit message next to dots without branches.\"\"\"\n    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''\n    summary = summary.strip()\n    if not summary:\n        return None\n    if len(summary) > _SUMMARY_MAX_CHARS:\n        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'\n    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)\n    text_item.setFont(Cache.label_font())\n    text_item.setBrush(QtWidgets.QApplication.palette().text())\n    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)\n    text_item.setZValue(-1)\n    return text_item\n\n\nclass Label(QtWidgets.QGraphicsItem):"
+        }
+      }
+    },
+    {
+      "step_id": 143,
+      "timestamp": "2026-04-27T18:06:42.470Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01BSBmGBi2ynXVYK8uRnPBDm",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01BSBmGBi2ynXVYK8uRnPBDm",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "./venv/bin/python -c \"import ast; ast.parse(open('cola/widgets/dag.py').read()); print('OK')\"",
+            "description": "Syntax check"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01BSBmGBi2ynXVYK8uRnPBDm",
+            "content": "OK\n\n[stdout]\nOK\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 103762,
+        "completion_tokens": 131,
+        "cached_tokens": 103761,
+        "extra": {
+          "cache_creation_input_tokens": 733,
+          "cache_read_input_tokens": 103761,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 733,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 131,
+              "cache_read_input_tokens": 103761,
+              "cache_creation_input_tokens": 733,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 733
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "OK",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01BSBmGBi2ynXVYK8uRnPBDm",
+            "type": "tool_result",
+            "content": "OK",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "OK",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01BSBmGBi2ynXVYK8uRnPBDm",
+            "type": "tool_result",
+            "content": "OK",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "./venv/bin/python -c \"import ast; ast.parse(open('cola/widgets/dag.py').read()); print('OK')\"",
+          "description": "Syntax check"
+        }
+      }
+    },
+    {
+      "step_id": 144,
+      "timestamp": "2026-04-27T18:06:53.619Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "改动总结：\n\n- `cola/widgets/dag.py` 新增模块级辅助 `_make_summary_label(commit, parent_item, xpos)`：取 `commit.summary` 的第一行，超过 50 字截断为 49 字 + `…`，用 `QGraphicsSimpleTextItem` 创建文本项，使用 `Cache.label_font()` 与系统调色板的 text brush（兼容暗色主题），位置与原 `Label` 对齐（`xpos + 1, -commit_radius / 2.0`），`zValue = -1`。\n- `Commit.__init__` 中 `else self.label = None` 改为 `self.label = _make_summary_label(...)`：有分支/标签时仍显示原 `Label`；没有时显示截断后的 commit message 第一行。空 summary 仍返回 `None`，不画任何东西。\n\n重启 `./venv/bin/python -m cola dag` 即可看到没有分支的提交点右侧出现 50 字以内的 commit 消息首行。",
+      "metrics": {
+        "prompt_tokens": 104495,
+        "completion_tokens": 349,
+        "cached_tokens": 104494,
+        "extra": {
+          "cache_creation_input_tokens": 145,
+          "cache_read_input_tokens": 104494,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 145,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 349,
+              "cache_read_input_tokens": 104494,
+              "cache_creation_input_tokens": 145,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 145
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 8014952,
-    "total_completion_tokens": 83332,
-    "total_cached_tokens": 8014725,
-    "total_steps": 133,
+    "total_prompt_tokens": 9029768,
+    "total_completion_tokens": 90192,
+    "total_cached_tokens": 9029521,
+    "total_steps": 144,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 133166,
-      "total_cache_read_input_tokens": 8014725
+      "total_cache_creation_input_tokens": 140775,
+      "total_cache_read_input_tokens": 9029521
     }
   }
 }
