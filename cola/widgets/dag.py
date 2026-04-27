@@ -2018,7 +2018,10 @@ class Commit(QtWidgets.QGraphicsItem):
             label.setParentItem(self)
             label.setPos(xpos + 1, -self.commit_radius / 2.0)
         else:
-            self.label = _make_summary_label(commit, self, xpos)
+            self.label = None
+        # Summary label is set by GraphView.layout_commits based on row layout.
+        self.summary_label = None
+        self._summary_side = None
 
         if len(commit.parents) > 1:
             self.brush = cached_merge_color
@@ -2028,6 +2031,40 @@ class Commit(QtWidgets.QGraphicsItem):
         self.pressed = False
         self.dragged = False
         self.edges = {}
+
+    def update_summary_label(self, side):
+        """Display the commit summary on the given side.
+
+        side is 'right', 'left', or None to remove.  No-op when the commit
+        already shows a branch label or has an empty summary.
+        """
+        if side == self._summary_side and self.summary_label is not None:
+            return
+        if self.summary_label is not None:
+            scene = self.summary_label.scene()
+            if scene is not None:
+                scene.removeItem(self.summary_label)
+            self.summary_label = None
+        self._summary_side = side
+        if side is None or self.commit.tags:
+            return
+        summary = (self.commit.summary or '').splitlines()[0]
+        summary = summary.strip()
+        if not summary:
+            return
+        if len(summary) > _SUMMARY_MAX_CHARS:
+            summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'
+        text_item = QtWidgets.QGraphicsSimpleTextItem(summary, self)
+        text_item.setFont(Cache.label_font())
+        text_item.setBrush(QtWidgets.QApplication.palette().text())
+        if side == 'right':
+            x = self.commit_radius / 2.0 + 2
+        else:
+            text_width = text_item.boundingRect().width()
+            x = -self.commit_radius / 2.0 - 2 - text_width
+        text_item.setPos(x, -self.commit_radius / 2.0)
+        text_item.setZValue(-1)
+        self.summary_label = text_item
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
@@ -2085,22 +2122,6 @@ class Commit(QtWidgets.QGraphicsItem):
 
 
 _SUMMARY_MAX_CHARS = 50
-
-
-def _make_summary_label(commit, parent_item, xpos):
-    """Show the first line of the commit message next to dots without branches."""
-    summary = (commit.summary or '').splitlines()[0] if commit.summary else ''
-    summary = summary.strip()
-    if not summary:
-        return None
-    if len(summary) > _SUMMARY_MAX_CHARS:
-        summary = summary[: _SUMMARY_MAX_CHARS - 1] + '…'
-    text_item = QtWidgets.QGraphicsSimpleTextItem(summary, parent_item)
-    text_item.setFont(Cache.label_font())
-    text_item.setBrush(QtWidgets.QApplication.palette().text())
-    text_item.setPos(xpos + 1, -Commit.commit_radius / 2.0)
-    text_item.setZValue(-1)
-    return text_item
 
 
 class Label(QtWidgets.QGraphicsItem):
@@ -2724,6 +2745,41 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
 
         for edge in invalid_edges:
             edge.commits_were_invalidated()
+
+        self._update_summary_labels()
+
+    def _update_summary_labels(self):
+        """Place commit-summary text on outer dots; clear interior dots.
+
+        Single-dot rows show the summary on the right.  Rows with two or more
+        dots show the summary only on the visually leftmost (highest column,
+        because x_off is negative) and rightmost (lowest column) dots.
+        """
+        by_row = {}
+        for node in self.commits:
+            if node.row is None or node.column is None:
+                continue
+            by_row.setdefault(node.row, []).append(node)
+
+        for nodes in by_row.values():
+            if len(nodes) == 1:
+                self._set_summary_side(nodes[0], 'right')
+                continue
+            sorted_nodes = sorted(nodes, key=lambda n: n.column)
+            rightmost = sorted_nodes[0]
+            leftmost = sorted_nodes[-1]
+            for node in sorted_nodes:
+                if node is leftmost:
+                    self._set_summary_side(node, 'left')
+                elif node is rightmost:
+                    self._set_summary_side(node, 'right')
+                else:
+                    self._set_summary_side(node, None)
+
+    def _set_summary_side(self, node, side):
+        item = self.items.get(node.oid)
+        if item is not None:
+            item.update_summary_label(side)
 
     # Commit node layout technique
     #
