@@ -3169,8 +3169,16 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         result = cmds.do(cmds.CheckoutBranch, self.context, target_branch)
         if not result or result[0] != 0:
             return
-        cmds.do(cmds.MergeBranch, self.context, source)
+        merge_result = cmds.do(cmds.MergeBranch, self.context, source)
         self.merge_finished.emit()
+        if merge_result and merge_result[0] == 0:
+            switch_title = N_('Switch Back')
+            switch_text = N_('Switch back to "%s"?') % source
+            if Interaction.confirm(
+                switch_title, switch_text, '', N_('Switch'), default=False
+            ):
+                cmds.do(cmds.CheckoutBranch, self.context, source)
+                self.merge_finished.emit()
 
     def mouseMoveEvent(self, event):
         if self.is_panning:
