@@ -3149,7 +3149,9 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         }
         if not Interaction.confirm(title, text, '', N_('Checkout && Merge')):
             return
-        cmds.do(cmds.CheckoutBranch, self.context, target_branch)
+        result = cmds.do(cmds.CheckoutBranch, self.context, target_branch)
+        if not result or result[0] != 0:
+            return
         cmds.do(cmds.MergeBranch, self.context, source)
 
     def mouseMoveEvent(self, event):
