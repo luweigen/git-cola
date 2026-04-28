@@ -2271,7 +2271,7 @@ class Label(QtWidgets.QGraphicsItem):
 
             painter.drawRoundedRect(box_rect, border, border)
             painter.drawText(text_rect, Qt.TextSingleLine, display_tag)
-            hits.append((QRectF(box_rect), display_tag, is_head))
+            hits.append((QRectF(box_rect), display_tag, is_head, tag))
             current_width += text_rect.width() + spacing
 
         self._label_hits = hits
@@ -2281,7 +2281,7 @@ class Label(QtWidgets.QGraphicsItem):
             super().mousePressEvent(event)
             return
         pos = event.pos()
-        for rect, text, is_head in self._label_hits:
+        for rect, text, is_head, original_tag in self._label_hits:
             if not rect.contains(pos):
                 continue
             graph_view = self._graph_view()
@@ -2297,7 +2297,7 @@ class Label(QtWidgets.QGraphicsItem):
                 qtutils.set_clipboard(text)
                 event.accept()
                 return
-            self._show_branch_menu(event, text)
+            self._show_branch_menu(event, text, original_tag)
             event.accept()
             return
         super().mousePressEvent(event)
@@ -2323,7 +2323,8 @@ class Label(QtWidgets.QGraphicsItem):
             return None
         return getattr(model, 'currentbranch', None) or None
 
-    def _show_branch_menu(self, event, full_name):
+    def _show_branch_menu(self, event, full_name, original_tag):
+        is_local_branch = original_tag.startswith('heads/')
         agent_part = _agent_branch_part(full_name)
         menu = QtWidgets.QMenu()
         copy_full = menu.addAction(N_('Copy "%s"') % full_name)
@@ -2332,6 +2333,9 @@ class Label(QtWidgets.QGraphicsItem):
             copy_part = menu.addAction(N_('Copy "%s"') % agent_part)
         menu.addSeparator()
         checkout = menu.addAction(N_('Checkout "%s"') % full_name)
+        rename = None
+        if is_local_branch:
+            rename = menu.addAction(N_('Rename "%s"...') % full_name)
         merge_to = menu.addAction(N_('Merge to...'))
         chosen = menu.exec_(event.screenPos())
         if chosen is None:
@@ -2345,6 +2349,25 @@ class Label(QtWidgets.QGraphicsItem):
             if graph_view is None:
                 return
             result = cmds.do(cmds.CheckoutBranch, graph_view.context, full_name)
+            if result and result[0] == 0:
+                graph_view.merge_finished.emit()
+        elif rename is not None and chosen is rename:
+            graph_view = self._graph_view()
+            if graph_view is None:
+                return
+            new_name, ok = qtutils.prompt(
+                N_('Enter new branch name'),
+                title=N_('Rename "%s"') % full_name,
+                text=full_name,
+            )
+            if not ok:
+                return
+            new_name = new_name.strip()
+            if not new_name or new_name == full_name:
+                return
+            result = cmds.do(
+                cmds.RenameBranch, graph_view.context, full_name, new_name
+            )
             if result and result[0] == 0:
                 graph_view.merge_finished.emit()
         elif chosen is merge_to:

@@ -1342,11 +1342,13 @@ class RenameBranch(ContextCommand):
         self.branch = branch
         self.new_branch = new_branch
 
-    def do(self) -> None:
+    def do(self) -> tuple[int, str, str]:
         branch = self.branch
         new_branch = self.new_branch
         status, out, err = self.model.rename_branch(branch, new_branch)
-        Interaction.log_status(status, out, err)
+        title = N_('Rename branch failed')
+        Interaction.command(title, 'git branch -M', status, out, err)
+        return status, out, err
 
 
 class DeleteRemoteBranch(DeleteBranch):
