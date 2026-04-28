@@ -26369,19 +26369,574 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 334,
+      "timestamp": "2026-04-28T18:06:28.026Z",
+      "source": "user",
+      "message": "输入branch名称的对话框宽度扩大4倍",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 335,
+      "timestamp": "2026-04-28T18:06:51.257Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 205451,
+        "completion_tokens": 1896,
+        "cached_tokens": 205445,
+        "extra": {
+          "cache_creation_input_tokens": 834,
+          "cache_read_input_tokens": 205445,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 834,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 1896,
+              "cache_read_input_tokens": 205445,
+              "cache_creation_input_tokens": 834,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 834
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 336,
+      "timestamp": "2026-04-28T18:06:53.220Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01NsnxqRz9fv3VrgoL2sQ5xB",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01NsnxqRz9fv3VrgoL2sQ5xB",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "            new_name, ok = qtutils.prompt(\n                N_('Enter new branch name'),\n                title=N_('Rename \"%s\"') % full_name,\n                text=full_name,\n            )\n            if not ok:\n                return",
+            "new_string": "            new_name, ok = _prompt_wide(\n                N_('Enter new branch name'),\n                title=N_('Rename \"%s\"') % full_name,\n                text=full_name,\n                width_factor=4,\n            )\n            if not ok:\n                return"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01NsnxqRz9fv3VrgoL2sQ5xB",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully.\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"            new_name, ok = qtutils.prompt(\\n                N_('Enter new branch name'),\\n                title=N_('Rename \\\"%s\\\"') % full_name,\\n                text=full_name,\\n            )\\n            if not ok:\\n                return\", \"newString\": \"            new_name, ok = _prompt_wide(\\n                N_('Enter new branch name'),\\n                title=N_('Rename \\\"%s\\\"') % full_name,\\n                text=full_name,\\n                width_factor=4,\\n            )\\n            if not ok:\\n                return\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2355, \"oldLines\": 10, \"newStart\": 2355, \"newLines\": 11, \"lines\": [\"             graph_view = self._graph_view()\", \"             if graph_view is None:\", \"                 return\", \"-            new_name, ok = qtutils.prompt(\", \"+            new_name, ok = _prompt_wide(\", \"                 N_('Enter new branch name'),\", \"                 title=N_('Rename \\\"%s\\\"') % full_name,\", \"                 text=full_name,\", \"+                width_factor=4,\", \"             )\", \"             if not ok:\", \"                 return\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 205451,
+        "completion_tokens": 1896,
+        "cached_tokens": 205445,
+        "extra": {
+          "cache_creation_input_tokens": 834,
+          "cache_read_input_tokens": 205445,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 834,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 1896,
+              "cache_read_input_tokens": 205445,
+              "cache_creation_input_tokens": 834,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 834
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "            new_name, ok = qtutils.prompt(\n                N_('Enter new branch name'),\n                title=N_('Rename \"%s\"') % full_name,\n                text=full_name,\n            )\n            if not ok:\n                return",
+            "newString": "            new_name, ok = _prompt_wide(\n                N_('Enter new branch name'),\n                title=N_('Rename \"%s\"') % full_name,\n                text=full_name,\n                width_factor=4,\n            )\n            if not ok:\n                return",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2355,
+                "oldLines": 10,
+                "newStart": 2355,
+                "newLines": 11,
+                "lines": [
+                  "             graph_view = self._graph_view()",
+                  "             if graph_view is None:",
+                  "                 return",
+                  "-            new_name, ok = qtutils.prompt(",
+                  "+            new_name, ok = _prompt_wide(",
+                  "                 N_('Enter new branch name'),",
+                  "                 title=N_('Rename \"%s\"') % full_name,",
+                  "                 text=full_name,",
+                  "+                width_factor=4,",
+                  "             )",
+                  "             if not ok:",
+                  "                 return"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01NsnxqRz9fv3VrgoL2sQ5xB",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "            new_name, ok = qtutils.prompt(\n                N_('Enter new branch name'),\n                title=N_('Rename \"%s\"') % full_name,\n                text=full_name,\n            )\n            if not ok:\n                return",
+            "newString": "            new_name, ok = _prompt_wide(\n                N_('Enter new branch name'),\n                title=N_('Rename \"%s\"') % full_name,\n                text=full_name,\n                width_factor=4,\n            )\n            if not ok:\n                return",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2355,
+                "oldLines": 10,
+                "newStart": 2355,
+                "newLines": 11,
+                "lines": [
+                  "             graph_view = self._graph_view()",
+                  "             if graph_view is None:",
+                  "                 return",
+                  "-            new_name, ok = qtutils.prompt(",
+                  "+            new_name, ok = _prompt_wide(",
+                  "                 N_('Enter new branch name'),",
+                  "                 title=N_('Rename \"%s\"') % full_name,",
+                  "                 text=full_name,",
+                  "+                width_factor=4,",
+                  "             )",
+                  "             if not ok:",
+                  "                 return"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01NsnxqRz9fv3VrgoL2sQ5xB",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "            new_name, ok = qtutils.prompt(\n                N_('Enter new branch name'),\n                title=N_('Rename \"%s\"') % full_name,\n                text=full_name,\n            )\n            if not ok:\n                return",
+          "new_string": "            new_name, ok = _prompt_wide(\n                N_('Enter new branch name'),\n                title=N_('Rename \"%s\"') % full_name,\n                text=full_name,\n                width_factor=4,\n            )\n            if not ok:\n                return"
+        }
+      }
+    },
+    {
+      "step_id": 337,
+      "timestamp": "2026-04-28T18:06:56.091Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Add the helper at module level near `_agent_branch_part`:",
+      "metrics": {
+        "prompt_tokens": 206280,
+        "completion_tokens": 477,
+        "cached_tokens": 206279,
+        "extra": {
+          "cache_creation_input_tokens": 1949,
+          "cache_read_input_tokens": 206279,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1949,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 477,
+              "cache_read_input_tokens": 206279,
+              "cache_creation_input_tokens": 1949,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1949
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 338,
+      "timestamp": "2026-04-28T18:06:59.291Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01X5txjXiJq1evbMnC5ijtie",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01X5txjXiJq1evbMnC5ijtie",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "def _agent_branch_part(name):",
+            "new_string": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.\n\n    width_factor multiplies QInputDialog's natural width hint.\n    \"\"\"\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\n    dialog.setWindowTitle(title)\n    dialog.setLabelText(msg)\n    dialog.setTextValue(text)\n    hint = dialog.sizeHint()\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return dialog.textValue(), accepted\n\n\ndef _agent_branch_part(name):"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01X5txjXiJq1evbMnC5ijtie",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully.\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"def _agent_branch_part(name):\", \"newString\": \"def _prompt_wide(msg, title, text='', width_factor=1):\\n    \\\"\\\"\\\"Like qtutils.prompt but with the line edit (and dialog) made wider.\\n\\n    width_factor multiplies QInputDialog's natural width hint.\\n    \\\"\\\"\\\"\\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\\n    dialog.setWindowTitle(title)\\n    dialog.setLabelText(msg)\\n    dialog.setTextValue(text)\\n    hint = dialog.sizeHint()\\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\\n    return dialog.textValue(), accepted\\n\\n\\ndef _agent_branch_part(name):\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2377, \"oldLines\": 6, \"newStart\": 2377, \"newLines\": 22, \"lines\": [\"                 graph_view.enter_merge_mode(full_name)\", \" \", \" \", \"+def _prompt_wide(msg, title, text='', width_factor=1):\", \"+    \\\"\\\"\\\"Like qtutils.prompt but with the line edit (and dialog) made wider.\", \"+\", \"+    width_factor multiplies QInputDialog's natural width hint.\", \"+    \\\"\\\"\\\"\", \"+    dialog = QtWidgets.QInputDialog(qtutils.active_window())\", \"+    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\", \"+    dialog.setWindowTitle(title)\", \"+    dialog.setLabelText(msg)\", \"+    dialog.setTextValue(text)\", \"+    hint = dialog.sizeHint()\", \"+    dialog.setMinimumWidth(int(hint.width() * width_factor))\", \"+    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\", \"+    return dialog.textValue(), accepted\", \"+\", \"+\", \" def _agent_branch_part(name):\", \"     \\\"\\\"\\\"Return the agent name segment for branches starting with \\\"agent_\\\" or \\\"agent/\\\".\", \" \"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 206280,
+        "completion_tokens": 477,
+        "cached_tokens": 206279,
+        "extra": {
+          "cache_creation_input_tokens": 1949,
+          "cache_read_input_tokens": 206279,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1949,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 477,
+              "cache_read_input_tokens": 206279,
+              "cache_creation_input_tokens": 1949,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1949
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "def _agent_branch_part(name):",
+            "newString": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.\n\n    width_factor multiplies QInputDialog's natural width hint.\n    \"\"\"\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\n    dialog.setWindowTitle(title)\n    dialog.setLabelText(msg)\n    dialog.setTextValue(text)\n    hint = dialog.sizeHint()\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return dialog.textValue(), accepted\n\n\ndef _agent_branch_part(name):",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2377,
+                "oldLines": 6,
+                "newStart": 2377,
+                "newLines": 22,
+                "lines": [
+                  "                 graph_view.enter_merge_mode(full_name)",
+                  " ",
+                  " ",
+                  "+def _prompt_wide(msg, title, text='', width_factor=1):",
+                  "+    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.",
+                  "+",
+                  "+    width_factor multiplies QInputDialog's natural width hint.",
+                  "+    \"\"\"",
+                  "+    dialog = QtWidgets.QInputDialog(qtutils.active_window())",
+                  "+    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)",
+                  "+    dialog.setWindowTitle(title)",
+                  "+    dialog.setLabelText(msg)",
+                  "+    dialog.setTextValue(text)",
+                  "+    hint = dialog.sizeHint()",
+                  "+    dialog.setMinimumWidth(int(hint.width() * width_factor))",
+                  "+    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted",
+                  "+    return dialog.textValue(), accepted",
+                  "+",
+                  "+",
+                  " def _agent_branch_part(name):",
+                  "     \"\"\"Return the agent name segment for branches starting with \"agent_\" or \"agent/\".",
+                  " "
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01X5txjXiJq1evbMnC5ijtie",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "def _agent_branch_part(name):",
+            "newString": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.\n\n    width_factor multiplies QInputDialog's natural width hint.\n    \"\"\"\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\n    dialog.setWindowTitle(title)\n    dialog.setLabelText(msg)\n    dialog.setTextValue(text)\n    hint = dialog.sizeHint()\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return dialog.textValue(), accepted\n\n\ndef _agent_branch_part(name):",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2377,
+                "oldLines": 6,
+                "newStart": 2377,
+                "newLines": 22,
+                "lines": [
+                  "                 graph_view.enter_merge_mode(full_name)",
+                  " ",
+                  " ",
+                  "+def _prompt_wide(msg, title, text='', width_factor=1):",
+                  "+    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.",
+                  "+",
+                  "+    width_factor multiplies QInputDialog's natural width hint.",
+                  "+    \"\"\"",
+                  "+    dialog = QtWidgets.QInputDialog(qtutils.active_window())",
+                  "+    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)",
+                  "+    dialog.setWindowTitle(title)",
+                  "+    dialog.setLabelText(msg)",
+                  "+    dialog.setTextValue(text)",
+                  "+    hint = dialog.sizeHint()",
+                  "+    dialog.setMinimumWidth(int(hint.width() * width_factor))",
+                  "+    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted",
+                  "+    return dialog.textValue(), accepted",
+                  "+",
+                  "+",
+                  " def _agent_branch_part(name):",
+                  "     \"\"\"Return the agent name segment for branches starting with \"agent_\" or \"agent/\".",
+                  " "
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01X5txjXiJq1evbMnC5ijtie",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "def _agent_branch_part(name):",
+          "new_string": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.\n\n    width_factor multiplies QInputDialog's natural width hint.\n    \"\"\"\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\n    dialog.setWindowTitle(title)\n    dialog.setLabelText(msg)\n    dialog.setTextValue(text)\n    hint = dialog.sizeHint()\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return dialog.textValue(), accepted\n\n\ndef _agent_branch_part(name):"
+        }
+      }
+    },
+    {
+      "step_id": 339,
+      "timestamp": "2026-04-28T18:07:02.449Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01VoAFeuabDNhC5525oB3rZz",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01VoAFeuabDNhC5525oB3rZz",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "./venv/bin/python -c \"import ast; ast.parse(open('cola/widgets/dag.py').read()); print('OK')\"",
+            "description": "Syntax check"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01VoAFeuabDNhC5525oB3rZz",
+            "content": "OK\n\n[stdout]\nOK\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 208229,
+        "completion_tokens": 131,
+        "cached_tokens": 208228,
+        "extra": {
+          "cache_creation_input_tokens": 525,
+          "cache_read_input_tokens": 208228,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 525,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 131,
+              "cache_read_input_tokens": 208228,
+              "cache_creation_input_tokens": 525,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 525
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "OK",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01VoAFeuabDNhC5525oB3rZz",
+            "type": "tool_result",
+            "content": "OK",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "OK",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01VoAFeuabDNhC5525oB3rZz",
+            "type": "tool_result",
+            "content": "OK",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "./venv/bin/python -c \"import ast; ast.parse(open('cola/widgets/dag.py').read()); print('OK')\"",
+          "description": "Syntax check"
+        }
+      }
+    },
+    {
+      "step_id": 340,
+      "timestamp": "2026-04-28T18:07:09.021Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "改动：\n\n- 新增模块级辅助 `_prompt_wide(msg, title, text='', width_factor=1)`：手工构造 `QInputDialog`，按 `sizeHint().width() * width_factor` 设 `setMinimumWidth`（QInputDialog 内部布局会让 line edit 跟着撑开）。返回 `(text_value, accepted)`，与 `qtutils.prompt` 兼容。\n- `Label._show_branch_menu` 中改名分支调用改为 `_prompt_wide(..., width_factor=4)`。其它对话框不动。\n\n效果：弹出\"输入新分支名\"对话框时，宽度约为默认的 4 倍，长名字（如 `agent_xxxx-xxxx-.../clipboard_quote_menu.py`）一眼可见、便于编辑。重启 `python -m cola dag` 验证。",
+      "metrics": {
+        "prompt_tokens": 208229,
+        "completion_tokens": 299,
+        "cached_tokens": 208228,
+        "extra": {
+          "cache_creation_input_tokens": 670,
+          "cache_read_input_tokens": 208228,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 670,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 299,
+              "cache_read_input_tokens": 208228,
+              "cache_creation_input_tokens": 670,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 670
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 33683627,
-    "total_completion_tokens": 201289,
-    "total_cached_tokens": 33683059,
-    "total_steps": 333,
+    "total_prompt_tokens": 34923547,
+    "total_completion_tokens": 206465,
+    "total_cached_tokens": 34922963,
+    "total_steps": 340,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 1608821,
-      "total_cache_read_input_tokens": 33683059
+      "total_cache_creation_input_tokens": 1615582,
+      "total_cache_read_input_tokens": 34922963
     }
   }
 }

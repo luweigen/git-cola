@@ -2355,10 +2355,11 @@ class Label(QtWidgets.QGraphicsItem):
             graph_view = self._graph_view()
             if graph_view is None:
                 return
-            new_name, ok = qtutils.prompt(
+            new_name, ok = _prompt_wide(
                 N_('Enter new branch name'),
                 title=N_('Rename "%s"') % full_name,
                 text=full_name,
+                width_factor=4,
             )
             if not ok:
                 return
@@ -2374,6 +2375,22 @@ class Label(QtWidgets.QGraphicsItem):
             graph_view = self._graph_view()
             if graph_view is not None:
                 graph_view.enter_merge_mode(full_name)
+
+
+def _prompt_wide(msg, title, text='', width_factor=1):
+    """Like qtutils.prompt but with the line edit (and dialog) made wider.
+
+    width_factor multiplies QInputDialog's natural width hint.
+    """
+    dialog = QtWidgets.QInputDialog(qtutils.active_window())
+    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)
+    dialog.setWindowTitle(title)
+    dialog.setLabelText(msg)
+    dialog.setTextValue(text)
+    hint = dialog.sizeHint()
+    dialog.setMinimumWidth(int(hint.width() * width_factor))
+    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted
+    return dialog.textValue(), accepted
 
 
 def _agent_branch_part(name):
