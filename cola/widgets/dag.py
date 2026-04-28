@@ -1392,9 +1392,9 @@ class GitDAG(standard.MainWindow):
         left = Qt.LeftDockWidgetArea
         right = Qt.RightDockWidgetArea
         self.addDockWidget(left, self.log_dock)
-        self.addDockWidget(left, self.diff_dock)
+        self.addDockWidget(left, self.file_dock)
         self.addDockWidget(right, self.graphview_dock)
-        self.addDockWidget(right, self.file_dock)
+        self.addDockWidget(right, self.diff_dock)
 
         # Also re-loads dag.* from the saved state
         self.init_state(context.settings, self.resize_to_desktop)
