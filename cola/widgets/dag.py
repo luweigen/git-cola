@@ -958,13 +958,15 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 class CommitTreeWidgetItem(QtWidgets.QTreeWidgetItem):
     """Custom TreeWidgetItem used in to build the commit tree widget"""
 
-    SUMMARY = 0
-    AUTHOR = 1
-    DATE = 2
+    OID = 0
+    SUMMARY = 1
+    AUTHOR = 2
+    DATE = 3
 
-    def __init__(self, commit, parent=None):
+    def __init__(self, commit, abbrev=7, parent=None):
         QtWidgets.QTreeWidgetItem.__init__(self, parent)
         self.commit = commit
+        self.setText(self.OID, (commit.oid or '')[:abbrev])
         self.setText(self.SUMMARY, commit.summary)
         self.setText(self.AUTHOR, commit.author)
         self.setText(self.DATE, commit.authdate)
@@ -983,7 +985,9 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         ViewerMixin.__init__(self)
 
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.setHeaderLabels([N_('Summary'), N_('Author'), N_('Date, Time')])
+        self.setHeaderLabels(
+            [N_('ID'), N_('Summary'), N_('Author'), N_('Date, Time')]
+        )
         self.header().setSectionResizeMode(
             CommitTreeWidgetItem.DATE, QtWidgets.QHeaderView.Stretch
         )
@@ -1026,9 +1030,8 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         except (KeyError, ValueError):
             column_widths = None
         if column_widths:
-            # We only care about the first two columns. This allows the final
-            # column to stretch and shrink.
-            self.set_column_widths(column_widths[:2])
+            # Skip the final column so it stretches and shrinks freely.
+            self.set_column_widths(column_widths[:3])
             self._column_init_state = ColumnInitState.SHOW_EVENT
         return True
 
@@ -1043,8 +1046,12 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             width = self.header().width()
             one_half = width // 2
             one_quarter = width // 4
+            oid_width = self.fontMetrics().horizontalAdvance('m' * 9)
             # Set initial SUMMARY column width; it will be adjusted when graph loads.
-            self.setColumnWidth(CommitTreeWidgetItem.SUMMARY, one_half)
+            self.setColumnWidth(CommitTreeWidgetItem.OID, oid_width)
+            self.setColumnWidth(
+                CommitTreeWidgetItem.SUMMARY, max(one_half - oid_width, one_quarter)
+            )
             self.setColumnWidth(CommitTreeWidgetItem.AUTHOR, one_quarter)
 
     def display_inline_graph(self, enabled):
@@ -1129,8 +1136,9 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         items = []
         head = 'HEAD'
         head_oid = None
+        abbrev = prefs.abbrev(self.context)
         for commit in reversed(commits):
-            item = CommitTreeWidgetItem(commit)
+            item = CommitTreeWidgetItem(commit, abbrev=abbrev)
             items.append(item)
             self.oidmap[commit.oid] = item
             for tag in commit.tags:
@@ -1392,9 +1400,9 @@ class GitDAG(standard.MainWindow):
         left = Qt.LeftDockWidgetArea
         right = Qt.RightDockWidgetArea
         self.addDockWidget(left, self.log_dock)
-        self.addDockWidget(left, self.file_dock)
+        self.addDockWidget(left, self.diff_dock)
         self.addDockWidget(right, self.graphview_dock)
-        self.addDockWidget(right, self.diff_dock)
+        self.addDockWidget(right, self.file_dock)
 
         # Also re-loads dag.* from the saved state
         self.init_state(context.settings, self.resize_to_desktop)
