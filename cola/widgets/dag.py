@@ -2331,6 +2331,7 @@ class Label(QtWidgets.QGraphicsItem):
         if agent_part is not None:
             copy_part = menu.addAction(N_('Copy "%s"') % agent_part)
         menu.addSeparator()
+        checkout = menu.addAction(N_('Checkout "%s"') % full_name)
         merge_to = menu.addAction(N_('Merge to...'))
         chosen = menu.exec_(event.screenPos())
         if chosen is None:
@@ -2339,6 +2340,13 @@ class Label(QtWidgets.QGraphicsItem):
             qtutils.set_clipboard(full_name)
         elif copy_part is not None and chosen is copy_part:
             qtutils.set_clipboard(agent_part)
+        elif chosen is checkout:
+            graph_view = self._graph_view()
+            if graph_view is None:
+                return
+            result = cmds.do(cmds.CheckoutBranch, graph_view.context, full_name)
+            if result and result[0] == 0:
+                graph_view.merge_finished.emit()
         elif chosen is merge_to:
             graph_view = self._graph_view()
             if graph_view is not None:
