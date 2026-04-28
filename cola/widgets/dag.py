@@ -2378,19 +2378,30 @@ class Label(QtWidgets.QGraphicsItem):
 
 
 def _prompt_wide(msg, title, text='', width_factor=1):
-    """Like qtutils.prompt but with the line edit (and dialog) made wider.
+    """Like qtutils.prompt, but with the dialog forced wider.
 
-    width_factor multiplies QInputDialog's natural width hint.
+    width_factor multiplies a reference QInputDialog width.  We build the
+    widget tree directly because QInputDialog ignores most width hints.
     """
-    dialog = QtWidgets.QInputDialog(qtutils.active_window())
-    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)
+    parent = qtutils.active_window()
+    dialog = QtWidgets.QDialog(parent)
     dialog.setWindowTitle(title)
-    dialog.setLabelText(msg)
-    dialog.setTextValue(text)
-    hint = dialog.sizeHint()
-    dialog.setMinimumWidth(int(hint.width() * width_factor))
+    label = QtWidgets.QLabel(msg)
+    line_edit = QtWidgets.QLineEdit(text)
+    line_edit.selectAll()
+    buttons = QtWidgets.QDialogButtonBox(
+        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+    )
+    buttons.accepted.connect(dialog.accept)
+    buttons.rejected.connect(dialog.reject)
+    layout = QtWidgets.QVBoxLayout(dialog)
+    layout.addWidget(label)
+    layout.addWidget(line_edit)
+    layout.addWidget(buttons)
+    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280
+    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())
     accepted = dialog.exec_() == QtWidgets.QDialog.Accepted
-    return dialog.textValue(), accepted
+    return line_edit.text(), accepted
 
 
 def _agent_branch_part(name):

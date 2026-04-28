@@ -26924,19 +26924,462 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 341,
+      "timestamp": "2026-04-28T18:12:02.684Z",
+      "source": "user",
+      "message": "没有效果",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 342,
+      "timestamp": "2026-04-28T18:12:20.173Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 208904,
+        "completion_tokens": 2342,
+        "cached_tokens": 208898,
+        "extra": {
+          "cache_creation_input_tokens": 305,
+          "cache_read_input_tokens": 208898,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 305,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 2342,
+              "cache_read_input_tokens": 208898,
+              "cache_creation_input_tokens": 305,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 305
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 343,
+      "timestamp": "2026-04-28T18:12:21.262Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "`QInputDialog` 对宽度调整不太配合（内部布局会回退到自己的算法）。改用直接拼装的 `QDialog` 强制设置宽度。",
+      "metrics": {
+        "prompt_tokens": 208904,
+        "completion_tokens": 2342,
+        "cached_tokens": 208898,
+        "extra": {
+          "cache_creation_input_tokens": 305,
+          "cache_read_input_tokens": 208898,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 305,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 2342,
+              "cache_read_input_tokens": 208898,
+              "cache_creation_input_tokens": 305,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 305
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 344,
+      "timestamp": "2026-04-28T18:12:27.435Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01DXrngxWN9jTUkQp7bA1cy9",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01DXrngxWN9jTUkQp7bA1cy9",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.\n\n    width_factor multiplies QInputDialog's natural width hint.\n    \"\"\"\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\n    dialog.setWindowTitle(title)\n    dialog.setLabelText(msg)\n    dialog.setTextValue(text)\n    hint = dialog.sizeHint()\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return dialog.textValue(), accepted",
+            "new_string": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt, but with the dialog forced wider.\n\n    width_factor multiplies a reference QInputDialog width.  We build the\n    widget tree directly because QInputDialog ignores most width hints.\n    \"\"\"\n    parent = qtutils.active_window()\n    dialog = QtWidgets.QDialog(parent)\n    dialog.setWindowTitle(title)\n    label = QtWidgets.QLabel(msg)\n    line_edit = QtWidgets.QLineEdit(text)\n    line_edit.selectAll()\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(label)\n    layout.addWidget(line_edit)\n    layout.addWidget(buttons)\n    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280\n    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return line_edit.text(), accepted"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01DXrngxWN9jTUkQp7bA1cy9",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully.\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"def _prompt_wide(msg, title, text='', width_factor=1):\\n    \\\"\\\"\\\"Like qtutils.prompt but with the line edit (and dialog) made wider.\\n\\n    width_factor multiplies QInputDialog's natural width hint.\\n    \\\"\\\"\\\"\\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\\n    dialog.setWindowTitle(title)\\n    dialog.setLabelText(msg)\\n    dialog.setTextValue(text)\\n    hint = dialog.sizeHint()\\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\\n    return dialog.textValue(), accepted\", \"newString\": \"def _prompt_wide(msg, title, text='', width_factor=1):\\n    \\\"\\\"\\\"Like qtutils.prompt, but with the dialog forced wider.\\n\\n    width_factor multiplies a reference QInputDialog width.  We build the\\n    widget tree directly because QInputDialog ignores most width hints.\\n    \\\"\\\"\\\"\\n    parent = qtutils.active_window()\\n    dialog = QtWidgets.QDialog(parent)\\n    dialog.setWindowTitle(title)\\n    label = QtWidgets.QLabel(msg)\\n    line_edit = QtWidgets.QLineEdit(text)\\n    line_edit.selectAll()\\n    buttons = QtWidgets.QDialogButtonBox(\\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\\n    )\\n    buttons.accepted.connect(dialog.accept)\\n    buttons.rejected.connect(dialog.reject)\\n    layout = QtWidgets.QVBoxLayout(dialog)\\n    layout.addWidget(label)\\n    layout.addWidget(line_edit)\\n    layout.addWidget(buttons)\\n    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280\\n    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())\\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\\n    return line_edit.text(), accepted\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2378, \"oldLines\": 19, \"newStart\": 2378, \"newLines\": 30, \"lines\": [\" \", \" \", \" def _prompt_wide(msg, title, text='', width_factor=1):\", \"-    \\\"\\\"\\\"Like qtutils.prompt but with the line edit (and dialog) made wider.\", \"+    \\\"\\\"\\\"Like qtutils.prompt, but with the dialog forced wider.\", \" \", \"-    width_factor multiplies QInputDialog's natural width hint.\", \"+    width_factor multiplies a reference QInputDialog width.  We build the\", \"+    widget tree directly because QInputDialog ignores most width hints.\", \"     \\\"\\\"\\\"\", \"-    dialog = QtWidgets.QInputDialog(qtutils.active_window())\", \"-    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\", \"+    parent = qtutils.active_window()\", \"+    dialog = QtWidgets.QDialog(parent)\", \"     dialog.setWindowTitle(title)\", \"-    dialog.setLabelText(msg)\", \"-    dialog.setTextValue(text)\", \"-    hint = dialog.sizeHint()\", \"-    dialog.setMinimumWidth(int(hint.width() * width_factor))\", \"+    label = QtWidgets.QLabel(msg)\", \"+    line_edit = QtWidgets.QLineEdit(text)\", \"+    line_edit.selectAll()\", \"+    buttons = QtWidgets.QDialogButtonBox(\", \"+        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\", \"+    )\", \"+    buttons.accepted.connect(dialog.accept)\", \"+    buttons.rejected.connect(dialog.reject)\", \"+    layout = QtWidgets.QVBoxLayout(dialog)\", \"+    layout.addWidget(label)\", \"+    layout.addWidget(line_edit)\", \"+    layout.addWidget(buttons)\", \"+    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280\", \"+    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())\", \"     accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\", \"-    return dialog.textValue(), accepted\", \"+    return line_edit.text(), accepted\", \" \", \" \", \" def _agent_branch_part(name):\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 208904,
+        "completion_tokens": 2342,
+        "cached_tokens": 208898,
+        "extra": {
+          "cache_creation_input_tokens": 305,
+          "cache_read_input_tokens": 208898,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 305,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 2342,
+              "cache_read_input_tokens": 208898,
+              "cache_creation_input_tokens": 305,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 305
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.\n\n    width_factor multiplies QInputDialog's natural width hint.\n    \"\"\"\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\n    dialog.setWindowTitle(title)\n    dialog.setLabelText(msg)\n    dialog.setTextValue(text)\n    hint = dialog.sizeHint()\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return dialog.textValue(), accepted",
+            "newString": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt, but with the dialog forced wider.\n\n    width_factor multiplies a reference QInputDialog width.  We build the\n    widget tree directly because QInputDialog ignores most width hints.\n    \"\"\"\n    parent = qtutils.active_window()\n    dialog = QtWidgets.QDialog(parent)\n    dialog.setWindowTitle(title)\n    label = QtWidgets.QLabel(msg)\n    line_edit = QtWidgets.QLineEdit(text)\n    line_edit.selectAll()\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(label)\n    layout.addWidget(line_edit)\n    layout.addWidget(buttons)\n    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280\n    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return line_edit.text(), accepted",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2378,
+                "oldLines": 19,
+                "newStart": 2378,
+                "newLines": 30,
+                "lines": [
+                  " ",
+                  " ",
+                  " def _prompt_wide(msg, title, text='', width_factor=1):",
+                  "-    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.",
+                  "+    \"\"\"Like qtutils.prompt, but with the dialog forced wider.",
+                  " ",
+                  "-    width_factor multiplies QInputDialog's natural width hint.",
+                  "+    width_factor multiplies a reference QInputDialog width.  We build the",
+                  "+    widget tree directly because QInputDialog ignores most width hints.",
+                  "     \"\"\"",
+                  "-    dialog = QtWidgets.QInputDialog(qtutils.active_window())",
+                  "-    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)",
+                  "+    parent = qtutils.active_window()",
+                  "+    dialog = QtWidgets.QDialog(parent)",
+                  "     dialog.setWindowTitle(title)",
+                  "-    dialog.setLabelText(msg)",
+                  "-    dialog.setTextValue(text)",
+                  "-    hint = dialog.sizeHint()",
+                  "-    dialog.setMinimumWidth(int(hint.width() * width_factor))",
+                  "+    label = QtWidgets.QLabel(msg)",
+                  "+    line_edit = QtWidgets.QLineEdit(text)",
+                  "+    line_edit.selectAll()",
+                  "+    buttons = QtWidgets.QDialogButtonBox(",
+                  "+        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel",
+                  "+    )",
+                  "+    buttons.accepted.connect(dialog.accept)",
+                  "+    buttons.rejected.connect(dialog.reject)",
+                  "+    layout = QtWidgets.QVBoxLayout(dialog)",
+                  "+    layout.addWidget(label)",
+                  "+    layout.addWidget(line_edit)",
+                  "+    layout.addWidget(buttons)",
+                  "+    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280",
+                  "+    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())",
+                  "     accepted = dialog.exec_() == QtWidgets.QDialog.Accepted",
+                  "-    return dialog.textValue(), accepted",
+                  "+    return line_edit.text(), accepted",
+                  " ",
+                  " ",
+                  " def _agent_branch_part(name):"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01DXrngxWN9jTUkQp7bA1cy9",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.\n\n    width_factor multiplies QInputDialog's natural width hint.\n    \"\"\"\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\n    dialog.setWindowTitle(title)\n    dialog.setLabelText(msg)\n    dialog.setTextValue(text)\n    hint = dialog.sizeHint()\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return dialog.textValue(), accepted",
+            "newString": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt, but with the dialog forced wider.\n\n    width_factor multiplies a reference QInputDialog width.  We build the\n    widget tree directly because QInputDialog ignores most width hints.\n    \"\"\"\n    parent = qtutils.active_window()\n    dialog = QtWidgets.QDialog(parent)\n    dialog.setWindowTitle(title)\n    label = QtWidgets.QLabel(msg)\n    line_edit = QtWidgets.QLineEdit(text)\n    line_edit.selectAll()\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(label)\n    layout.addWidget(line_edit)\n    layout.addWidget(buttons)\n    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280\n    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return line_edit.text(), accepted",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2378,
+                "oldLines": 19,
+                "newStart": 2378,
+                "newLines": 30,
+                "lines": [
+                  " ",
+                  " ",
+                  " def _prompt_wide(msg, title, text='', width_factor=1):",
+                  "-    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.",
+                  "+    \"\"\"Like qtutils.prompt, but with the dialog forced wider.",
+                  " ",
+                  "-    width_factor multiplies QInputDialog's natural width hint.",
+                  "+    width_factor multiplies a reference QInputDialog width.  We build the",
+                  "+    widget tree directly because QInputDialog ignores most width hints.",
+                  "     \"\"\"",
+                  "-    dialog = QtWidgets.QInputDialog(qtutils.active_window())",
+                  "-    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)",
+                  "+    parent = qtutils.active_window()",
+                  "+    dialog = QtWidgets.QDialog(parent)",
+                  "     dialog.setWindowTitle(title)",
+                  "-    dialog.setLabelText(msg)",
+                  "-    dialog.setTextValue(text)",
+                  "-    hint = dialog.sizeHint()",
+                  "-    dialog.setMinimumWidth(int(hint.width() * width_factor))",
+                  "+    label = QtWidgets.QLabel(msg)",
+                  "+    line_edit = QtWidgets.QLineEdit(text)",
+                  "+    line_edit.selectAll()",
+                  "+    buttons = QtWidgets.QDialogButtonBox(",
+                  "+        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel",
+                  "+    )",
+                  "+    buttons.accepted.connect(dialog.accept)",
+                  "+    buttons.rejected.connect(dialog.reject)",
+                  "+    layout = QtWidgets.QVBoxLayout(dialog)",
+                  "+    layout.addWidget(label)",
+                  "+    layout.addWidget(line_edit)",
+                  "+    layout.addWidget(buttons)",
+                  "+    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280",
+                  "+    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())",
+                  "     accepted = dialog.exec_() == QtWidgets.QDialog.Accepted",
+                  "-    return dialog.textValue(), accepted",
+                  "+    return line_edit.text(), accepted",
+                  " ",
+                  " ",
+                  " def _agent_branch_part(name):"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01DXrngxWN9jTUkQp7bA1cy9",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully."
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt but with the line edit (and dialog) made wider.\n\n    width_factor multiplies QInputDialog's natural width hint.\n    \"\"\"\n    dialog = QtWidgets.QInputDialog(qtutils.active_window())\n    dialog.setInputMode(QtWidgets.QInputDialog.TextInput)\n    dialog.setWindowTitle(title)\n    dialog.setLabelText(msg)\n    dialog.setTextValue(text)\n    hint = dialog.sizeHint()\n    dialog.setMinimumWidth(int(hint.width() * width_factor))\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return dialog.textValue(), accepted",
+          "new_string": "def _prompt_wide(msg, title, text='', width_factor=1):\n    \"\"\"Like qtutils.prompt, but with the dialog forced wider.\n\n    width_factor multiplies a reference QInputDialog width.  We build the\n    widget tree directly because QInputDialog ignores most width hints.\n    \"\"\"\n    parent = qtutils.active_window()\n    dialog = QtWidgets.QDialog(parent)\n    dialog.setWindowTitle(title)\n    label = QtWidgets.QLabel(msg)\n    line_edit = QtWidgets.QLineEdit(text)\n    line_edit.selectAll()\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(label)\n    layout.addWidget(line_edit)\n    layout.addWidget(buttons)\n    reference = QtWidgets.QInputDialog(parent).sizeHint().width() or 280\n    dialog.resize(int(reference * width_factor), dialog.sizeHint().height())\n    accepted = dialog.exec_() == QtWidgets.QDialog.Accepted\n    return line_edit.text(), accepted"
+        }
+      }
+    },
+    {
+      "step_id": 345,
+      "timestamp": "2026-04-28T18:12:30.530Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_011g8LdfFbSMe9981MriF6nb",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_011g8LdfFbSMe9981MriF6nb",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "./venv/bin/python -c \"import ast; ast.parse(open('cola/widgets/dag.py').read()); print('OK')\"",
+            "description": "Syntax check"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_011g8LdfFbSMe9981MriF6nb",
+            "content": "OK\n\n[stdout]\nOK\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 209204,
+        "completion_tokens": 131,
+        "cached_tokens": 209203,
+        "extra": {
+          "cache_creation_input_tokens": 2557,
+          "cache_read_input_tokens": 209203,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 2557,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 131,
+              "cache_read_input_tokens": 209203,
+              "cache_creation_input_tokens": 2557,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 2557
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "OK",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_011g8LdfFbSMe9981MriF6nb",
+            "type": "tool_result",
+            "content": "OK",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "OK",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_011g8LdfFbSMe9981MriF6nb",
+            "type": "tool_result",
+            "content": "OK",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "./venv/bin/python -c \"import ast; ast.parse(open('cola/widgets/dag.py').read()); print('OK')\"",
+          "description": "Syntax check"
+        }
+      }
+    },
+    {
+      "step_id": 346,
+      "timestamp": "2026-04-28T18:12:37.842Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "改动思路换了：\n\n- 不再用 `QInputDialog`（它对外部传入的宽度比较抗拒，layout 会按内部算法回退）。\n- 直接拼一个 `QDialog`：`QLabel`（提示语） + `QLineEdit`（默认 `selectAll` 方便整段替换） + `QDialogButtonBox(Ok | Cancel)`。\n- 宽度参考值 = 临时构造一个 `QInputDialog` 的 `sizeHint().width()`（或回退 280），乘以 `width_factor=4` → `dialog.resize(...)`。这次 `QDialog` 没有内部约束，resize 会生效。\n- 接口签名不变：`(text, accepted)`，调用方代码不动。\n\n重启 `python -m cola dag`，弹出来的\"输入新分支名\"对话框应当能展示完整的长 agent 名。",
+      "metrics": {
+        "prompt_tokens": 211761,
+        "completion_tokens": 304,
+        "cached_tokens": 211760,
+        "extra": {
+          "cache_creation_input_tokens": 145,
+          "cache_read_input_tokens": 211760,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 145,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 304,
+              "cache_read_input_tokens": 211760,
+              "cache_creation_input_tokens": 145,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 145
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 34923547,
-    "total_completion_tokens": 206465,
-    "total_cached_tokens": 34922963,
-    "total_steps": 340,
+    "total_prompt_tokens": 35971224,
+    "total_completion_tokens": 213926,
+    "total_cached_tokens": 35970620,
+    "total_steps": 346,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 1615582,
-      "total_cache_read_input_tokens": 34922963
+      "total_cache_creation_input_tokens": 1619199,
+      "total_cache_read_input_tokens": 35970620
     }
   }
 }
