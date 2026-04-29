@@ -401,8 +401,11 @@ def files_modified_between(
     """Return (paths, ignored_paths) for files whose mtime is in ``[t_start, t_end]``.
 
     Scans the entire worktree (tracked, untracked, and gitignored) so that
-    files hidden by .gitignore are not silently skipped. ``ignored_paths`` is
-    the subset of paths that match .gitignore rules.
+    files hidden by .gitignore are not silently skipped. Symbolic links that
+    resolve to directories are walked recursively so that files reachable
+    only through a symlinked directory are also considered. ``ignored_paths``
+    is the subset of paths that should be force-added (matched by .gitignore
+    or only reachable through a symlinked directory).
     """
     git = context.git
     worktree = git.worktree() or ''
@@ -430,22 +433,87 @@ def files_modified_between(
     candidates.update(_split(tracked))
     candidates.update(_split(others))
 
+    if worktree:
+        extra_files = _expand_symlink_dirs(worktree, candidates)
+        candidates.update(extra_files)
+        # Files reachable only through a symlinked directory are not tracked
+        # by Git, so they need force-add when amending.
+        ignored_set.update(extra_files)
+
     if t_end < t_start:
         t_start, t_end = t_end, t_start
 
+    # Commit timestamps from git are integer seconds; compare against the
+    # integer floor of mtime so files written within the same second as the
+    # commit are not excluded by sub-second precision.
     matched: list[str] = []
+    floor_start = int(t_start)
+    floor_end = int(t_end)
     for path in candidates:
         full = os.path.join(worktree, path) if worktree else path
         try:
             st = os.stat(full)
         except OSError:
             continue
-        mtime = st.st_mtime
-        if t_start <= mtime <= t_end:
+        mtime = int(st.st_mtime)
+        if floor_start <= mtime <= floor_end:
             matched.append(path)
 
     matched.sort()
     return matched, ignored_set
+
+
+def _expand_symlink_dirs(worktree: str, candidates: set[str]) -> set[str]:
+    """Recursively expand symlinks that point to directories.
+
+    For each candidate that is a symlink to a directory, walk the target and
+    return the relative paths (under ``worktree``) of all files reachable
+    through it. Cycles are avoided via a real-path seen-set.
+    """
+    extra_files: set[str] = set()
+    seen_real: set[str] = set()
+    queue: list[str] = []
+
+    for path in candidates:
+        full = os.path.join(worktree, path)
+        try:
+            if not os.path.islink(full):
+                continue
+            real = os.path.realpath(full)
+            if not os.path.isdir(real):
+                continue
+        except OSError:
+            continue
+        queue.append(full)
+
+    while queue:
+        dir_full = queue.pop()
+        try:
+            real = os.path.realpath(dir_full)
+        except OSError:
+            continue
+        if real in seen_real:
+            continue
+        seen_real.add(real)
+        try:
+            entries = os.listdir(dir_full)
+        except OSError:
+            continue
+        for name in entries:
+            entry_full = os.path.join(dir_full, name)
+            try:
+                if os.path.isdir(entry_full):
+                    queue.append(entry_full)
+                elif os.path.isfile(entry_full):
+                    rel = os.path.relpath(entry_full, worktree)
+                    if rel.startswith('..'):
+                        continue
+                    rel = rel.replace(os.sep, '/')
+                    extra_files.add(rel)
+            except OSError:
+                continue
+
+    return extra_files
 
 
 def tag_list(context: ApplicationContext) -> list[Any]:
