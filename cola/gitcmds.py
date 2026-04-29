@@ -379,6 +379,75 @@ def untracked_files(
     return []
 
 
+def commit_unix_time(context: ApplicationContext, ref: str) -> int | None:
+    """Return the unix commit time (%ct) of ``ref`` or None when unavailable."""
+    status, out, _ = context.git.log(
+        '-1', '--format=%ct', ref, _readonly=True
+    )
+    if status != 0:
+        return None
+    text = out.strip()
+    if not text:
+        return None
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+
+def files_modified_between(
+    context: ApplicationContext, t_start: float, t_end: float
+) -> tuple[list[str], set[str]]:
+    """Return (paths, ignored_paths) for files whose mtime is in ``[t_start, t_end]``.
+
+    Scans the entire worktree (tracked, untracked, and gitignored) so that
+    files hidden by .gitignore are not silently skipped. ``ignored_paths`` is
+    the subset of paths that match .gitignore rules.
+    """
+    git = context.git
+    worktree = git.worktree() or ''
+
+    tracked = git.ls_files('--', z=True, _readonly=True)[STDOUT]
+    others = git.ls_files(
+        '--', z=True, others=True, _readonly=True
+    )[STDOUT]
+    ignored_out = git.ls_files(
+        '--',
+        z=True,
+        others=True,
+        ignored=True,
+        exclude_standard=True,
+        _readonly=True,
+    )[STDOUT]
+
+    def _split(blob: str) -> list[str]:
+        if not blob:
+            return []
+        return [p for p in blob.split('\0') if p]
+
+    ignored_set = set(_split(ignored_out))
+    candidates: set[str] = set()
+    candidates.update(_split(tracked))
+    candidates.update(_split(others))
+
+    if t_end < t_start:
+        t_start, t_end = t_end, t_start
+
+    matched: list[str] = []
+    for path in candidates:
+        full = os.path.join(worktree, path) if worktree else path
+        try:
+            st = os.stat(full)
+        except OSError:
+            continue
+        mtime = st.st_mtime
+        if t_start <= mtime <= t_end:
+            matched.append(path)
+
+    matched.sort()
+    return matched, ignored_set
+
+
 def tag_list(context: ApplicationContext) -> list[Any]:
     """Return a list of tags."""
     result = for_each_ref_basename(context, 'refs/tags')

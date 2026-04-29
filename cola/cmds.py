@@ -305,6 +305,32 @@ class AmendMode(EditModel):
         self.context.selection.reset(emit=True)
 
 
+class AmendFilesIntoHead(ContextCommand):
+    """Force-add the given paths and amend HEAD without editing the message."""
+
+    def __init__(
+        self,
+        context: ApplicationContext,
+        paths: list[str],
+        force_paths: set[str] | None = None,
+    ) -> None:
+        super().__init__(context)
+        self.paths = list(paths)
+        self.force_paths = set(force_paths or ())
+
+    def do(self) -> None:
+        if not self.paths:
+            return
+        status, out, err = self.git.add('-f', '--', *self.paths)
+        Interaction.command(N_('Error'), 'git add -f', status, out, err)
+        if status != 0:
+            return
+        status, out, err = self.git.commit('--amend', '--no-edit')
+        Interaction.command(N_('Error'), 'git commit --amend', status, out, err)
+        if status == 0:
+            self.model.update_status()
+
+
 class AnnexAdd(ContextCommand):
     """Add to Git Annex"""
 

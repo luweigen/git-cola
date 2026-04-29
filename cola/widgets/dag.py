@@ -188,6 +188,14 @@ class ViewerMixin:
         context = self.context
         self.with_oid(lambda oid: cmds.do(cmds.Revert, context, oid))
 
+    def amend_files_into_commit(self):
+        """Open a dialog to amend files into the most recent commit (HEAD)."""
+        context = self.context
+        oid = self.clicked_oid()
+        if not oid:
+            return
+        AmendFilesDialog.run(context, oid, parent=self)
+
     def copy_to_clipboard(self):
         """Copy the current commit object ID to the clipboard"""
         self.with_oid(qtutils.set_clipboard)
@@ -364,6 +372,16 @@ class ViewerMixin:
         self.menu_actions['cherry_pick'].setEnabled(
             has_single_selection_or_clicked and has_oid
         )
+        is_head_commit = False
+        if has_oid and commit is not None:
+            head_status, head_out, _ = self.context.git.rev_parse(
+                'HEAD', _readonly=True
+            )
+            if head_status == 0:
+                is_head_commit = head_out.strip() == commit.oid
+        self.menu_actions['amend_files_into_commit'].setEnabled(
+            has_single_selection_or_clicked and is_head_commit
+        )
         self.menu_actions['copy'].setEnabled(
             has_single_selection_or_clicked and has_oid
         )
@@ -435,6 +453,7 @@ class ViewerMixin:
         menu.addSeparator()
         menu.addAction(self.menu_actions['cherry_pick'])
         menu.addAction(self.menu_actions['revert'])
+        menu.addAction(self.menu_actions['amend_files_into_commit'])
         menu.addAction(self.menu_actions['create_patch'])
         menu.addAction(self.menu_actions['create_tarball'])
         menu.addSeparator()
@@ -531,6 +550,14 @@ def viewer_actions(widget, proxy):
         'cherry_pick': set_icon(
             icons.cherry_pick(),
             qtutils.add_action(widget, N_('Cherry Pick'), proxy.cherry_pick),
+        ),
+        'amend_files_into_commit': set_icon(
+            icons.commit(),
+            qtutils.add_action(
+                widget,
+                N_('Amend Files Into Commit...'),
+                proxy.amend_files_into_commit,
+            ),
         ),
         'revert': set_icon(
             icons.undo(), qtutils.add_action(widget, N_('Revert'), proxy.revert)
@@ -3299,6 +3326,183 @@ def sort_by_generation(commits):
         return commits
     commits.sort(key=lambda x: x.generation)
     return commits
+
+
+class AmendFilesDialog(standard.Dialog):
+    """Pick worktree files modified during a commit's time window and amend them in."""
+
+    def __init__(self, context, head_oid, paths, ignored_set, in_commit, parent=None):
+        super().__init__(parent=parent)
+        self.context = context
+        self.head_oid = head_oid
+        self.ignored_set = set(ignored_set)
+        self.paths = list(paths)
+
+        abbrev = prefs.abbrev(context)
+        short = head_oid[:abbrev] if head_oid else 'HEAD'
+        self.setWindowTitle(N_('Amend Files Into Commit %s') % short)
+        self.setWindowModality(Qt.WindowModal)
+
+        self.info_label = QtWidgets.QLabel(
+            N_(
+                'Select files modified between the previous commit and %s.\n'
+                'Selected files will be added (with --force for ignored files)\n'
+                'and the commit will be amended without changing the message.'
+            )
+            % short
+        )
+        self.info_label.setWordWrap(True)
+
+        self.list_widget = QtWidgets.QListWidget(self)
+        self.list_widget.setAlternatingRowColors(True)
+        self.list_widget.setSelectionMode(
+            QtWidgets.QAbstractItemView.NoSelection
+        )
+
+        for path in self.paths:
+            display_text = path
+            if path in self.ignored_set:
+                display_text = '%s  [%s]' % (path, N_('ignored'))
+            item = QtWidgets.QListWidgetItem(display_text, self.list_widget)
+            item.setData(Qt.UserRole, path)
+            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            if path in in_commit:
+                item.setCheckState(Qt.Checked)
+            else:
+                item.setCheckState(Qt.Unchecked)
+            if path in self.ignored_set:
+                item.setForeground(QtGui.QBrush(QtGui.QColor('#a06000')))
+
+        if not self.paths:
+            empty = QtWidgets.QListWidgetItem(
+                N_('No files were modified during this time window.'),
+                self.list_widget,
+            )
+            empty.setFlags(Qt.ItemIsEnabled)
+
+        self.select_all_button = qtutils.create_button(text=N_('Select All'))
+        self.select_none_button = qtutils.create_button(text=N_('Select None'))
+        self.cancel_button = qtutils.close_button(text=N_('Cancel'))
+        self.amend_button = qtutils.ok_button(
+            N_('Modify Commit'),
+            enabled=bool(self.paths),
+            icon=icons.commit(),
+        )
+
+        button_layout = qtutils.hbox(
+            defs.no_margin,
+            defs.button_spacing,
+            self.select_all_button,
+            self.select_none_button,
+            qtutils.STRETCH,
+            self.cancel_button,
+            self.amend_button,
+        )
+
+        self.main_layout = qtutils.vbox(
+            defs.margin,
+            defs.spacing,
+            self.info_label,
+            self.list_widget,
+            button_layout,
+        )
+        self.setLayout(self.main_layout)
+
+        qtutils.connect_button(self.select_all_button, self._select_all)
+        qtutils.connect_button(self.select_none_button, self._select_none)
+        qtutils.connect_button(self.cancel_button, self.reject)
+        qtutils.connect_button(self.amend_button, self._on_amend)
+
+        self.init_state(None, self.resize_widget, parent)
+
+    def resize_widget(self, parent):
+        width, height = qtutils.default_size(parent, 640, 480)
+        self.resize(width, height)
+
+    def _set_all(self, state):
+        for row in range(self.list_widget.count()):
+            item = self.list_widget.item(row)
+            if item.flags() & Qt.ItemIsUserCheckable:
+                item.setCheckState(state)
+
+    def _select_all(self):
+        self._set_all(Qt.Checked)
+
+    def _select_none(self):
+        self._set_all(Qt.Unchecked)
+
+    def _checked_paths(self):
+        result = []
+        for row in range(self.list_widget.count()):
+            item = self.list_widget.item(row)
+            if not (item.flags() & Qt.ItemIsUserCheckable):
+                continue
+            if item.checkState() == Qt.Checked:
+                path = item.data(Qt.UserRole)
+                if path:
+                    result.append(path)
+        return result
+
+    def _on_amend(self):
+        paths = self._checked_paths()
+        if not paths:
+            Interaction.information(
+                N_('No Files Selected'),
+                N_('Select at least one file to amend into the commit.'),
+            )
+            return
+        ignored_selected = [p for p in paths if p in self.ignored_set]
+        force_set = set(ignored_selected)
+        cmds.do(cmds.AmendFilesIntoHead, self.context, paths, force_set)
+        self.accept()
+
+    @classmethod
+    def run(cls, context, oid, parent=None):
+        """Validate that ``oid`` is HEAD then build and show the dialog."""
+        status, head_out, _ = context.git.rev_parse('HEAD', _readonly=True)
+        if status != 0:
+            Interaction.information(
+                N_('Cannot Amend'),
+                N_('Unable to resolve HEAD.'),
+            )
+            return
+        head_oid = head_out.strip()
+        if oid != head_oid:
+            Interaction.information(
+                N_('Cannot Amend'),
+                N_(
+                    'This action only applies to the most recent commit (HEAD).'
+                ),
+            )
+            return
+
+        t_head = gitcmds.commit_unix_time(context, 'HEAD')
+        t_prev = gitcmds.commit_unix_time(context, 'HEAD~')
+        if t_head is None:
+            Interaction.information(
+                N_('Cannot Amend'),
+                N_('Unable to read HEAD commit time.'),
+            )
+            return
+        if t_prev is None:
+            t_prev = 0.0
+
+        paths, ignored_set = gitcmds.files_modified_between(
+            context, float(t_prev), float(t_head)
+        )
+        in_commit = set(gitcmds.changed_files(context, head_oid))
+
+        # Always surface files already in the commit, even if their mtime is
+        # outside the window (e.g. someone touched them afterwards).
+        for path in in_commit:
+            if path not in paths:
+                paths.append(path)
+        paths.sort()
+
+        dialog = cls(context, head_oid, paths, ignored_set, in_commit, parent=parent)
+        dialog.show()
+        dialog.raise_()
+        dialog.exec_()
 
 
 # Glossary
