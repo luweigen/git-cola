@@ -2688,6 +2688,8 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         bounds.adjust(-64, 0, 0, 0)
         self.setSceneRect(bounds)
         self.fit_view_to_items(items)
+        # Start one zoom-out step below the auto-fit scale.
+        self.scale_view(1.0 / 1.5)
 
     def zoom_to_fit(self):
         """Fit selected items into the viewport"""
