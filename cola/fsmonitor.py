@@ -54,6 +54,14 @@ elif utils.is_linux():
         pass
     else:
         AVAILABLE = 'inotify'
+elif utils.is_darwin():
+    try:
+        from watchdog.events import FileSystemEventHandler  # type: ignore
+        from watchdog.observers import Observer  # type: ignore
+    except ImportError:
+        pass
+    else:
+        AVAILABLE = 'watchdog'
 
 
 class _Monitor(QtCore.QObject):
@@ -568,6 +576,157 @@ if AVAILABLE == 'pywin32':
             self.wait()
 
 
+if AVAILABLE == 'watchdog':
+
+    class _WatchdogHandler(FileSystemEventHandler):
+        """Forward every watchdog event to the owning thread."""
+
+        def __init__(self, thread: '_WatchdogThread') -> None:
+            super().__init__()
+            self._thread = thread
+
+        def on_any_event(self, event) -> None:
+            self._thread._on_event(event.src_path, bool(event.is_directory))
+            dest = getattr(event, 'dest_path', '')
+            if dest:
+                self._thread._on_event(dest, bool(event.is_directory))
+
+    class _WatchdogThread(_BaseThread):
+        """File system monitor backed by the watchdog package (macOS FSEvents)."""
+
+        def __init__(self, context: ApplicationContext, monitor: _Monitor) -> None:
+            _BaseThread.__init__(self, context, monitor)
+            git = context.git
+            worktree = git.worktree()
+            if worktree is not None:
+                worktree = core.abspath(worktree)
+            self._worktree = worktree
+            self._git_dir = core.abspath(git.git_path())
+            self._observer: Observer | None = None
+            self._lock = Lock()
+            self._pipe_r: int | None = None
+            self._pipe_w: int | None = None
+
+        def run(self) -> None:
+            try:
+                self._pipe_r, self._pipe_w = os.pipe()
+                handler = _WatchdogHandler(self)
+                observer = Observer()
+                if self._worktree is not None:
+                    try:
+                        observer.schedule(handler, self._worktree, recursive=True)
+                    except OSError:
+                        pass
+                # Schedule the .git directory only if it lives outside the
+                # worktree (separate gitdir, submodule, bare worktree).
+                git_inside = self._worktree is not None and (
+                    self._git_dir == self._worktree
+                    or self._git_dir.startswith(self._worktree + os.sep)
+                )
+                if not git_inside:
+                    try:
+                        observer.schedule(handler, self._git_dir, recursive=True)
+                    except OSError:
+                        pass
+                observer.start()
+                self._observer = observer
+                self._log_enabled_message()
+
+                poll_obj = select.poll()
+                poll_obj.register(self._pipe_r, select.POLLIN)
+                while self._running:
+                    timeout = self.inotify_delay if self._pending else None
+                    try:
+                        events = poll_obj.poll(timeout)
+                    except OSError:
+                        continue
+                    if not self._running:
+                        break
+                    if not events:
+                        self.notify()
+                    else:
+                        try:
+                            os.read(self._pipe_r, 4096)
+                        except OSError:
+                            pass
+            finally:
+                if self._observer is not None:
+                    try:
+                        self._observer.stop()
+                        self._observer.join(timeout=2.0)
+                    except Exception:
+                        pass
+                    self._observer = None
+                with self._lock:
+                    if self._pipe_r is not None:
+                        try:
+                            os.close(self._pipe_r)
+                        except OSError:
+                            pass
+                        self._pipe_r = None
+                    if self._pipe_w is not None:
+                        try:
+                            os.close(self._pipe_w)
+                        except OSError:
+                            pass
+                        self._pipe_w = None
+
+        def _on_event(self, src_path: str, is_directory: bool) -> None:
+            """Classify a watchdog event and wake the run loop."""
+            if not src_path or is_directory:
+                return
+            try:
+                src_path = core.abspath(src_path)
+            except OSError:
+                return
+            git_dir = self._git_dir
+            if src_path == git_dir or src_path.startswith(git_dir + os.sep):
+                rel = src_path[len(git_dir) + 1:] if src_path != git_dir else ''
+                if rel.endswith('.lock'):
+                    return
+                base = os.path.basename(rel)
+                if base in ('HEAD', 'index'):
+                    self._force_notify = True
+                elif base == 'config':
+                    self._force_config = True
+                elif (
+                    rel.startswith('refs/')
+                    or rel == 'packed-refs'
+                    or rel == 'FETCH_HEAD'
+                    or rel == 'ORIG_HEAD'
+                    or rel == 'MERGE_HEAD'
+                ):
+                    self._force_notify = True
+                else:
+                    return
+            elif self._worktree is not None and (
+                src_path == self._worktree
+                or src_path.startswith(self._worktree + os.sep)
+            ):
+                if self._use_check_ignore and src_path != self._worktree:
+                    self._file_paths.add(src_path)
+                else:
+                    self._force_notify = True
+            else:
+                return
+            with self._lock:
+                if self._pipe_w is not None:
+                    try:
+                        os.write(self._pipe_w, bchr(0))
+                    except OSError:
+                        pass
+
+        def stop(self) -> None:
+            self._running = False
+            with self._lock:
+                if self._pipe_w is not None:
+                    try:
+                        os.write(self._pipe_w, bchr(0))
+                    except OSError:
+                        pass
+            self.wait()
+
+
 def create(context: ApplicationContext) -> _Monitor:
     thread_class = None
     cfg = context.cfg
@@ -581,6 +740,8 @@ def create(context: ApplicationContext) -> _Monitor:
         thread_class = _InotifyThread
     elif AVAILABLE == 'pywin32':
         thread_class = _Win32Thread
+    elif AVAILABLE == 'watchdog':
+        thread_class = _WatchdogThread
     else:
         if utils.is_win32():
             msg = N_(
@@ -592,6 +753,14 @@ def create(context: ApplicationContext) -> _Monitor:
             msg = N_(
                 'File system change monitoring: disabled because libc'
                 ' does not support the inotify system calls.\n'
+            )
+            Interaction.log(msg)
+        elif utils.is_darwin():
+            msg = N_(
+                'File system change monitoring: disabled because the'
+                ' "watchdog" Python package is not installed.\n'
+                '\n'
+                '    pip install watchdog\n'
             )
             Interaction.log(msg)
     return _Monitor(context, thread_class)
