@@ -3331,12 +3331,15 @@ def sort_by_generation(commits):
 class AmendFilesDialog(standard.Dialog):
     """Pick worktree files modified during a commit's time window and amend them in."""
 
-    def __init__(self, context, head_oid, paths, ignored_set, in_commit, parent=None):
+    def __init__(
+        self, context, head_oid, paths, ignored_set, default_checked, parent=None
+    ):
         super().__init__(parent=parent)
         self.context = context
         self.head_oid = head_oid
         self.ignored_set = set(ignored_set)
         self.paths = list(paths)
+        default_checked = set(default_checked)
 
         abbrev = prefs.abbrev(context)
         short = head_oid[:abbrev] if head_oid else 'HEAD'
@@ -3366,7 +3369,7 @@ class AmendFilesDialog(standard.Dialog):
             item = QtWidgets.QListWidgetItem(display_text, self.list_widget)
             item.setData(Qt.UserRole, path)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
-            if path in in_commit:
+            if path in default_checked:
                 item.setCheckState(Qt.Checked)
             else:
                 item.setCheckState(Qt.Unchecked)
@@ -3491,15 +3494,20 @@ class AmendFilesDialog(standard.Dialog):
             context, float(t_prev), float(t_head)
         )
         in_commit = set(gitcmds.changed_files(context, head_oid))
+        staged = set(gitcmds.staged_against_head(context))
 
-        # Always surface files already in the commit, even if their mtime is
-        # outside the window (e.g. someone touched them afterwards).
-        for path in in_commit:
+        # Always surface files already in the commit and files currently
+        # staged for amending, even if their mtime is outside the window.
+        for path in in_commit | staged:
             if path not in paths:
                 paths.append(path)
         paths.sort()
 
-        dialog = cls(context, head_oid, paths, ignored_set, in_commit, parent=parent)
+        default_checked = in_commit | staged
+
+        dialog = cls(
+            context, head_oid, paths, ignored_set, default_checked, parent=parent
+        )
         dialog.show()
         dialog.raise_()
         dialog.exec_()

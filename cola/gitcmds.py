@@ -379,6 +379,16 @@ def untracked_files(
     return []
 
 
+def staged_against_head(context: ApplicationContext) -> list[str]:
+    """Return the names of files currently staged relative to HEAD."""
+    status, out, _ = context.git.diff_index(
+        'HEAD', cached=True, name_only=True, z=True, _readonly=True
+    )
+    if status != 0 or not out:
+        return []
+    return [p for p in out.split('\0') if p]
+
+
 def commit_unix_time(context: ApplicationContext, ref: str) -> int | None:
     """Return the unix commit time (%ct) of ``ref`` or None when unavailable."""
     status, out, _ = context.git.log(
