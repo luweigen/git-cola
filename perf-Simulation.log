@@ -1,0 +1,7 @@
+
+=== git-cola perf counters (since last dump) ===
+name                                          count      total       mean        p95        max
+CommitTreeWidget.add_commits                      1      1.33s      1.33s      1.33s      1.33s
+CommitTreeWidget.apply_graph_result               1      1.32s      1.32s      1.32s      1.32s
+CommitTreeWidget.resizeColumnToContents           1      1.32s      1.32s      1.32s      1.32s
+=================================================

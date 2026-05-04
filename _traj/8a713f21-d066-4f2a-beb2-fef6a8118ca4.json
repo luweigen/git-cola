@@ -32314,19 +32314,450 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 372,
+      "timestamp": "2026-05-04T13:53:46.813Z",
+      "source": "user",
+      "message": "超过1000条的输出见perf-Simulation.log,当前repo（没有性能问题）的输出见perf.log",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 373,
+      "timestamp": "2026-05-04T13:53:49.953Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 207190,
+        "completion_tokens": 201,
+        "cached_tokens": 207184,
+        "extra": {
+          "cache_creation_input_tokens": 878,
+          "cache_read_input_tokens": 207184,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 878,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 201,
+              "cache_read_input_tokens": 207184,
+              "cache_creation_input_tokens": 878,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 878
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 374,
+      "timestamp": "2026-05-04T13:53:50.800Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01GV4t4AUUxHMKNj9w5mJNYd",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01GV4t4AUUxHMKNj9w5mJNYd",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "ls -la /Users/luwei/work/git-cola/perf*.log 2>/dev/null; ls -la /Users/luwei/work/AI/Simulation/perf*.log 2>/dev/null",
+            "description": "Find perf log files"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01GV4t4AUUxHMKNj9w5mJNYd",
+            "content": "Exit code 1\n-rw-r--r--  1 luwei  staff  484  5  4 16:50 /Users/luwei/work/git-cola/perf-Simulation.log\n-rw-r--r--  1 luwei  staff  484  5  4 16:51 /Users/luwei/work/git-cola/perf.log\n\n[error] tool reported failure"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 207190,
+        "completion_tokens": 201,
+        "cached_tokens": 207184,
+        "extra": {
+          "cache_creation_input_tokens": 878,
+          "cache_read_input_tokens": 207184,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 878,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 201,
+              "cache_read_input_tokens": 207184,
+              "cache_creation_input_tokens": 878,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 878
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "is_error": true,
+          "raw_tool_result": {
+            "type": "tool_result",
+            "content": "Exit code 1\n-rw-r--r--  1 luwei  staff  484  5  4 16:50 /Users/luwei/work/git-cola/perf-Simulation.log\n-rw-r--r--  1 luwei  staff  484  5  4 16:51 /Users/luwei/work/git-cola/perf.log",
+            "is_error": true,
+            "tool_use_id": "toolu_01GV4t4AUUxHMKNj9w5mJNYd"
+          }
+        },
+        "tool_result_is_error": true,
+        "metadata": {
+          "is_error": true,
+          "raw_tool_result": {
+            "type": "tool_result",
+            "content": "Exit code 1\n-rw-r--r--  1 luwei  staff  484  5  4 16:50 /Users/luwei/work/git-cola/perf-Simulation.log\n-rw-r--r--  1 luwei  staff  484  5  4 16:51 /Users/luwei/work/git-cola/perf.log",
+            "is_error": true,
+            "tool_use_id": "toolu_01GV4t4AUUxHMKNj9w5mJNYd"
+          }
+        },
+        "raw_arguments": {
+          "command": "ls -la /Users/luwei/work/git-cola/perf*.log 2>/dev/null; ls -la /Users/luwei/work/AI/Simulation/perf*.log 2>/dev/null",
+          "description": "Find perf log files"
+        }
+      }
+    },
+    {
+      "step_id": 375,
+      "timestamp": "2026-05-04T13:53:56.250Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Read toolu_01WB3PsCuq7qWYwPLENnsPSN",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01WB3PsCuq7qWYwPLENnsPSN",
+          "function_name": "Read",
+          "arguments": {
+            "file_path": "/Users/luwei/work/git-cola/perf-Simulation.log"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01WB3PsCuq7qWYwPLENnsPSN",
+            "content": "1\t\n2\t=== git-cola perf counters (since last dump) ===\n3\tname                                          count      total       mean        p95        max\n4\tCommitTreeWidget.add_commits                      1      1.33s      1.33s      1.33s      1.33s\n5\tCommitTreeWidget.apply_graph_result               1      1.32s      1.32s      1.32s      1.32s\n6\tCommitTreeWidget.resizeColumnToContents           1      1.32s      1.32s      1.32s      1.32s\n7\t=================================================\n8\n\n[metadata] {\"type\": \"text\", \"file\": {\"filePath\": \"/Users/luwei/work/git-cola/perf-Simulation.log\", \"content\": \"\\n=== git-cola perf counters (since last dump) ===\\nname                                          count      total       mean        p95        max\\nCommitTreeWidget.add_commits                      1      1.33s      1.33s      1.33s      1.33s\\nCommitTreeWidget.apply_graph_result               1      1.32s      1.32s      1.32s      1.32s\\nCommitTreeWidget.resizeColumnToContents           1      1.32s      1.32s      1.32s      1.32s\\n=================================================\\n\", \"numLines\": 8, \"startLine\": 1, \"totalLines\": 8}}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 208063,
+        "completion_tokens": 150,
+        "cached_tokens": 208062,
+        "extra": {
+          "cache_creation_input_tokens": 333,
+          "cache_read_input_tokens": 208062,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 333,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 150,
+              "cache_read_input_tokens": 208062,
+              "cache_creation_input_tokens": 333,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 333
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Read",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/perf-Simulation.log",
+              "content": "\n=== git-cola perf counters (since last dump) ===\nname                                          count      total       mean        p95        max\nCommitTreeWidget.add_commits                      1      1.33s      1.33s      1.33s      1.33s\nCommitTreeWidget.apply_graph_result               1      1.32s      1.32s      1.32s      1.32s\nCommitTreeWidget.resizeColumnToContents           1      1.32s      1.32s      1.32s      1.32s\n=================================================\n",
+              "numLines": 8,
+              "startLine": 1,
+              "totalLines": 8
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01WB3PsCuq7qWYwPLENnsPSN",
+            "type": "tool_result",
+            "content": "1\t\n2\t=== git-cola perf counters (since last dump) ===\n3\tname                                          count      total       mean        p95        max\n4\tCommitTreeWidget.add_commits                      1      1.33s      1.33s      1.33s      1.33s\n5\tCommitTreeWidget.apply_graph_result               1      1.32s      1.32s      1.32s      1.32s\n6\tCommitTreeWidget.resizeColumnToContents           1      1.32s      1.32s      1.32s      1.32s\n7\t=================================================\n8\t"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/perf-Simulation.log",
+              "content": "\n=== git-cola perf counters (since last dump) ===\nname                                          count      total       mean        p95        max\nCommitTreeWidget.add_commits                      1      1.33s      1.33s      1.33s      1.33s\nCommitTreeWidget.apply_graph_result               1      1.32s      1.32s      1.32s      1.32s\nCommitTreeWidget.resizeColumnToContents           1      1.32s      1.32s      1.32s      1.32s\n=================================================\n",
+              "numLines": 8,
+              "startLine": 1,
+              "totalLines": 8
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01WB3PsCuq7qWYwPLENnsPSN",
+            "type": "tool_result",
+            "content": "1\t\n2\t=== git-cola perf counters (since last dump) ===\n3\tname                                          count      total       mean        p95        max\n4\tCommitTreeWidget.add_commits                      1      1.33s      1.33s      1.33s      1.33s\n5\tCommitTreeWidget.apply_graph_result               1      1.32s      1.32s      1.32s      1.32s\n6\tCommitTreeWidget.resizeColumnToContents           1      1.32s      1.32s      1.32s      1.32s\n7\t=================================================\n8\t"
+          }
+        },
+        "raw_arguments": {
+          "file_path": "/Users/luwei/work/git-cola/perf-Simulation.log"
+        }
+      }
+    },
+    {
+      "step_id": 376,
+      "timestamp": "2026-05-04T13:53:56.360Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Read toolu_015aZtj3BVpCji4qDQ6XJAUN",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_015aZtj3BVpCji4qDQ6XJAUN",
+          "function_name": "Read",
+          "arguments": {
+            "file_path": "/Users/luwei/work/git-cola/perf.log"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_015aZtj3BVpCji4qDQ6XJAUN",
+            "content": "1\t\n2\t=== git-cola perf counters (since last dump) ===\n3\tname                                          count      total       mean        p95        max\n4\tCommitTreeWidget.add_commits                      5   132.51ms    26.50ms    35.28ms    47.89ms\n5\tCommitTreeWidget.apply_graph_result               5    71.98ms    14.40ms    10.60ms    38.52ms\n6\tCommitTreeWidget.resizeColumnToContents           1    33.25ms    33.25ms    33.25ms    33.25ms\n7\t=================================================\n8\n\n[metadata] {\"type\": \"text\", \"file\": {\"filePath\": \"/Users/luwei/work/git-cola/perf.log\", \"content\": \"\\n=== git-cola perf counters (since last dump) ===\\nname                                          count      total       mean        p95        max\\nCommitTreeWidget.add_commits                      5   132.51ms    26.50ms    35.28ms    47.89ms\\nCommitTreeWidget.apply_graph_result               5    71.98ms    14.40ms    10.60ms    38.52ms\\nCommitTreeWidget.resizeColumnToContents           1    33.25ms    33.25ms    33.25ms    33.25ms\\n=================================================\\n\", \"numLines\": 8, \"startLine\": 1, \"totalLines\": 8}}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 208063,
+        "completion_tokens": 150,
+        "cached_tokens": 208062,
+        "extra": {
+          "cache_creation_input_tokens": 333,
+          "cache_read_input_tokens": 208062,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 333,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 150,
+              "cache_read_input_tokens": 208062,
+              "cache_creation_input_tokens": 333,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 333
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Read",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/perf.log",
+              "content": "\n=== git-cola perf counters (since last dump) ===\nname                                          count      total       mean        p95        max\nCommitTreeWidget.add_commits                      5   132.51ms    26.50ms    35.28ms    47.89ms\nCommitTreeWidget.apply_graph_result               5    71.98ms    14.40ms    10.60ms    38.52ms\nCommitTreeWidget.resizeColumnToContents           1    33.25ms    33.25ms    33.25ms    33.25ms\n=================================================\n",
+              "numLines": 8,
+              "startLine": 1,
+              "totalLines": 8
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_015aZtj3BVpCji4qDQ6XJAUN",
+            "type": "tool_result",
+            "content": "1\t\n2\t=== git-cola perf counters (since last dump) ===\n3\tname                                          count      total       mean        p95        max\n4\tCommitTreeWidget.add_commits                      5   132.51ms    26.50ms    35.28ms    47.89ms\n5\tCommitTreeWidget.apply_graph_result               5    71.98ms    14.40ms    10.60ms    38.52ms\n6\tCommitTreeWidget.resizeColumnToContents           1    33.25ms    33.25ms    33.25ms    33.25ms\n7\t=================================================\n8\t"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/perf.log",
+              "content": "\n=== git-cola perf counters (since last dump) ===\nname                                          count      total       mean        p95        max\nCommitTreeWidget.add_commits                      5   132.51ms    26.50ms    35.28ms    47.89ms\nCommitTreeWidget.apply_graph_result               5    71.98ms    14.40ms    10.60ms    38.52ms\nCommitTreeWidget.resizeColumnToContents           1    33.25ms    33.25ms    33.25ms    33.25ms\n=================================================\n",
+              "numLines": 8,
+              "startLine": 1,
+              "totalLines": 8
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_015aZtj3BVpCji4qDQ6XJAUN",
+            "type": "tool_result",
+            "content": "1\t\n2\t=== git-cola perf counters (since last dump) ===\n3\tname                                          count      total       mean        p95        max\n4\tCommitTreeWidget.add_commits                      5   132.51ms    26.50ms    35.28ms    47.89ms\n5\tCommitTreeWidget.apply_graph_result               5    71.98ms    14.40ms    10.60ms    38.52ms\n6\tCommitTreeWidget.resizeColumnToContents           1    33.25ms    33.25ms    33.25ms    33.25ms\n7\t=================================================\n8\t"
+          }
+        },
+        "raw_arguments": {
+          "file_path": "/Users/luwei/work/git-cola/perf.log"
+        }
+      }
+    },
+    {
+      "step_id": 377,
+      "timestamp": "2026-05-04T13:54:22.917Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 208063,
+        "completion_tokens": 2570,
+        "cached_tokens": 208062,
+        "extra": {
+          "cache_creation_input_tokens": 910,
+          "cache_read_input_tokens": 208062,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 910,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 2570,
+              "cache_read_input_tokens": 208062,
+              "cache_creation_input_tokens": 910,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 910
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 378,
+      "timestamp": "2026-05-04T13:54:36.389Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "数据已读完。两个发现：\n\n## 一、`resizeColumnToContents` 是**加载**瓶颈（已确认）\n\n| 指标 | git-cola repo（小） | Simulation repo（大） | 比值 |\n|---|---:|---:|---:|\n| `add_commits` 总耗时 | 132ms | 1.33s | 10× |\n| `apply_graph_result` 总耗时 | 72ms | 1.32s | 18× |\n| **`resizeColumnToContents`** | **33ms** | **1.32s** | **40×** |\n\n注意 `apply_graph_result` 总耗时 ≈ `resizeColumnToContents` 总耗时，说明 `apply_graph_result` 里其它逻辑（遍历 oid/setData）基本免费，**几乎所有时间都花在那一行 `self.resizeColumnToContents(SUMMARY)` 上**。Qt 文档警告里说的\"不要在大数据上用 ResizeToContents\"在你这里实测兑现了。\n\n## 二、滚动数据缺失，需要再测一次\n\n两份 log 都**没有 `GraphDelegate.paint / sizeHint / _graph_width / _labels_width / _draw_labels` 的任何记录**——说明你按 `Ctrl+Shift+P` 或关闭窗口前**还没滚动**。要查滚动卡顿的真凶，麻烦再跑一次：\n\n```bash\nGIT_COLA_PERF=1 ./bin/git-dag --all 2>perf-scroll.log\n```\n\n操作顺序：\n1. 等图加载完\n2. **在左侧 tree 区域上下滚动 ~10 秒**（不是右边的图）\n3. **左右滚动 ~10 秒**\n4. 按 `Ctrl+Shift+P`\n5. 把新的 `perf-scroll.log` 发给我\n\n应该能看到 `GraphDelegate.paint` 等条目，count 几千，那才是滚动慢的根因数据。\n\n---\n\n## 与此同时，可以先动手修加载瓶颈\n\n`resizeColumnToContents` 已经实锤是大头。要立刻改的话，方案：\n\n**A. 启发式列宽（最稳）**：取前 200 行 sizeHint 的最大宽度 + padding 做列宽，O(200) 而不是 O(100000)。\n\n**B. 完全跳过自动 resize**：用启动时的固定百分比（视口宽 50%），让用户自己拖 header。\n\n**C. 用 `setSectionResizeMode(Interactive)` + 一次性给个上限**。\n\n你想要我先按方案 A 改这一项吗？还是等滚动数据回来一起看？",
+      "metrics": {
+        "prompt_tokens": 208063,
+        "completion_tokens": 2570,
+        "cached_tokens": 208062,
+        "extra": {
+          "cache_creation_input_tokens": 910,
+          "cache_read_input_tokens": 208062,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 910,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 2570,
+              "cache_read_input_tokens": 208062,
+              "cache_creation_input_tokens": 910,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 910
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 42388042,
-    "total_completion_tokens": 322758,
-    "total_cached_tokens": 42384914,
-    "total_steps": 371,
+    "total_prompt_tokens": 43634674,
+    "total_completion_tokens": 328600,
+    "total_cached_tokens": 43631530,
+    "total_steps": 378,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 1653882,
-      "total_cache_read_input_tokens": 42384914
+      "total_cache_creation_input_tokens": 1658124,
+      "total_cache_read_input_tokens": 43631530
     }
   }
 }

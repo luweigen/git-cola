@@ -1,0 +1,7 @@
+
+=== git-cola perf counters (since last dump) ===
+name                                          count      total       mean        p95        max
+CommitTreeWidget.add_commits                      5   132.51ms    26.50ms    35.28ms    47.89ms
+CommitTreeWidget.apply_graph_result               5    71.98ms    14.40ms    10.60ms    38.52ms
+CommitTreeWidget.resizeColumnToContents           1    33.25ms    33.25ms    33.25ms    33.25ms
+=================================================
