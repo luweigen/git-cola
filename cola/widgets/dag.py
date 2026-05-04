@@ -17,6 +17,7 @@ from .. import gitcmds
 from .. import guicmds
 from .. import hotkeys
 from .. import icons
+from .. import perf
 from .. import qtcompat
 from .. import qtutils
 from .. import utils
@@ -785,6 +786,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
     LABEL_SPACING = 4
     LABEL_TEXT_OFFSET = 3
 
+    @perf.time_method('GraphDelegate.paint')
     def paint(self, painter, option, index):
         row = index.data(GRAPH_ROW_ROLE)
         prev_row = index.data(GRAPH_PREV_ROW_ROLE)
@@ -878,6 +880,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
         painter.restore()
 
+    @perf.time_method('GraphDelegate._draw_labels')
     def _draw_labels(
         self,
         painter: Optional[QtGui.QPainter],
@@ -939,10 +942,12 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
         return current_x - start_x
 
+    @perf.time_method('GraphDelegate._labels_width')
     def _labels_width(self, font_metrics: QtGui.QFontMetrics, tags: list[str]):
         """Calculate total width needed for all labels."""
         return self._draw_labels(None, 0, tags, 0, font_metrics)
 
+    @perf.time_method('GraphDelegate._graph_width')
     def _graph_width(self, row, prev_row):
         """Calculate the width needed for the graph."""
         if row is None and prev_row is None:
@@ -957,6 +962,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
                 max_col = max(max_col, edge.from_column, edge.to_column)
         return (max_col + 1) * self.LANE_WIDTH
 
+    @perf.time_method('GraphDelegate.sizeHint')
     def sizeHint(self, option, index):
         graph_row = index.data(GRAPH_ROW_ROLE)
         prev_row = index.data(GRAPH_PREV_ROW_ROLE)
@@ -1157,6 +1163,7 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         self.oidmap.clear()
         self.commits = []
 
+    @perf.time_method('CommitTreeWidget.add_commits')
     def add_commits(self, commits):
         """Add commits to the tree"""
         self.commits.extend(commits)
@@ -1184,6 +1191,7 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         )
         self.apply_graph_result(graph_result)
 
+    @perf.time_method('CommitTreeWidget.apply_graph_result')
     def apply_graph_result(self, graph_result) -> None:
         oid_to_index: dict[str, int] = {}
         for i, row in enumerate(graph_result.rows):
@@ -1207,7 +1215,8 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         # Resize column to fit content after graph data is loaded.
         if self._column_init_state < ColumnInitState.GRAPH:
             self._column_init_state = ColumnInitState.GRAPH
-            self.resizeColumnToContents(CommitTreeWidgetItem.SUMMARY)
+            with perf.timer('CommitTreeWidget.resizeColumnToContents'):
+                self.resizeColumnToContents(CommitTreeWidgetItem.SUMMARY)
 
     def create_patch(self):
         """Export a patch from the selected items"""
@@ -1470,6 +1479,12 @@ class GitDAG(standard.MainWindow):
         qtutils.add_action(self, 'FocusInput', self.focus_input, hotkeys.FOCUS_INPUT)
         qtutils.add_action(self, 'FocusTree', self.focus_tree, hotkeys.FOCUS_TREE)
         qtutils.add_action(self, 'FocusDiff', self.focus_diff, hotkeys.FOCUS_DIFF)
+        qtutils.add_action(
+            self,
+            N_('Dump Performance Counters'),
+            self._dump_perf,
+            'Ctrl+Shift+P',
+        )
         qtutils.add_close_action(self)
 
         self.set_params(params)
@@ -1792,11 +1807,17 @@ class GitDAG(standard.MainWindow):
             return
         self.search_line_range_in_oid(oid)
 
+    def _dump_perf(self):
+        """Print accumulated perf counters to stderr (Ctrl+Shift+P)."""
+        perf.dump()
+
     # Qt overrides
     def closeEvent(self, event):
         """Ensure the revision text popup is closed"""
         self.revtext.close_popup()
         self._stop_reader_thread()
+        if perf.ENABLED:
+            perf.dump()
         standard.MainWindow.closeEvent(self, event)
 
     def showEvent(self, event):
