@@ -1,0 +1,12 @@
+
+=== git-cola perf counters (since last dump) ===
+name                                          count      total       mean        p95        max
+CommitTreeWidget.paintEvent                     138     69.77s   505.60ms   777.34ms   921.58ms
+CommitTreeWidget.add_commits                      1      1.38s      1.38s      1.38s      1.38s
+CommitTreeWidget.apply_graph_result               1      1.38s      1.38s      1.38s      1.38s
+CommitTreeWidget.resizeColumnToContents           1      1.37s      1.37s      1.37s      1.37s
+GraphView.paintEvent                             21   113.88ms     5.42ms    10.53ms    17.40ms
+GraphView.scrollContentsBy                        9     3.28ms    364.9us     1.23ms     1.45ms
+CommitTreeWidget.dataChanged                   3893     2.06ms      530ns      541ns    252.8us
+CommitTreeWidget.scrollContentsBy                80    761.2us      9.5us     13.1us     26.1us
+=================================================

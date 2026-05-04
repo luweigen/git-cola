@@ -1005,6 +1005,22 @@ class CommitTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         self.setText(self.DATE, commit.authdate)
 
 
+class _TimingDelegate(QtWidgets.QStyledItemDelegate):
+    """Pass-through delegate that times every paint/sizeHint call.
+
+    Installed only when GIT_COLA_PERF=1 so we can attribute paintEvent cost
+    to per-cell delegate work. Visual output is identical to Qt's default.
+    """
+
+    @perf.time_method('TimingDelegate.paint')
+    def paint(self, painter, option, index):
+        QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+
+    @perf.time_method('TimingDelegate.sizeHint')
+    def sizeHint(self, option, index):
+        return QtWidgets.QStyledItemDelegate.sizeHint(self, option, index)
+
+
 class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
     """Display commits using a flat treewidget in "list" mode"""
 
@@ -1026,6 +1042,9 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         )
 
         self.graph_delegate = GraphDelegate(self)
+        if perf.ENABLED:
+            self._timing_delegate = _TimingDelegate(self)
+            self.setItemDelegate(self._timing_delegate)
         self.context = context
         self.oidmap = {}
         self.menu_actions = None
@@ -1089,6 +1108,12 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
 
     def display_inline_graph(self, enabled):
         """Enable and disable the display of inline graph in the commit list"""
+        if perf.ENABLED:
+            import sys
+            sys.stderr.write(
+                f'[git-cola perf] display_inline_graph(enabled={enabled})\n'
+            )
+            sys.stderr.flush()
         if enabled:
             delegate = self.graph_delegate
         else:
