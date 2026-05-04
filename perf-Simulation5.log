@@ -1,0 +1,37 @@
+[git-cola perf] display_inline_graph(enabled=False)
+[git-cola perf] column widths: OID=66 SUMMARY=154358 AUTHOR=73 DATE=100
+[git-cola perf] rows=1298 max_summary_len=23104 max_author_len=6
+[git-cola perf] hotkey fired at 17:18:30 (ENABLED=True)
+
+=== git-cola perf counters (since last dump) ===
+name                                          count      total       mean        p95        max
+CommitTreeWidget.paintEvent                     327    151.39s   462.97ms   733.36ms   920.82ms
+TimingDelegate.paint.SUMMARY                  15922    150.70s     9.47ms    54.25ms   116.69ms
+CommitTreeWidget.add_commits                      1      1.38s      1.38s      1.38s      1.38s
+CommitTreeWidget.apply_graph_result               1      1.38s      1.38s      1.38s      1.38s
+CommitTreeWidget.resizeColumnToContents           1      1.37s      1.37s      1.37s      1.37s
+TimingDelegate.sizeHint.SUMMARY                1001      1.36s     1.36ms    12.61ms    17.48ms
+TimingDelegate.paint.DATE                      3011   299.54ms     99.5us    118.4us    844.9us
+TimingDelegate.paint.AUTHOR                    2438    93.73ms     38.4us     54.8us    269.2us
+TimingDelegate.paint.OID                       1274    76.38ms     60.0us     77.2us     1.79ms
+GraphView.paintEvent                             18    72.78ms     4.04ms     6.56ms    10.97ms
+GraphView.scrollContentsBy                        9     2.74ms    304.8us    765.6us     1.59ms
+CommitTreeWidget.dataChanged                   3893     1.90ms      488ns      459ns    210.0us
+CommitTreeWidget.scrollContentsBy               156     1.53ms      9.8us     15.3us     91.3us
+TimingDelegate.sizeHint.col-1                     9    234.3us     26.0us     33.5us     80.6us
+TimingDelegate.sizeHint.OID                       1    122.5us    122.5us    122.5us    122.5us
+TimingDelegate.sizeHint.DATE                      1     31.9us     31.9us     31.9us     31.9us
+TimingDelegate.sizeHint.AUTHOR                    1     20.4us     20.4us     20.4us     20.4us
+=================================================
+[git-cola perf] hotkey fired at 17:18:31 (ENABLED=True)
+[git-cola perf] no samples recorded
+[git-cola perf] hotkey fired at 17:18:32 (ENABLED=True)
+[git-cola perf] no samples recorded
+
+=== git-cola perf counters (since last dump) ===
+name                                          count      total       mean        p95        max
+CommitTreeWidget.paintEvent                       1   370.68ms   370.68ms   370.68ms   370.68ms
+TimingDelegate.paint.SUMMARY                     58   360.29ms     6.21ms     3.19ms   107.71ms
+GraphView.paintEvent                              1    50.23ms    50.23ms    50.23ms    50.23ms
+TimingDelegate.paint.OID                         58     6.19ms    106.7us    217.5us    276.2us
+=================================================

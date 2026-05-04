@@ -995,12 +995,20 @@ class CommitTreeWidgetItem(QtWidgets.QTreeWidgetItem):
     SUMMARY = 1
     AUTHOR = 2
     DATE = 3
+    # A commit may have a pathologically long subject line (e.g. a commit
+    # whose message body was joined into the subject). Truncating before
+    # handing the text to Qt keeps per-cell paint and column-width math
+    # bounded; commit.summary still holds the full value for diff/copy.
+    SUMMARY_DISPLAY_MAX = 256
 
     def __init__(self, commit, abbrev=7, parent=None):
         QtWidgets.QTreeWidgetItem.__init__(self, parent)
         self.commit = commit
         self.setText(self.OID, (commit.oid or '')[:abbrev])
-        self.setText(self.SUMMARY, commit.summary)
+        summary = commit.summary or ''
+        if len(summary) > self.SUMMARY_DISPLAY_MAX:
+            summary = summary[: self.SUMMARY_DISPLAY_MAX] + '…'
+        self.setText(self.SUMMARY, summary)
         self.setText(self.AUTHOR, commit.author)
         self.setText(self.DATE, commit.authdate)
 
@@ -1251,6 +1259,14 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             self._column_init_state = ColumnInitState.GRAPH
             with perf.timer('CommitTreeWidget.resizeColumnToContents'):
                 self.resizeColumnToContents(CommitTreeWidgetItem.SUMMARY)
+            # Cap the SUMMARY column width: an unusually long subject line
+            # can otherwise push it to tens of thousands of pixels, which
+            # makes every cell paint extremely slow.
+            viewport_w = self.viewport().width()
+            if viewport_w > 0:
+                cap = max(viewport_w * 6 // 10, 320)
+                if self.columnWidth(CommitTreeWidgetItem.SUMMARY) > cap:
+                    self.setColumnWidth(CommitTreeWidgetItem.SUMMARY, cap)
             if perf.ENABLED:
                 import sys
                 widths = [self.columnWidth(i) for i in range(4)]
