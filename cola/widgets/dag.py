@@ -48,7 +48,7 @@ def git_dag(context, args=None, existing_view=None, show=True):
     branch = model.currentbranch
     # disambiguate between branch names and filenames by using '--'
     branch_doubledash = (branch + ' --') if branch else ''
-    params = dag.DAG(branch_doubledash, 1000)
+    params = dag.DAG(branch_doubledash, 100000)
     params.set_arguments(args)
 
     if existing_view is None:
