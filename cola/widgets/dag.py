@@ -1553,6 +1553,10 @@ class GitDAG(standard.MainWindow):
             count = state['count']
             if self.params.overridden('count'):
                 count = self.params.count
+            # Migrate legacy persisted default (1000) to the current default
+            # when the user has not explicitly chosen a different value.
+            elif count == 1000 and self.params.count > count:
+                count = self.params.count
         except (KeyError, TypeError, ValueError, AttributeError):
             count = self.params.count
             result = False
