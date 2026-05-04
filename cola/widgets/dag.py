@@ -1010,15 +1010,24 @@ class _TimingDelegate(QtWidgets.QStyledItemDelegate):
 
     Installed only when GIT_COLA_PERF=1 so we can attribute paintEvent cost
     to per-cell delegate work. Visual output is identical to Qt's default.
+    Per-column counters discriminate which column is the bottleneck.
     """
 
-    @perf.time_method('TimingDelegate.paint')
-    def paint(self, painter, option, index):
-        QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+    _COLUMN_NAMES = ('OID', 'SUMMARY', 'AUTHOR', 'DATE')
 
-    @perf.time_method('TimingDelegate.sizeHint')
+    def _column_label(self, index) -> str:
+        col = index.column()
+        if 0 <= col < len(self._COLUMN_NAMES):
+            return self._COLUMN_NAMES[col]
+        return f'col{col}'
+
+    def paint(self, painter, option, index):
+        with perf.timer(f'TimingDelegate.paint.{self._column_label(index)}'):
+            QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+
     def sizeHint(self, option, index):
-        return QtWidgets.QStyledItemDelegate.sizeHint(self, option, index)
+        with perf.timer(f'TimingDelegate.sizeHint.{self._column_label(index)}'):
+            return QtWidgets.QStyledItemDelegate.sizeHint(self, option, index)
 
 
 class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
@@ -1242,6 +1251,32 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             self._column_init_state = ColumnInitState.GRAPH
             with perf.timer('CommitTreeWidget.resizeColumnToContents'):
                 self.resizeColumnToContents(CommitTreeWidgetItem.SUMMARY)
+            if perf.ENABLED:
+                import sys
+                widths = [self.columnWidth(i) for i in range(4)]
+                sys.stderr.write(
+                    '[git-cola perf] column widths: '
+                    f'OID={widths[0]} SUMMARY={widths[1]} '
+                    f'AUTHOR={widths[2]} DATE={widths[3]}\n'
+                )
+                max_summary = 0
+                max_author = 0
+                count = self.topLevelItemCount()
+                for i in range(count):
+                    item = self.topLevelItem(i)
+                    if item is None:
+                        continue
+                    s = item.text(CommitTreeWidgetItem.SUMMARY)
+                    a = item.text(CommitTreeWidgetItem.AUTHOR)
+                    if len(s) > max_summary:
+                        max_summary = len(s)
+                    if len(a) > max_author:
+                        max_author = len(a)
+                sys.stderr.write(
+                    f'[git-cola perf] rows={count} '
+                    f'max_summary_len={max_summary} max_author_len={max_author}\n'
+                )
+                sys.stderr.flush()
 
     def create_patch(self):
         """Export a patch from the selected items"""
