@@ -1245,6 +1245,24 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             return
         QtWidgets.QTreeWidget.mousePressEvent(self, event)
 
+    @perf.time_method('CommitTreeWidget.paintEvent')
+    def paintEvent(self, event):
+        """Time the full per-frame paint cost of the tree."""
+        QtWidgets.QTreeWidget.paintEvent(self, event)
+
+    @perf.time_method('CommitTreeWidget.scrollContentsBy')
+    def scrollContentsBy(self, dx, dy):
+        """Time scroll-induced viewport repaint dispatch."""
+        QtWidgets.QTreeWidget.scrollContentsBy(self, dx, dy)
+
+    @perf.time_method('CommitTreeWidget.dataChanged')
+    def dataChanged(self, top_left, bottom_right, roles=None):
+        """Time the model->view dataChanged dispatch (selection updates etc)."""
+        if roles is None:
+            QtWidgets.QTreeWidget.dataChanged(self, top_left, bottom_right)
+        else:
+            QtWidgets.QTreeWidget.dataChanged(self, top_left, bottom_right, roles)
+
 
 class GitDAG(standard.MainWindow):
     """The git-dag widget."""
@@ -3320,6 +3338,16 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
             self.wheel_zoom(event)
         else:
             self.wheel_pan(event)
+
+    @perf.time_method('GraphView.paintEvent')
+    def paintEvent(self, event):
+        """Time the per-frame paint cost of the graphics view."""
+        QtWidgets.QGraphicsView.paintEvent(self, event)
+
+    @perf.time_method('GraphView.scrollContentsBy')
+    def scrollContentsBy(self, dx, dy):
+        """Time the graphics view scroll dispatch."""
+        QtWidgets.QGraphicsView.scrollContentsBy(self, dx, dy)
 
     def fitInView(self, rect, flags=Qt.IgnoreAspectRatio):
         """Override fitInView to remove unwanted margins
