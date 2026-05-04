@@ -1502,6 +1502,7 @@ class GitDAG(standard.MainWindow):
             N_('Dump Performance Counters'),
             self._dump_perf,
             'Ctrl+Shift+P',
+            'F12',
         )
         qtutils.add_close_action(self)
 
@@ -1826,7 +1827,14 @@ class GitDAG(standard.MainWindow):
         self.search_line_range_in_oid(oid)
 
     def _dump_perf(self):
-        """Print accumulated perf counters to stderr (Ctrl+Shift+P)."""
+        """Print accumulated perf counters to stderr (Ctrl+Shift+P / F12)."""
+        import sys
+        import time as _time
+        sys.stderr.write(
+            f'[git-cola perf] hotkey fired at '
+            f'{_time.strftime("%H:%M:%S")} (ENABLED={perf.ENABLED})\n'
+        )
+        sys.stderr.flush()
         perf.dump()
 
     # Qt overrides
