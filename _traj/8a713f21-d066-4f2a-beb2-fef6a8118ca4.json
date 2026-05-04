@@ -38681,19 +38681,263 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 454,
+      "timestamp": "2026-05-04T14:22:15.376Z",
+      "source": "user",
+      "message": "输出在perf-Simulation6.log",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 455,
+      "timestamp": "2026-05-04T14:22:17.871Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 251498,
+        "completion_tokens": 119,
+        "cached_tokens": 251492,
+        "extra": {
+          "cache_creation_input_tokens": 537,
+          "cache_read_input_tokens": 251492,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 537,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 119,
+              "cache_read_input_tokens": 251492,
+              "cache_creation_input_tokens": 537,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 537
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 456,
+      "timestamp": "2026-05-04T14:22:18.251Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Read toolu_01EZ7HRVi8s3d8jp4uGYUDr9",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01EZ7HRVi8s3d8jp4uGYUDr9",
+          "function_name": "Read",
+          "arguments": {
+            "file_path": "/Users/luwei/work/git-cola/perf-Simulation6.log"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01EZ7HRVi8s3d8jp4uGYUDr9",
+            "content": "1\t[git-cola perf] display_inline_graph(enabled=False)\n2\t[git-cola perf] column widths: OID=66 SUMMARY=320 AUTHOR=73 DATE=100\n3\t[git-cola perf] rows=1298 max_summary_len=257 max_author_len=6\n4\t[git-cola perf] hotkey fired at 17:21:54 (ENABLED=True)\n5\t\n6\t=== git-cola perf counters (since last dump) ===\n7\tname                                          count      total       mean        p95        max\n8\tCommitTreeWidget.paintEvent                     203      4.67s    23.00ms    36.73ms    50.28ms\n9\tTimingDelegate.paint.SUMMARY                   8980      3.53s    392.8us    717.1us     3.68ms\n10\tTimingDelegate.paint.DATE                      6205   629.34ms    101.4us    116.5us    896.4us\n11\tTimingDelegate.paint.AUTHOR                    5106   182.16ms     35.7us     40.1us    199.3us\n12\tCommitTreeWidget.add_commits                      1   172.03ms   172.03ms   172.03ms   172.03ms\n13\tCommitTreeWidget.apply_graph_result               1   166.24ms   166.24ms   166.24ms   166.24ms\n14\tTimingDelegate.paint.OID                       2896   158.47ms     54.7us     69.8us    295.0us\n15\tCommitTreeWidget.resizeColumnToContents           1   156.10ms   156.10ms   156.10ms   156.10ms\n16\tTimingDelegate.sizeHint.SUMMARY                1001   153.35ms    153.2us    218.2us     2.95ms\n17\tGraphView.paintEvent                             13    28.03ms     2.16ms     2.49ms    10.08ms\n18\tGraphView.scrollContentsBy                        9     2.71ms    300.9us    935.8us     1.34ms\n19\tCommitTreeWidget.dataChanged                   3893     1.95ms      501ns      500ns    230.1us\n20\tCommitTreeWidget.scrollContentsBy               122    683.6us      5.6us     11.5us     70.4us\n21\tTimingDelegate.sizeHint.col-1                    11    251.4us     22.9us     38.8us     76.5us\n22\tTimingDelegate.sizeHint.OID                       1    136.2us    136.2us    136.2us    136.2us\n23\tTimingDelegate.sizeHint.AUTHOR                    1     52.6us     52.6us     52.6us     52.6us\n24\tTimingDelegate.sizeHint.DATE                      1     42.2us     42.2us     42.2us     42.2us\n25\t=================================================\n26\t\n27\t=== git-cola perf counters (since last dump) ===\n28\tname                                          count      total       mean        p95        max\n29\tCommitTreeWidget.paintEvent                       2    70.90ms    35.45ms     1.24ms    69.66ms\n30\tTimingDelegate.paint.SUMMARY                     59    57.37ms    972.4us     2.69ms     6.88ms\n31\tGraphView.paintEvent                              1    10.38ms    10.38ms    10.38ms    10.38ms\n32\tTimingDelegate.paint.OID                         59     8.87ms    150.3us    357.2us    790.1us\n33\t=================================================\n34\n\n[metadata] {\"type\": \"text\", \"file\": {\"filePath\": \"/Users/luwei/work/git-cola/perf-Simulation6.log\", \"content\": \"[git-cola perf] display_inline_graph(enabled=False)\\n[git-cola perf] column widths: OID=66 SUMMARY=320 AUTHOR=73 DATE=100\\n[git-cola perf] rows=1298 max_summary_len=257 max_author_len=6\\n[git-cola perf] hotkey fired at 17:21:54 (ENABLED=True)\\n\\n=== git-cola perf counters (since last dump) ===\\nname                                          count      total       mean        p95        max\\nCommitTreeWidget.paintEvent                     203      4.67s    23.00ms    36.73ms    50.28ms\\nTimingDelegate.paint.SUMMARY                   8980      3.53s    392.8us    717.1us     3.68ms\\nTimingDelegate.paint.DATE                      6205   629.34ms    101.4us    116.5us    896.4us\\nTimingDelegate.paint.AUTHOR                    5106   182.16ms     35.7us     40.1us    199.3us\\nCommitTreeWidget.add_commits                      1   172.03ms   172.03ms   172.03ms   172.03ms\\nCommitTreeWidget.apply_graph_result               1   166.24ms   166.24ms   166.24ms   166.24ms\\nTimingDelegate.paint.OID                       2896   158.47ms     54.7us     69.8us    295.0us\\nCommitTreeWidget.resizeColumnToContents           1   156.10ms   156.10ms   156.10ms   156.10ms\\nTimingDelegate.sizeHint.SUMMARY                1001   153.35ms    153.2us    218.2us     2.95ms\\nGraphView.paintEvent                             13    28.03ms     2.16ms     2.49ms    10.08ms\\nGraphView.scrollContentsBy                        9     2.71ms    300.9us    935.8us     1.34ms\\nCommitTreeWidget.dataChanged                   3893     1.95ms      501ns      500ns    230.1us\\nCommitTreeWidget.scrollContentsBy               122    683.6us      5.6us     11.5us     70.4us\\nTimingDelegate.sizeHint.col-1                    11    251.4us     22.9us     38.8us     76.5us\\nTimingDelegate.sizeHint.OID                       1    136.2us    136.2us    136.2us    136.2us\\nTimingDelegate.sizeHint.AUTHOR                    1     52.6us     52.6us     52.6us     52.6us\\nTimingDelegate.sizeHint.DATE                      1     42.2us     42.2us     42.2us     42.2us\\n=================================================\\n\\n=== git-cola perf counters (since last dump) ===\\nname                                          count      total       mean        p95        max\\nCommitTreeWidget.paintEvent                       2    70.90ms    35.45ms     1.24ms    69.66ms\\nTimingDelegate.paint.SUMMARY                     59    57.37ms    972.4us     2.69ms     6.88ms\\nGraphView.paintEvent                              1    10.38ms    10.38ms    10.38ms    10.38ms\\nTimingDelegate.paint.OID                         59     8.87ms    150.3us    357.2us    790.1us\\n=================================================\\n\", \"numLines\": 34, \"startLine\": 1, \"totalLines\": 34}}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 251498,
+        "completion_tokens": 119,
+        "cached_tokens": 251492,
+        "extra": {
+          "cache_creation_input_tokens": 537,
+          "cache_read_input_tokens": 251492,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 537,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 119,
+              "cache_read_input_tokens": 251492,
+              "cache_creation_input_tokens": 537,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 537
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Read",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/perf-Simulation6.log",
+              "content": "[git-cola perf] display_inline_graph(enabled=False)\n[git-cola perf] column widths: OID=66 SUMMARY=320 AUTHOR=73 DATE=100\n[git-cola perf] rows=1298 max_summary_len=257 max_author_len=6\n[git-cola perf] hotkey fired at 17:21:54 (ENABLED=True)\n\n=== git-cola perf counters (since last dump) ===\nname                                          count      total       mean        p95        max\nCommitTreeWidget.paintEvent                     203      4.67s    23.00ms    36.73ms    50.28ms\nTimingDelegate.paint.SUMMARY                   8980      3.53s    392.8us    717.1us     3.68ms\nTimingDelegate.paint.DATE                      6205   629.34ms    101.4us    116.5us    896.4us\nTimingDelegate.paint.AUTHOR                    5106   182.16ms     35.7us     40.1us    199.3us\nCommitTreeWidget.add_commits                      1   172.03ms   172.03ms   172.03ms   172.03ms\nCommitTreeWidget.apply_graph_result               1   166.24ms   166.24ms   166.24ms   166.24ms\nTimingDelegate.paint.OID                       2896   158.47ms     54.7us     69.8us    295.0us\nCommitTreeWidget.resizeColumnToContents           1   156.10ms   156.10ms   156.10ms   156.10ms\nTimingDelegate.sizeHint.SUMMARY                1001   153.35ms    153.2us    218.2us     2.95ms\nGraphView.paintEvent                             13    28.03ms     2.16ms     2.49ms    10.08ms\nGraphView.scrollContentsBy                        9     2.71ms    300.9us    935.8us     1.34ms\nCommitTreeWidget.dataChanged                   3893     1.95ms      501ns      500ns    230.1us\nCommitTreeWidget.scrollContentsBy               122    683.6us      5.6us     11.5us     70.4us\nTimingDelegate.sizeHint.col-1                    11    251.4us     22.9us     38.8us     76.5us\nTimingDelegate.sizeHint.OID                       1    136.2us    136.2us    136.2us    136.2us\nTimingDelegate.sizeHint.AUTHOR                    1     52.6us     52.6us     52.6us     52.6us\nTimingDelegate.sizeHint.DATE                      1     42.2us     42.2us     42.2us     42.2us\n=================================================\n\n=== git-cola perf counters (since last dump) ===\nname                                          count      total       mean        p95        max\nCommitTreeWidget.paintEvent                       2    70.90ms    35.45ms     1.24ms    69.66ms\nTimingDelegate.paint.SUMMARY                     59    57.37ms    972.4us     2.69ms     6.88ms\nGraphView.paintEvent                              1    10.38ms    10.38ms    10.38ms    10.38ms\nTimingDelegate.paint.OID                         59     8.87ms    150.3us    357.2us    790.1us\n=================================================\n",
+              "numLines": 34,
+              "startLine": 1,
+              "totalLines": 34
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01EZ7HRVi8s3d8jp4uGYUDr9",
+            "type": "tool_result",
+            "content": "1\t[git-cola perf] display_inline_graph(enabled=False)\n2\t[git-cola perf] column widths: OID=66 SUMMARY=320 AUTHOR=73 DATE=100\n3\t[git-cola perf] rows=1298 max_summary_len=257 max_author_len=6\n4\t[git-cola perf] hotkey fired at 17:21:54 (ENABLED=True)\n5\t\n6\t=== git-cola perf counters (since last dump) ===\n7\tname                                          count      total       mean        p95        max\n8\tCommitTreeWidget.paintEvent                     203      4.67s    23.00ms    36.73ms    50.28ms\n9\tTimingDelegate.paint.SUMMARY                   8980      3.53s    392.8us    717.1us     3.68ms\n10\tTimingDelegate.paint.DATE                      6205   629.34ms    101.4us    116.5us    896.4us\n11\tTimingDelegate.paint.AUTHOR                    5106   182.16ms     35.7us     40.1us    199.3us\n12\tCommitTreeWidget.add_commits                      1   172.03ms   172.03ms   172.03ms   172.03ms\n13\tCommitTreeWidget.apply_graph_result               1   166.24ms   166.24ms   166.24ms   166.24ms\n14\tTimingDelegate.paint.OID                       2896   158.47ms     54.7us     69.8us    295.0us\n15\tCommitTreeWidget.resizeColumnToContents           1   156.10ms   156.10ms   156.10ms   156.10ms\n16\tTimingDelegate.sizeHint.SUMMARY                1001   153.35ms    153.2us    218.2us     2.95ms\n17\tGraphView.paintEvent                             13    28.03ms     2.16ms     2.49ms    10.08ms\n18\tGraphView.scrollContentsBy                        9     2.71ms    300.9us    935.8us     1.34ms\n19\tCommitTreeWidget.dataChanged                   3893     1.95ms      501ns      500ns    230.1us\n20\tCommitTreeWidget.scrollContentsBy               122    683.6us      5.6us     11.5us     70.4us\n21\tTimingDelegate.sizeHint.col-1                    11    251.4us     22.9us     38.8us     76.5us\n22\tTimingDelegate.sizeHint.OID                       1    136.2us    136.2us    136.2us    136.2us\n23\tTimingDelegate.sizeHint.AUTHOR                    1     52.6us     52.6us     52.6us     52.6us\n24\tTimingDelegate.sizeHint.DATE                      1     42.2us     42.2us     42.2us     42.2us\n25\t=================================================\n26\t\n27\t=== git-cola perf counters (since last dump) ===\n28\tname                                          count      total       mean        p95        max\n29\tCommitTreeWidget.paintEvent                       2    70.90ms    35.45ms     1.24ms    69.66ms\n30\tTimingDelegate.paint.SUMMARY                     59    57.37ms    972.4us     2.69ms     6.88ms\n31\tGraphView.paintEvent                              1    10.38ms    10.38ms    10.38ms    10.38ms\n32\tTimingDelegate.paint.OID                         59     8.87ms    150.3us    357.2us    790.1us\n33\t=================================================\n34\t"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/perf-Simulation6.log",
+              "content": "[git-cola perf] display_inline_graph(enabled=False)\n[git-cola perf] column widths: OID=66 SUMMARY=320 AUTHOR=73 DATE=100\n[git-cola perf] rows=1298 max_summary_len=257 max_author_len=6\n[git-cola perf] hotkey fired at 17:21:54 (ENABLED=True)\n\n=== git-cola perf counters (since last dump) ===\nname                                          count      total       mean        p95        max\nCommitTreeWidget.paintEvent                     203      4.67s    23.00ms    36.73ms    50.28ms\nTimingDelegate.paint.SUMMARY                   8980      3.53s    392.8us    717.1us     3.68ms\nTimingDelegate.paint.DATE                      6205   629.34ms    101.4us    116.5us    896.4us\nTimingDelegate.paint.AUTHOR                    5106   182.16ms     35.7us     40.1us    199.3us\nCommitTreeWidget.add_commits                      1   172.03ms   172.03ms   172.03ms   172.03ms\nCommitTreeWidget.apply_graph_result               1   166.24ms   166.24ms   166.24ms   166.24ms\nTimingDelegate.paint.OID                       2896   158.47ms     54.7us     69.8us    295.0us\nCommitTreeWidget.resizeColumnToContents           1   156.10ms   156.10ms   156.10ms   156.10ms\nTimingDelegate.sizeHint.SUMMARY                1001   153.35ms    153.2us    218.2us     2.95ms\nGraphView.paintEvent                             13    28.03ms     2.16ms     2.49ms    10.08ms\nGraphView.scrollContentsBy                        9     2.71ms    300.9us    935.8us     1.34ms\nCommitTreeWidget.dataChanged                   3893     1.95ms      501ns      500ns    230.1us\nCommitTreeWidget.scrollContentsBy               122    683.6us      5.6us     11.5us     70.4us\nTimingDelegate.sizeHint.col-1                    11    251.4us     22.9us     38.8us     76.5us\nTimingDelegate.sizeHint.OID                       1    136.2us    136.2us    136.2us    136.2us\nTimingDelegate.sizeHint.AUTHOR                    1     52.6us     52.6us     52.6us     52.6us\nTimingDelegate.sizeHint.DATE                      1     42.2us     42.2us     42.2us     42.2us\n=================================================\n\n=== git-cola perf counters (since last dump) ===\nname                                          count      total       mean        p95        max\nCommitTreeWidget.paintEvent                       2    70.90ms    35.45ms     1.24ms    69.66ms\nTimingDelegate.paint.SUMMARY                     59    57.37ms    972.4us     2.69ms     6.88ms\nGraphView.paintEvent                              1    10.38ms    10.38ms    10.38ms    10.38ms\nTimingDelegate.paint.OID                         59     8.87ms    150.3us    357.2us    790.1us\n=================================================\n",
+              "numLines": 34,
+              "startLine": 1,
+              "totalLines": 34
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01EZ7HRVi8s3d8jp4uGYUDr9",
+            "type": "tool_result",
+            "content": "1\t[git-cola perf] display_inline_graph(enabled=False)\n2\t[git-cola perf] column widths: OID=66 SUMMARY=320 AUTHOR=73 DATE=100\n3\t[git-cola perf] rows=1298 max_summary_len=257 max_author_len=6\n4\t[git-cola perf] hotkey fired at 17:21:54 (ENABLED=True)\n5\t\n6\t=== git-cola perf counters (since last dump) ===\n7\tname                                          count      total       mean        p95        max\n8\tCommitTreeWidget.paintEvent                     203      4.67s    23.00ms    36.73ms    50.28ms\n9\tTimingDelegate.paint.SUMMARY                   8980      3.53s    392.8us    717.1us     3.68ms\n10\tTimingDelegate.paint.DATE                      6205   629.34ms    101.4us    116.5us    896.4us\n11\tTimingDelegate.paint.AUTHOR                    5106   182.16ms     35.7us     40.1us    199.3us\n12\tCommitTreeWidget.add_commits                      1   172.03ms   172.03ms   172.03ms   172.03ms\n13\tCommitTreeWidget.apply_graph_result               1   166.24ms   166.24ms   166.24ms   166.24ms\n14\tTimingDelegate.paint.OID                       2896   158.47ms     54.7us     69.8us    295.0us\n15\tCommitTreeWidget.resizeColumnToContents           1   156.10ms   156.10ms   156.10ms   156.10ms\n16\tTimingDelegate.sizeHint.SUMMARY                1001   153.35ms    153.2us    218.2us     2.95ms\n17\tGraphView.paintEvent                             13    28.03ms     2.16ms     2.49ms    10.08ms\n18\tGraphView.scrollContentsBy                        9     2.71ms    300.9us    935.8us     1.34ms\n19\tCommitTreeWidget.dataChanged                   3893     1.95ms      501ns      500ns    230.1us\n20\tCommitTreeWidget.scrollContentsBy               122    683.6us      5.6us     11.5us     70.4us\n21\tTimingDelegate.sizeHint.col-1                    11    251.4us     22.9us     38.8us     76.5us\n22\tTimingDelegate.sizeHint.OID                       1    136.2us    136.2us    136.2us    136.2us\n23\tTimingDelegate.sizeHint.AUTHOR                    1     52.6us     52.6us     52.6us     52.6us\n24\tTimingDelegate.sizeHint.DATE                      1     42.2us     42.2us     42.2us     42.2us\n25\t=================================================\n26\t\n27\t=== git-cola perf counters (since last dump) ===\n28\tname                                          count      total       mean        p95        max\n29\tCommitTreeWidget.paintEvent                       2    70.90ms    35.45ms     1.24ms    69.66ms\n30\tTimingDelegate.paint.SUMMARY                     59    57.37ms    972.4us     2.69ms     6.88ms\n31\tGraphView.paintEvent                              1    10.38ms    10.38ms    10.38ms    10.38ms\n32\tTimingDelegate.paint.OID                         59     8.87ms    150.3us    357.2us    790.1us\n33\t=================================================\n34\t"
+          }
+        },
+        "raw_arguments": {
+          "file_path": "/Users/luwei/work/git-cola/perf-Simulation6.log"
+        }
+      }
+    },
+    {
+      "step_id": 457,
+      "timestamp": "2026-05-04T14:22:34.281Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 252030,
+        "completion_tokens": 1825,
+        "cached_tokens": 252029,
+        "extra": {
+          "cache_creation_input_tokens": 1284,
+          "cache_read_input_tokens": 252029,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1284,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 1825,
+              "cache_read_input_tokens": 252029,
+              "cache_creation_input_tokens": 1284,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1284
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 458,
+      "timestamp": "2026-05-04T14:22:44.877Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "修复成功。对比一目了然：\n\n| 指标 | 修复前 | 修复后 | 倍数 |\n|---|---:|---:|---:|\n| SUMMARY 列宽 | 154,358 px | **320 px** | 482× |\n| 最长 summary 字符数 | 23,104 | **257**（256 + …） | |\n| `paint.SUMMARY` 平均 | 9.47ms | **392us** | **24×** |\n| `paint.SUMMARY` p95 | 54ms | **717us** | **76×** |\n| **`paintEvent` 平均** | **462ms** | **23ms** | **20×** |\n| `paintEvent` p95 | 733ms | 37ms | 20× |\n| `paintEvent` 最大 | 921ms | 50ms | 18× |\n| `apply_graph_result` 总耗时 | 1.38s | **166ms** | 8× |\n| `add_commits` 总耗时 | 1.38s | 172ms | 8× |\n\n帧时间从 **462ms（~2 fps）→ 23ms（~43 fps）**，加载从 1.4s 降到 170ms。理论上滚动现在应该是丝滑的，加载也快了一个数量级。\n\n请实际试一下手感是否符合预期。如果 OK，我把所有诊断脚手架清理掉，只保留：\n\n**保留**：\n- `cola/perf.py` 模块本身（关闭时零开销，将来仍能用）\n- `display_inline_graph` 切回原状（不打印调试信息）\n- `_TimingDelegate` / 按列分计时 / `column widths` 调试 print **删除**\n- `paintEvent` / `scrollContentsBy` / `dataChanged` 等冗余插桩 **删除**\n- `GraphView.paintEvent` / `GraphView.scrollContentsBy` 插桩 **删除**\n- `GitDAG._dump_perf` / `Ctrl+Shift+P` / `F12` 快捷键 **保留**（轻量、有用）\n- `closeEvent` 的 `perf.dump()` **保留**\n\n**实质修复保留**：\n- `CommitTreeWidgetItem.SUMMARY_DISPLAY_MAX = 256` 截断\n- `apply_graph_result` 里 SUMMARY 列宽上限（视口 60%）\n\n你确认手感 OK 后我就清理。",
+      "metrics": {
+        "prompt_tokens": 252030,
+        "completion_tokens": 1825,
+        "cached_tokens": 252029,
+        "extra": {
+          "cache_creation_input_tokens": 1284,
+          "cache_read_input_tokens": 252029,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1284,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 1825,
+              "cache_read_input_tokens": 252029,
+              "cache_creation_input_tokens": 1284,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1284
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 59701267,
-    "total_completion_tokens": 406103,
-    "total_cached_tokens": 59697998,
-    "total_steps": 453,
+    "total_prompt_tokens": 60708323,
+    "total_completion_tokens": 409991,
+    "total_cached_tokens": 60705040,
+    "total_steps": 458,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 1730893,
-      "total_cache_read_input_tokens": 59697998
+      "total_cache_creation_input_tokens": 1734535,
+      "total_cache_read_input_tokens": 60705040
     }
   }
 }
