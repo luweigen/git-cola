@@ -1364,6 +1364,7 @@ class GitDAG(standard.MainWindow):
         self.old_oids = None
         self.old_count = 0
         self.old_display_status = None
+        self.old_head_oid = None
         self.force_refresh = False
         self._widgets_initialized = False
 
@@ -1749,12 +1750,18 @@ class GitDAG(standard.MainWindow):
         refs = set(model.local_branches + model.remote_branches + model.tags)
         argv = utils.shell_split(ref or 'HEAD')
         oids = gitcmds.parse_refs(context, argv)
+        # Track HEAD separately so that an external "git checkout" still
+        # triggers a redraw when the visible ref range (e.g. a specific
+        # branch or "--all") would otherwise resolve to the same oids.
+        head_status, head_out, _ = context.git.rev_parse('HEAD', _readonly=True)
+        head_oid = head_out.strip() if head_status == 0 else None
         update = (
             self.force_refresh
             or count != self.old_count
             or oids != self.old_oids
             or refs != self.old_refs
             or display_status != self.old_display_status
+            or head_oid != self.old_head_oid
         )
         if update:
             self._stop_reader_thread()
@@ -1767,6 +1774,7 @@ class GitDAG(standard.MainWindow):
         self.old_count = count
         self.old_refs = refs
         self.old_display_status = self.params.display_status
+        self.old_head_oid = head_oid
         self.force_refresh = False
 
     def select_commits(self, commits):
