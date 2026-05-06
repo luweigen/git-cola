@@ -50,10 +50,10 @@ def git_dag(context, args=None, existing_view=None, show=True):
     # disambiguate between branch names and filenames by using '--'
     branch_doubledash = (branch + ' --') if branch else ''
     params = dag.DAG(branch_doubledash, 100000)
-    # ``cola.dag.orphancooldown`` provides the default; CLI ``--orphan-cooldown``
-    # in ``args`` (handled below by ``set_arguments``) takes precedence.
-    params.set_orphan_cooldown(
-        context.cfg.get('cola.dag.orphancooldown', default=0)
+    # ``cola.dag.orphanisolate`` is the persistent default; CLI
+    # ``--orphan-isolate`` (parsed below) takes precedence.
+    params.set_orphan_isolate(
+        context.cfg.get('cola.dag.orphanisolate', default=False)
     )
     params.set_arguments(args)
 
@@ -1072,7 +1072,7 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         self.menu_actions = None
         self.selecting = False
         self.commits = []
-        self.orphan_cooldown = 0
+        self.orphan_isolate = False
         self._column_init_state = ColumnInitState.NONE
         self.action_up = qtutils.add_action(
             self, N_('Go Up'), self.go_up, hotkeys.MOVE_UP
@@ -1236,7 +1236,7 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
                 for commit in commits
             ],
             head_oid=head_oid,
-            orphan_cooldown=self.orphan_cooldown,
+            orphan_isolate=self.orphan_isolate,
         )
         self.apply_graph_result(graph_result)
 
@@ -1598,9 +1598,9 @@ class GitDAG(standard.MainWindow):
         # Update fields affected by model
         self.revtext.setText(params.ref)
         self.maxresults.setValue(params.count)
-        cooldown = getattr(params, 'orphan_cooldown', 0)
-        self.treewidget.orphan_cooldown = cooldown
-        self.graphview.orphan_cooldown = cooldown
+        isolate = bool(getattr(params, 'orphan_isolate', False))
+        self.treewidget.orphan_isolate = isolate
+        self.graphview.orphan_isolate = isolate
         self.update_window_title()
 
         self._stop_reader_thread()
@@ -2623,16 +2623,11 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         self.min_column = 0
         self.frontier = {}
         self.tagged_cells = set()
-        # When non-zero, a freed orphan-chain column is held off-limits
-        # for the rest of the current ``recompute_grid()`` so unrelated
+        # When true, a freed orphan-chain column is held off-limits for
+        # the remainder of the current ``recompute_grid()`` so unrelated
         # chains processed at much higher generations cannot land on the
         # same x position (which would visually merge the two chains).
-        # The numeric value is preserved for symmetry with the inline
-        # graph's per-row counter, but in this view any value >= 1
-        # behaves as "permanent within the build" -- generation-driven
-        # iteration would otherwise burn through any small N within the
-        # very next handful of steps.
-        self.orphan_cooldown = 0
+        self.orphan_isolate = False
         # Populated transiently inside recompute_grid().
         self._orphan_columns: set[int] = set()
         self._reserved_columns: set[int] = set()
@@ -3288,7 +3283,7 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
             # visually fuse with the orphan chain.
             if column in self._orphan_columns:
                 self._orphan_columns.discard(column)
-                if self.orphan_cooldown > 0:
+                if self.orphan_isolate:
                     self._reserved_columns.add(column)
         else:
             self.columns[column] = count - 1

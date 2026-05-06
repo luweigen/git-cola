@@ -34,28 +34,23 @@ class GraphResult:
 def build_graph(
     commits: list[tuple[str, list[str]]],
     head_oid: str | None = None,
-    orphan_cooldown: int = 0,
+    orphan_isolate: bool = False,
 ) -> GraphResult:
     """Build a row-based graph representation from a list of commits.
 
     Commits are received in topo order from RepoReader (oldest first).
 
-    When ``orphan_cooldown`` is set to ``N >= 1`` an orphan-root commit
-    that closes its lane keeps the column reserved (rendered as a blank
-    column) until the cooldown counter ticks back down to zero, so that
-    an unrelated chain processed shortly afterwards cannot reuse the same
-    column. The counter is initialized to ``N`` at the orphan row and
-    decremented at the start of every subsequent row; ``N = 1`` is enough
-    to push the next new tip into a fresh column. The default ``0``
-    preserves the historical behavior of trimming the closed column
-    immediately.
+    When ``orphan_isolate`` is true, an orphan-root commit that closes
+    its lane keeps the column reserved (rendered as a blank column) for
+    the rest of the build, so an unrelated chain processed later cannot
+    reuse it and visually fuse with the orphan chain. The default
+    (false) preserves the historical behavior of trimming the closed
+    column immediately.
     """
     active_lanes: list[str | None] = []
-    # Per-column cooldown counters parallel to ``active_lanes``. A positive
-    # value pins a None slot in place; the counter is decremented at the
-    # start of every row.
-    lane_cooldown: list[int] = []
-    cooldown = max(0, orphan_cooldown)
+    # Per-column reservation flags parallel to ``active_lanes``. ``True``
+    # pins a None slot so trim and non-first-parent reuse skip it.
+    lane_reserved: list[bool] = []
     color_map: dict[str, int] = {}
     next_color = 0
     rows: list[GraphRow] = []
@@ -63,19 +58,13 @@ def build_graph(
 
     # The graph is built top-to-bottom (newest first), so the input is reversed.
     for oid, parent_oids in reversed(commits):
-        # Tick down lane cooldowns at the top of every row so a column held
-        # by ``orphan_cooldown`` becomes reusable exactly N rows later.
-        for i, value in enumerate(lane_cooldown):
-            if value > 0:
-                lane_cooldown[i] = value - 1
-
         # Find the commit in active_lanes or allocate a new lane.
         if oid in active_lanes:
             commit_column = active_lanes.index(oid)
         else:
             commit_column = len(active_lanes)
             active_lanes.append(oid)
-            lane_cooldown.append(0)
+            lane_reserved.append(False)
 
         # Assign a color for this commit's lane.
         commit_color = color_map.get(oid, None)
@@ -124,21 +113,20 @@ def build_graph(
                         active_lanes[commit_column] = parent_oid
                         parent_col = commit_column
                     else:
-                        # Try to reuse a None slot, but skip slots whose
-                        # cooldown is still active (orphan-closed lanes).
+                        # Try to reuse a None slot, but skip slots
+                        # reserved for orphan-chain isolation.
                         parent_col = -1
                         for slot, lane_oid in enumerate(active_lanes):
-                            if lane_oid is None and lane_cooldown[slot] <= 0:
+                            if lane_oid is None and not lane_reserved[slot]:
                                 parent_col = slot
                                 break
                         if parent_col >= 0:
                             active_lanes[parent_col] = parent_oid
-                            lane_cooldown[parent_col] = 0
                         else:
                             # Append new
                             parent_col = len(active_lanes)
                             active_lanes.append(parent_oid)
-                            lane_cooldown.append(0)
+                            lane_reserved.append(False)
 
                 edges.append(
                     EdgeSegment(
@@ -148,24 +136,25 @@ def build_graph(
                     )
                 )
         else:
-            # Root commit - remove its lane and start its cooldown so the
-            # column cannot be re-used by an unrelated chain in the next
-            # ``orphan_cooldown`` rows.
+            # Root commit - remove its lane. With ``orphan_isolate`` the
+            # column stays reserved for the remainder of the build, so an
+            # unrelated chain processed later cannot land on the same
+            # column.
             active_lanes[commit_column] = None
-            if cooldown > 0:
-                lane_cooldown[commit_column] = cooldown
+            if orphan_isolate:
+                lane_reserved[commit_column] = True
 
         max_columns = max(max_columns, len(active_lanes))
 
-        # Trim trailing None slots, but keep slots that are still cooling
-        # down so the visual gap survives until the cooldown expires.
+        # Trim trailing None slots, but keep reserved slots so the visual
+        # gap survives for the rest of the build.
         while (
             active_lanes
             and active_lanes[-1] is None
-            and lane_cooldown[-1] <= 0
+            and not lane_reserved[-1]
         ):
             active_lanes.pop()
-            lane_cooldown.pop()
+            lane_reserved.pop()
 
         if head_oid is not None and oid == head_oid:
             color = GraphRowColor.HEAD

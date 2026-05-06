@@ -169,18 +169,14 @@ def add_dag_command(subparser: argparse._SubParsersAction) -> None:
         default=False,
     )
     parser.add_argument(
-        '--orphan-cooldown',
-        metavar='<N>',
-        dest='orphan_cooldown',
-        type=int,
+        '--orphan-isolate',
+        dest='orphan_isolate',
+        action='store_true',
         default=None,
         help=(
-            'isolate orphan-branch chains in their own column so unrelated '
-            'chains processed later cannot reuse it (0 = off, the historical '
-            'behavior; any positive value turns isolation on -- the inline '
-            'graph honors N as a per-row counter while the graph view '
-            'reserves the column for the rest of the rebuild). '
-            'Default: cola.dag.orphancooldown, falling back to 0.'
+            "give orphan-branch chains their own column so unrelated chains "
+            "processed later cannot reuse it (default: cola.dag.orphanisolate, "
+            "falling back to off)"
         ),
     )
     parser.add_argument(

@@ -50,10 +50,10 @@ class DAG:
         self.ref = ref
         self.count = count
         self.display_status = True
-        # Number of rows to keep an orphan-closed lane reserved before the
-        # column may be recycled by a later chain. ``0`` (the default) keeps
-        # the historical "trim immediately" behavior.
-        self.orphan_cooldown = 0
+        # When true, an orphan-rooted chain keeps its column reserved
+        # for the rest of the layout pass so an unrelated chain cannot
+        # land on the same column.
+        self.orphan_isolate = False
         self.overrides = {}
 
     def set_ref(self, ref: str) -> bool:
@@ -74,23 +74,23 @@ class DAG:
         if self.set_count(args.count):
             self.overrides['count'] = args.count
 
-        cooldown = getattr(args, 'orphan_cooldown', None)
-        if cooldown is not None and self.set_orphan_cooldown(cooldown):
-            self.overrides['orphan_cooldown'] = cooldown
+        isolate = getattr(args, 'orphan_isolate', None)
+        if isolate is not None and self.set_orphan_isolate(isolate):
+            self.overrides['orphan_isolate'] = bool(isolate)
 
         if hasattr(args, 'args') and args.args:
             ref = core.list2cmdline(args.args)
             if self.set_ref(ref):
                 self.overrides['ref'] = ref
 
-    def set_orphan_cooldown(self, value: int) -> bool:
-        try:
-            value = max(0, int(value))
-        except (TypeError, ValueError):
+    def set_orphan_isolate(self, value) -> bool:
+        if isinstance(value, str):
+            normalized = value.strip().lower() in ('1', 'true', 'yes', 'on')
+        else:
+            normalized = bool(value)
+        if normalized == self.orphan_isolate:
             return False
-        if value == self.orphan_cooldown:
-            return False
-        self.orphan_cooldown = value
+        self.orphan_isolate = normalized
         return True
 
     def set_display_status(self, enabled: bool) -> None:
