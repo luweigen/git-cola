@@ -485,15 +485,13 @@ def _edge_color(self):
     edge = edges.get(parents[0].oid)
     if edge is None or edge.pen is None:
         return None
-    color = QtGui.QColor(edge.pen.color())
-    color.setAlpha(255)
-    return color
+    return QtGui.QColor(edge.pen.color())
 ```
 
 - `Label.parentItem()` 是该 commit 的 `Commit` graphics item（在 `Commit.__init__` 里 `label.setParentItem(self)` 设的）。
 - `Commit` 的 `edges` dict 在 `GraphView.link()` 中填充，键是父 oid，值是 `Edge`。取**第一父**那条边的 `pen.color()`。
 - root commit（`parents == []`）→ 没边 → 返回 `None`，调用方退回老配色。
-- `Edge.pen` 的颜色 alpha 是 128（半透明，画线时柔和），但作为标签底色用 alpha=128 会让场景背景透出来，所以拷贝一份 `QColor` 后 `setAlpha(255)` 改成不透明。
+- `Edge.pen` 的颜色 alpha 是 128（半透明），label 底色直接继承同样的 alpha——这样 label 和 line 的红/紫/青饱和度一致，不会再出现"线浅、label 深"的视觉割裂；代价是 label 背景会被场景底色透洗一档，但 5 种基础调色板色（红/青/紫/绿/橙）配黑字都还可读。如果暗主题下 alpha=128 太淡，再考虑加 `cola.dag.labelopacity` 之类的档位。
 
 #### 12.2 `Label.paint()` 三处分支挂上 `edge_color`（`cola/widgets/dag.py:Label.paint`）
 

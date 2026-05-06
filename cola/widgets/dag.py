@@ -2408,6 +2408,9 @@ class Label(QtWidgets.QGraphicsItem):
         """Return the brush color of the edge leaving this commit toward
         its first parent. Returns ``None`` if the commit is a root or the
         edge is unavailable.
+
+        The edge pen's alpha (128) is preserved so the label box matches
+        the line's translucency.
         """
         commit_item = self.parentItem()
         if commit_item is None:
@@ -2420,11 +2423,7 @@ class Label(QtWidgets.QGraphicsItem):
         edge = edges.get(parents[0].oid)
         if edge is None or edge.pen is None:
             return None
-        # Edge pen alpha is 128 for the line; bump to fully opaque so the
-        # filled label box doesn't bleed the scene background through it.
-        color = QtGui.QColor(edge.pen.color())
-        color.setAlpha(255)
-        return color
+        return QtGui.QColor(edge.pen.color())
 
     def paint(self, painter, _option, _widget, cache=Cache):
         # Draw tags and branches
