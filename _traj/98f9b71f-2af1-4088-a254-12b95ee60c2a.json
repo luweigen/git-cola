@@ -45359,19 +45359,821 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 551,
+      "timestamp": "2026-05-06T11:14:19.056Z",
+      "source": "user",
+      "message": "将新的参数和所做的算法修改更新NOTE.md",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 552,
+      "timestamp": "2026-05-06T11:14:22.186Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 451828,
+        "completion_tokens": 188,
+        "cached_tokens": 451822,
+        "extra": {
+          "cache_creation_input_tokens": 816,
+          "cache_read_input_tokens": 451822,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 816,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 188,
+              "cache_read_input_tokens": 451822,
+              "cache_creation_input_tokens": 816,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 816
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 553,
+      "timestamp": "2026-05-06T11:14:22.959Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01RwsgfzQN5L5DdHK8YrbUDe",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01RwsgfzQN5L5DdHK8YrbUDe",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "ls -la NOTE.md 2>&1; echo \"---\"; ls *.md 2>&1 | head",
+            "description": "Check NOTE.md existence"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01RwsgfzQN5L5DdHK8YrbUDe",
+            "content": "-rw-r--r--@ 1 luwei  staff  7634  4 27 22:31 NOTE.md\n---\nCLAUDE.md\nCONTRIBUTING.md\nNOTE.md\nREADME.md\n\n[stdout]\n-rw-r--r--@ 1 luwei  staff  7634  4 27 22:31 NOTE.md\n---\nCLAUDE.md\nCONTRIBUTING.md\nNOTE.md\nREADME.md\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 451828,
+        "completion_tokens": 188,
+        "cached_tokens": 451822,
+        "extra": {
+          "cache_creation_input_tokens": 816,
+          "cache_read_input_tokens": 451822,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 816,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 188,
+              "cache_read_input_tokens": 451822,
+              "cache_creation_input_tokens": 816,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 816
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "-rw-r--r--@ 1 luwei  staff  7634  4 27 22:31 NOTE.md\n---\nCLAUDE.md\nCONTRIBUTING.md\nNOTE.md\nREADME.md",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01RwsgfzQN5L5DdHK8YrbUDe",
+            "type": "tool_result",
+            "content": "-rw-r--r--@ 1 luwei  staff  7634  4 27 22:31 NOTE.md\n---\nCLAUDE.md\nCONTRIBUTING.md\nNOTE.md\nREADME.md",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "-rw-r--r--@ 1 luwei  staff  7634  4 27 22:31 NOTE.md\n---\nCLAUDE.md\nCONTRIBUTING.md\nNOTE.md\nREADME.md",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01RwsgfzQN5L5DdHK8YrbUDe",
+            "type": "tool_result",
+            "content": "-rw-r--r--@ 1 luwei  staff  7634  4 27 22:31 NOTE.md\n---\nCLAUDE.md\nCONTRIBUTING.md\nNOTE.md\nREADME.md",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "ls -la NOTE.md 2>&1; echo \"---\"; ls *.md 2>&1 | head",
+          "description": "Check NOTE.md existence"
+        }
+      }
+    },
+    {
+      "step_id": 554,
+      "timestamp": "2026-05-06T11:14:25.734Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Read toolu_01J2BHqZxMEnZ7LHiV4EyEBj",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01J2BHqZxMEnZ7LHiV4EyEBj",
+          "function_name": "Read",
+          "arguments": {
+            "file_path": "/Users/luwei/work/git-cola/NOTE.md"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01J2BHqZxMEnZ7LHiV4EyEBj",
+            "content": "1\t# 开发模式安装与代码变更生效说明\n2\t\n3\t## 问题\n4\t\n5\t用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n6\t\n7\t## 结论\n8\t\n9\t可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n10\t\n11\t## 注意事项\n12\t\n13\t1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n14\t2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n15\t3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n16\t4. **两种等价启动方式**，二选一即可：\n17\t   - `./venv/bin/python -m cola dag`\n18\t   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n19\t5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n20\t\n21\t## 排查\"改了代码却没生效\"\n22\t\n23\t多半是以下三种情况：\n24\t\n25\t- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n26\t- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n27\t- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n28\t\n29\t```bash\n30\twhich git-cola\n31\t./venv/bin/python -c \"import cola; print(cola.__file__)\"\n32\t```\n33\t\n34\t第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n35\t\n36\t---\n37\t\n38\t# DAG 视图定制改动\n39\t\n40\t以下所有改动均集中在 `cola/widgets/dag.py`。\n41\t\n42\t## 1. 缩短节点垂直间距\n43\t\n44\t- `GraphView.y_off`：`-20` → `-12`。\n45\t- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\n46\t- 节点垂直距离视觉上缩窄了约 2/3。\n47\t- 手工调整到 -12 视觉效果更好。\n48\t\n49\t## 2. 点击分支/标签复制名字\n50\t\n51\t`Label` 类（每个 commit 旁的分支/标签框）改造：\n52\t\n53\t- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\n54\t- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\n55\t- `mousePressEvent`：左键点击命中某个标签框时——\n56\t  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\n57\t  - 其它：弹出菜单（见下条）。\n58\t  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\n59\t\n60\t## 3. agent 分支特殊菜单\n61\t\n62\t`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\n63\t\n64\t- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\n65\t  - `agent_foo/bar` → `foo`\n66\t  - `agent/foo/bar` → `foo`\n67\t  - `agent_foo` → `foo`\n68\t  - `main` → `None`\n69\t- 菜单结构：\n70\t  - `Copy \"完整名\"`\n71\t  - `Copy \"agent 段\"`（仅在以 `agent_` / `agent/` 起首时出现）\n72\t  - 分隔线\n73\t  - `Merge to...`\n74\t\n75\t普通分支（非 agent、非 HEAD）的菜单只有 `Copy \"完整名\"` + `Merge to...`。HEAD 不弹菜单。\n76\t\n77\t## 4. Merge to 流程\n78\t\n79\t源头：用户在分支菜单选 `Merge to...`。\n80\t\n81\t`GraphView` 端：\n82\t\n83\t- 类信号 `merge_source_changed = Signal(object)`。\n84\t- 状态 `self._merge_source`（None 表示未激活）。\n85\t- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\n86\t- `exit_merge_mode()`：清状态、`emit(None)`。\n87\t- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\n88\t  ```\n89\t  cmds.do(cmds.CheckoutBranch, context, target_branch)\n90\t  cmds.do(cmds.MergeBranch, context, source)\n91\t  ```\n92\t- `keyPressEvent`：merge 模式下 ESC 取消。\n93\t- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\n94\t- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\n95\t\n96\t## 5. 工具栏 merge 状态提示\n97\t\n98\t不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\n99\t\n100\t- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\n101\t- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\n102\t  - source 非空：显示 `\"<source> → ?\"` 并 `show()`。\n103\t  - source 为 `None`：`clear()` + `hide()`。\n104\t\n105\t`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\n106\t\n107\t## 6. 无分支节点显示 commit 消息首行\n108\t\n109\t为了在没有分支标签的提交点旁边给一些上下文：\n110\t\n111\t- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\n112\t- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\n113\t- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\n114\t  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\n115\t  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\n116\t  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\n117\t  - `zValue = -1`。\n118\t\n119\t## 7. 同行多节点：只在两端显示消息\n120\t\n121\t- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\n122\t- `_update_summary_labels`：\n123\t  - 按 `node.row` 分组。\n124\t  - 行内只 1 个 → 右侧显示。\n125\t  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\n126\t\n127\t每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\n128\t\n129\t## 8. 右键菜单新增 \"Copy Commit Message\"\n130\t\n131\t在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\n132\t\n133\t- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\n134\t  ```\n135\t  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\n136\t  qtutils.set_clipboard(out.rstrip('\\n'))\n137\t  ```\n138\t- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\n139\t- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\n140\t- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\n141\t\n142\t## 其它\n143\t\n144\t- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n145\t- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\n146\n\n[metadata] {\"type\": \"text\", \"file\": {\"filePath\": \"/Users/luwei/work/git-cola/NOTE.md\", \"content\": \"# 开发模式安装与代码变更生效说明\\n\\n## 问题\\n\\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\\n\\n## 结论\\n\\n可以。`--editable`（即 `pip install -e`）会把项目以\\\"开发模式\\\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\\n\\n## 注意事项\\n\\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\\n4. **两种等价启动方式**，二选一即可：\\n   - `./venv/bin/python -m cola dag`\\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\\n\\n## 排查\\\"改了代码却没生效\\\"\\n\\n多半是以下三种情况：\\n\\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\\n\\n```bash\\nwhich git-cola\\n./venv/bin/python -c \\\"import cola; print(cola.__file__)\\\"\\n```\\n\\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\\n\\n---\\n\\n# DAG 视图定制改动\\n\\n以下所有改动均集中在 `cola/widgets/dag.py`。\\n\\n## 1. 缩短节点垂直间距\\n\\n- `GraphView.y_off`：`-20` → `-12`。\\n- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\\n- 节点垂直距离视觉上缩窄了约 2/3。\\n- 手工调整到 -12 视觉效果更好。\\n\\n## 2. 点击分支/标签复制名字\\n\\n`Label` 类（每个 commit 旁的分支/标签框）改造：\\n\\n- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\\n- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\\n- `mousePressEvent`：左键点击命中某个标签框时——\\n  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\\n  - 其它：弹出菜单（见下条）。\\n  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\\n\\n## 3. agent 分支特殊菜单\\n\\n`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\\n\\n- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\\n  - `agent_foo/bar` → `foo`\\n  - `agent/foo/bar` → `foo`\\n  - `agent_foo` → `foo`\\n  - `main` → `None`\\n- 菜单结构：\\n  - `Copy \\\"完整名\\\"`\\n  - `Copy \\\"agent 段\\\"`（仅在以 `agent_` / `agent/` 起首时出现）\\n  - 分隔线\\n  - `Merge to...`\\n\\n普通分支（非 agent、非 HEAD）的菜单只有 `Copy \\\"完整名\\\"` + `Merge to...`。HEAD 不弹菜单。\\n\\n## 4. Merge to 流程\\n\\n源头：用户在分支菜单选 `Merge to...`。\\n\\n`GraphView` 端：\\n\\n- 类信号 `merge_source_changed = Signal(object)`。\\n- 状态 `self._merge_source`（None 表示未激活）。\\n- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\\n- `exit_merge_mode()`：清状态、`emit(None)`。\\n- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\\n  ```\\n  cmds.do(cmds.CheckoutBranch, context, target_branch)\\n  cmds.do(cmds.MergeBranch, context, source)\\n  ```\\n- `keyPressEvent`：merge 模式下 ESC 取消。\\n- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\\n- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\\n\\n## 5. 工具栏 merge 状态提示\\n\\n不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\\n\\n- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\\n- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\\n  - source 非空：显示 `\\\"<source> → ?\\\"` 并 `show()`。\\n  - source 为 `None`：`clear()` + `hide()`。\\n\\n`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\\n\\n## 6. 无分支节点显示 commit 消息首行\\n\\n为了在没有分支标签的提交点旁边给一些上下文：\\n\\n- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\\n- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\\n- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\\n  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\\n  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\\n  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\\n  - `zValue = -1`。\\n\\n## 7. 同行多节点：只在两端显示消息\\n\\n- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\\n- `_update_summary_labels`：\\n  - 按 `node.row` 分组。\\n  - 行内只 1 个 → 右侧显示。\\n  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\\n\\n每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\\n\\n## 8. 右键菜单新增 \\\"Copy Commit Message\\\"\\n\\n在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\\n\\n- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\\n  ```\\n  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\\n  qtutils.set_clipboard(out.rstrip('\\\\n'))\\n  ```\\n- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\\n- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\\n- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\\n\\n## 其它\\n\\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\\n\", \"numLines\": 146, \"startLine\": 1, \"totalLines\": 146}}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 452639,
+        "completion_tokens": 84,
+        "cached_tokens": 452638,
+        "extra": {
+          "cache_creation_input_tokens": 276,
+          "cache_read_input_tokens": 452638,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 276,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 84,
+              "cache_read_input_tokens": 452638,
+              "cache_creation_input_tokens": 276,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 276
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Read",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/NOTE.md",
+              "content": "# 开发模式安装与代码变更生效说明\n\n## 问题\n\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n\n## 结论\n\n可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n\n## 注意事项\n\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n4. **两种等价启动方式**，二选一即可：\n   - `./venv/bin/python -m cola dag`\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n\n## 排查\"改了代码却没生效\"\n\n多半是以下三种情况：\n\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n\n```bash\nwhich git-cola\n./venv/bin/python -c \"import cola; print(cola.__file__)\"\n```\n\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n\n---\n\n# DAG 视图定制改动\n\n以下所有改动均集中在 `cola/widgets/dag.py`。\n\n## 1. 缩短节点垂直间距\n\n- `GraphView.y_off`：`-20` → `-12`。\n- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\n- 节点垂直距离视觉上缩窄了约 2/3。\n- 手工调整到 -12 视觉效果更好。\n\n## 2. 点击分支/标签复制名字\n\n`Label` 类（每个 commit 旁的分支/标签框）改造：\n\n- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\n- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\n- `mousePressEvent`：左键点击命中某个标签框时——\n  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\n  - 其它：弹出菜单（见下条）。\n  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\n\n## 3. agent 分支特殊菜单\n\n`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\n\n- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\n  - `agent_foo/bar` → `foo`\n  - `agent/foo/bar` → `foo`\n  - `agent_foo` → `foo`\n  - `main` → `None`\n- 菜单结构：\n  - `Copy \"完整名\"`\n  - `Copy \"agent 段\"`（仅在以 `agent_` / `agent/` 起首时出现）\n  - 分隔线\n  - `Merge to...`\n\n普通分支（非 agent、非 HEAD）的菜单只有 `Copy \"完整名\"` + `Merge to...`。HEAD 不弹菜单。\n\n## 4. Merge to 流程\n\n源头：用户在分支菜单选 `Merge to...`。\n\n`GraphView` 端：\n\n- 类信号 `merge_source_changed = Signal(object)`。\n- 状态 `self._merge_source`（None 表示未激活）。\n- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\n- `exit_merge_mode()`：清状态、`emit(None)`。\n- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\n  ```\n  cmds.do(cmds.CheckoutBranch, context, target_branch)\n  cmds.do(cmds.MergeBranch, context, source)\n  ```\n- `keyPressEvent`：merge 模式下 ESC 取消。\n- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\n- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\n\n## 5. 工具栏 merge 状态提示\n\n不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\n\n- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\n- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\n  - source 非空：显示 `\"<source> → ?\"` 并 `show()`。\n  - source 为 `None`：`clear()` + `hide()`。\n\n`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\n\n## 6. 无分支节点显示 commit 消息首行\n\n为了在没有分支标签的提交点旁边给一些上下文：\n\n- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\n- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\n- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\n  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\n  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\n  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\n  - `zValue = -1`。\n\n## 7. 同行多节点：只在两端显示消息\n\n- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\n- `_update_summary_labels`：\n  - 按 `node.row` 分组。\n  - 行内只 1 个 → 右侧显示。\n  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\n\n每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\n\n## 8. 右键菜单新增 \"Copy Commit Message\"\n\n在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\n\n- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\n  ```\n  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\n  qtutils.set_clipboard(out.rstrip('\\n'))\n  ```\n- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\n- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\n- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\n\n## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\n",
+              "numLines": 146,
+              "startLine": 1,
+              "totalLines": 146
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01J2BHqZxMEnZ7LHiV4EyEBj",
+            "type": "tool_result",
+            "content": "1\t# 开发模式安装与代码变更生效说明\n2\t\n3\t## 问题\n4\t\n5\t用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n6\t\n7\t## 结论\n8\t\n9\t可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n10\t\n11\t## 注意事项\n12\t\n13\t1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n14\t2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n15\t3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n16\t4. **两种等价启动方式**，二选一即可：\n17\t   - `./venv/bin/python -m cola dag`\n18\t   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n19\t5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n20\t\n21\t## 排查\"改了代码却没生效\"\n22\t\n23\t多半是以下三种情况：\n24\t\n25\t- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n26\t- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n27\t- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n28\t\n29\t```bash\n30\twhich git-cola\n31\t./venv/bin/python -c \"import cola; print(cola.__file__)\"\n32\t```\n33\t\n34\t第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n35\t\n36\t---\n37\t\n38\t# DAG 视图定制改动\n39\t\n40\t以下所有改动均集中在 `cola/widgets/dag.py`。\n41\t\n42\t## 1. 缩短节点垂直间距\n43\t\n44\t- `GraphView.y_off`：`-20` → `-12`。\n45\t- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\n46\t- 节点垂直距离视觉上缩窄了约 2/3。\n47\t- 手工调整到 -12 视觉效果更好。\n48\t\n49\t## 2. 点击分支/标签复制名字\n50\t\n51\t`Label` 类（每个 commit 旁的分支/标签框）改造：\n52\t\n53\t- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\n54\t- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\n55\t- `mousePressEvent`：左键点击命中某个标签框时——\n56\t  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\n57\t  - 其它：弹出菜单（见下条）。\n58\t  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\n59\t\n60\t## 3. agent 分支特殊菜单\n61\t\n62\t`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\n63\t\n64\t- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\n65\t  - `agent_foo/bar` → `foo`\n66\t  - `agent/foo/bar` → `foo`\n67\t  - `agent_foo` → `foo`\n68\t  - `main` → `None`\n69\t- 菜单结构：\n70\t  - `Copy \"完整名\"`\n71\t  - `Copy \"agent 段\"`（仅在以 `agent_` / `agent/` 起首时出现）\n72\t  - 分隔线\n73\t  - `Merge to...`\n74\t\n75\t普通分支（非 agent、非 HEAD）的菜单只有 `Copy \"完整名\"` + `Merge to...`。HEAD 不弹菜单。\n76\t\n77\t## 4. Merge to 流程\n78\t\n79\t源头：用户在分支菜单选 `Merge to...`。\n80\t\n81\t`GraphView` 端：\n82\t\n83\t- 类信号 `merge_source_changed = Signal(object)`。\n84\t- 状态 `self._merge_source`（None 表示未激活）。\n85\t- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\n86\t- `exit_merge_mode()`：清状态、`emit(None)`。\n87\t- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\n88\t  ```\n89\t  cmds.do(cmds.CheckoutBranch, context, target_branch)\n90\t  cmds.do(cmds.MergeBranch, context, source)\n91\t  ```\n92\t- `keyPressEvent`：merge 模式下 ESC 取消。\n93\t- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\n94\t- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\n95\t\n96\t## 5. 工具栏 merge 状态提示\n97\t\n98\t不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\n99\t\n100\t- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\n101\t- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\n102\t  - source 非空：显示 `\"<source> → ?\"` 并 `show()`。\n103\t  - source 为 `None`：`clear()` + `hide()`。\n104\t\n105\t`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\n106\t\n107\t## 6. 无分支节点显示 commit 消息首行\n108\t\n109\t为了在没有分支标签的提交点旁边给一些上下文：\n110\t\n111\t- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\n112\t- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\n113\t- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\n114\t  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\n115\t  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\n116\t  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\n117\t  - `zValue = -1`。\n118\t\n119\t## 7. 同行多节点：只在两端显示消息\n120\t\n121\t- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\n122\t- `_update_summary_labels`：\n123\t  - 按 `node.row` 分组。\n124\t  - 行内只 1 个 → 右侧显示。\n125\t  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\n126\t\n127\t每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\n128\t\n129\t## 8. 右键菜单新增 \"Copy Commit Message\"\n130\t\n131\t在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\n132\t\n133\t- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\n134\t  ```\n135\t  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\n136\t  qtutils.set_clipboard(out.rstrip('\\n'))\n137\t  ```\n138\t- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\n139\t- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\n140\t- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\n141\t\n142\t## 其它\n143\t\n144\t- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n145\t- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\n146\t"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "type": "text",
+            "file": {
+              "filePath": "/Users/luwei/work/git-cola/NOTE.md",
+              "content": "# 开发模式安装与代码变更生效说明\n\n## 问题\n\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n\n## 结论\n\n可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n\n## 注意事项\n\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n4. **两种等价启动方式**，二选一即可：\n   - `./venv/bin/python -m cola dag`\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n\n## 排查\"改了代码却没生效\"\n\n多半是以下三种情况：\n\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n\n```bash\nwhich git-cola\n./venv/bin/python -c \"import cola; print(cola.__file__)\"\n```\n\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n\n---\n\n# DAG 视图定制改动\n\n以下所有改动均集中在 `cola/widgets/dag.py`。\n\n## 1. 缩短节点垂直间距\n\n- `GraphView.y_off`：`-20` → `-12`。\n- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\n- 节点垂直距离视觉上缩窄了约 2/3。\n- 手工调整到 -12 视觉效果更好。\n\n## 2. 点击分支/标签复制名字\n\n`Label` 类（每个 commit 旁的分支/标签框）改造：\n\n- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\n- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\n- `mousePressEvent`：左键点击命中某个标签框时——\n  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\n  - 其它：弹出菜单（见下条）。\n  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\n\n## 3. agent 分支特殊菜单\n\n`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\n\n- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\n  - `agent_foo/bar` → `foo`\n  - `agent/foo/bar` → `foo`\n  - `agent_foo` → `foo`\n  - `main` → `None`\n- 菜单结构：\n  - `Copy \"完整名\"`\n  - `Copy \"agent 段\"`（仅在以 `agent_` / `agent/` 起首时出现）\n  - 分隔线\n  - `Merge to...`\n\n普通分支（非 agent、非 HEAD）的菜单只有 `Copy \"完整名\"` + `Merge to...`。HEAD 不弹菜单。\n\n## 4. Merge to 流程\n\n源头：用户在分支菜单选 `Merge to...`。\n\n`GraphView` 端：\n\n- 类信号 `merge_source_changed = Signal(object)`。\n- 状态 `self._merge_source`（None 表示未激活）。\n- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\n- `exit_merge_mode()`：清状态、`emit(None)`。\n- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\n  ```\n  cmds.do(cmds.CheckoutBranch, context, target_branch)\n  cmds.do(cmds.MergeBranch, context, source)\n  ```\n- `keyPressEvent`：merge 模式下 ESC 取消。\n- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\n- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\n\n## 5. 工具栏 merge 状态提示\n\n不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\n\n- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\n- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\n  - source 非空：显示 `\"<source> → ?\"` 并 `show()`。\n  - source 为 `None`：`clear()` + `hide()`。\n\n`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\n\n## 6. 无分支节点显示 commit 消息首行\n\n为了在没有分支标签的提交点旁边给一些上下文：\n\n- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\n- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\n- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\n  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\n  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\n  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\n  - `zValue = -1`。\n\n## 7. 同行多节点：只在两端显示消息\n\n- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\n- `_update_summary_labels`：\n  - 按 `node.row` 分组。\n  - 行内只 1 个 → 右侧显示。\n  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\n\n每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\n\n## 8. 右键菜单新增 \"Copy Commit Message\"\n\n在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\n\n- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\n  ```\n  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\n  qtutils.set_clipboard(out.rstrip('\\n'))\n  ```\n- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\n- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\n- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\n\n## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\n",
+              "numLines": 146,
+              "startLine": 1,
+              "totalLines": 146
+            }
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01J2BHqZxMEnZ7LHiV4EyEBj",
+            "type": "tool_result",
+            "content": "1\t# 开发模式安装与代码变更生效说明\n2\t\n3\t## 问题\n4\t\n5\t用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n6\t\n7\t## 结论\n8\t\n9\t可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n10\t\n11\t## 注意事项\n12\t\n13\t1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n14\t2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n15\t3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n16\t4. **两种等价启动方式**，二选一即可：\n17\t   - `./venv/bin/python -m cola dag`\n18\t   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n19\t5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n20\t\n21\t## 排查\"改了代码却没生效\"\n22\t\n23\t多半是以下三种情况：\n24\t\n25\t- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n26\t- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n27\t- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n28\t\n29\t```bash\n30\twhich git-cola\n31\t./venv/bin/python -c \"import cola; print(cola.__file__)\"\n32\t```\n33\t\n34\t第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n35\t\n36\t---\n37\t\n38\t# DAG 视图定制改动\n39\t\n40\t以下所有改动均集中在 `cola/widgets/dag.py`。\n41\t\n42\t## 1. 缩短节点垂直间距\n43\t\n44\t- `GraphView.y_off`：`-20` → `-12`。\n45\t- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\n46\t- 节点垂直距离视觉上缩窄了约 2/3。\n47\t- 手工调整到 -12 视觉效果更好。\n48\t\n49\t## 2. 点击分支/标签复制名字\n50\t\n51\t`Label` 类（每个 commit 旁的分支/标签框）改造：\n52\t\n53\t- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\n54\t- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\n55\t- `mousePressEvent`：左键点击命中某个标签框时——\n56\t  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\n57\t  - 其它：弹出菜单（见下条）。\n58\t  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\n59\t\n60\t## 3. agent 分支特殊菜单\n61\t\n62\t`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\n63\t\n64\t- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\n65\t  - `agent_foo/bar` → `foo`\n66\t  - `agent/foo/bar` → `foo`\n67\t  - `agent_foo` → `foo`\n68\t  - `main` → `None`\n69\t- 菜单结构：\n70\t  - `Copy \"完整名\"`\n71\t  - `Copy \"agent 段\"`（仅在以 `agent_` / `agent/` 起首时出现）\n72\t  - 分隔线\n73\t  - `Merge to...`\n74\t\n75\t普通分支（非 agent、非 HEAD）的菜单只有 `Copy \"完整名\"` + `Merge to...`。HEAD 不弹菜单。\n76\t\n77\t## 4. Merge to 流程\n78\t\n79\t源头：用户在分支菜单选 `Merge to...`。\n80\t\n81\t`GraphView` 端：\n82\t\n83\t- 类信号 `merge_source_changed = Signal(object)`。\n84\t- 状态 `self._merge_source`（None 表示未激活）。\n85\t- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\n86\t- `exit_merge_mode()`：清状态、`emit(None)`。\n87\t- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\n88\t  ```\n89\t  cmds.do(cmds.CheckoutBranch, context, target_branch)\n90\t  cmds.do(cmds.MergeBranch, context, source)\n91\t  ```\n92\t- `keyPressEvent`：merge 模式下 ESC 取消。\n93\t- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\n94\t- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\n95\t\n96\t## 5. 工具栏 merge 状态提示\n97\t\n98\t不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\n99\t\n100\t- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\n101\t- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\n102\t  - source 非空：显示 `\"<source> → ?\"` 并 `show()`。\n103\t  - source 为 `None`：`clear()` + `hide()`。\n104\t\n105\t`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\n106\t\n107\t## 6. 无分支节点显示 commit 消息首行\n108\t\n109\t为了在没有分支标签的提交点旁边给一些上下文：\n110\t\n111\t- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\n112\t- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\n113\t- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\n114\t  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\n115\t  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\n116\t  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\n117\t  - `zValue = -1`。\n118\t\n119\t## 7. 同行多节点：只在两端显示消息\n120\t\n121\t- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\n122\t- `_update_summary_labels`：\n123\t  - 按 `node.row` 分组。\n124\t  - 行内只 1 个 → 右侧显示。\n125\t  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\n126\t\n127\t每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\n128\t\n129\t## 8. 右键菜单新增 \"Copy Commit Message\"\n130\t\n131\t在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\n132\t\n133\t- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\n134\t  ```\n135\t  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\n136\t  qtutils.set_clipboard(out.rstrip('\\n'))\n137\t  ```\n138\t- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\n139\t- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\n140\t- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\n141\t\n142\t## 其它\n143\t\n144\t- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n145\t- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\n146\t"
+          }
+        },
+        "raw_arguments": {
+          "file_path": "/Users/luwei/work/git-cola/NOTE.md"
+        }
+      }
+    },
+    {
+      "step_id": 555,
+      "timestamp": "2026-05-06T11:14:33.647Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 452915,
+        "completion_tokens": 3850,
+        "cached_tokens": 452914,
+        "extra": {
+          "cache_creation_input_tokens": 3945,
+          "cache_read_input_tokens": 452914,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 3945,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 3850,
+              "cache_read_input_tokens": 452914,
+              "cache_creation_input_tokens": 3945,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 3945
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 556,
+      "timestamp": "2026-05-06T11:15:31.158Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01QYTQv4HkyKXNMYCgo146Wg",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01QYTQv4HkyKXNMYCgo146Wg",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/NOTE.md",
+            "old_string": "## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。",
+            "new_string": "## 9. orphan 分支列隔离（`--orphan-isolate`）\n\n### 动机\n\n仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：\n\n```\n长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1\n                                       (cfd4542 处 leave_column(1)，col 1 释放)\norphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1\n```\n\n`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它\"想要\"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。\n\n### 新参数（CLI / git config / DAG 模型）\n\n| 层 | 名称 | 默认 | 说明 |\n|---|---|---|---|\n| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |\n| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |\n| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / \"true\"/\"yes\"/\"on\"/\"1\" 字串 |\n| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |\n\n`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。\n\n### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n\n#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）\n\n主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：\n- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。\n- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。\n\n这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。\n\n```python\nif self.orphan_isolate:\n    for node in list(self.commits):\n        if not node.parents and node.column is None:\n            node.column = self.alloc_column()\n            self._orphan_columns.add(node.column)\n            self._reserved_columns.add(node.column)\n```\n\n#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）\n\n新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。\n\n#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）\n\n原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。\n\n改成根据 `desired` 的正负决定哪一侧先尝试：\n\n```python\nsign = -1 if column < 0 else 1\nfor offset in itertools.count(0):\n    same_side = sign * offset\n    if is_free(same_side): col = same_side; break\n    other_side = -sign * offset\n    if is_free(other_side): col = other_side; break\n```\n\n`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。\n\n直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。\n\n#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）\n\n在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：\n1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。\n2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。\n\n```python\ndef leave_column(self, column):\n    count = self.columns[column]\n    if count == 1:\n        del self.columns[column]\n        if column in self._orphan_columns:\n            self._orphan_columns.discard(column)\n            if self.orphan_isolate:\n                self._reserved_columns.add(column)\n    else:\n        self.columns[column] = count - 1\n```\n\n#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）\n\n```python\nself.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))\n```\n\n每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。\n\n### 实测对比（Simulation repo，1310 个 commit，`--all`）\n\n| commit | 默认 col | `--orphan-isolate` col |\n|---|---|---|\n| f4b5f1c（老 orphan-root） | 0 | 0 |\n| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |\n| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |\n| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|\n| 7d8040f / e7c4c94 | −1 | 2 |\n| max / min column | 1 / −1 | 2 / −2 |\n\n`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。\n\n### 已知未做（如果以后还想推进）\n\n- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。\n- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。\n- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。\n\n## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01QYTQv4HkyKXNMYCgo146Wg",
+            "content": "The file /Users/luwei/work/git-cola/NOTE.md has been updated successfully. (file state is current in your context — no need to Read it back)\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/NOTE.md\", \"oldString\": \"## 其它\\n\\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\", \"newString\": \"## 9. orphan 分支列隔离（`--orphan-isolate`）\\n\\n### 动机\\n\\n仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：\\n\\n```\\n长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1\\n                                       (cfd4542 处 leave_column(1)，col 1 释放)\\norphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1\\n```\\n\\n`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它\\\"想要\\\"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。\\n\\n### 新参数（CLI / git config / DAG 模型）\\n\\n| 层 | 名称 | 默认 | 说明 |\\n|---|---|---|---|\\n| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |\\n| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |\\n| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / \\\"true\\\"/\\\"yes\\\"/\\\"on\\\"/\\\"1\\\" 字串 |\\n| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |\\n\\n`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。\\n\\n### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\\n\\n#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）\\n\\n主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：\\n- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。\\n- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。\\n\\n这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。\\n\\n```python\\nif self.orphan_isolate:\\n    for node in list(self.commits):\\n        if not node.parents and node.column is None:\\n            node.column = self.alloc_column()\\n            self._orphan_columns.add(node.column)\\n            self._reserved_columns.add(node.column)\\n```\\n\\n#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）\\n\\n新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。\\n\\n#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）\\n\\n原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。\\n\\n改成根据 `desired` 的正负决定哪一侧先尝试：\\n\\n```python\\nsign = -1 if column < 0 else 1\\nfor offset in itertools.count(0):\\n    same_side = sign * offset\\n    if is_free(same_side): col = same_side; break\\n    other_side = -sign * offset\\n    if is_free(other_side): col = other_side; break\\n```\\n\\n`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。\\n\\n直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。\\n\\n#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）\\n\\n在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：\\n1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。\\n2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。\\n\\n```python\\ndef leave_column(self, column):\\n    count = self.columns[column]\\n    if count == 1:\\n        del self.columns[column]\\n        if column in self._orphan_columns:\\n            self._orphan_columns.discard(column)\\n            if self.orphan_isolate:\\n                self._reserved_columns.add(column)\\n    else:\\n        self.columns[column] = count - 1\\n```\\n\\n#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）\\n\\n```python\\nself.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))\\n```\\n\\n每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。\\n\\n### 实测对比（Simulation repo，1310 个 commit，`--all`）\\n\\n| commit | 默认 col | `--orphan-isolate` col |\\n|---|---|---|\\n| f4b5f1c（老 orphan-root） | 0 | 0 |\\n| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |\\n| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |\\n| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|\\n| 7d8040f / e7c4c94 | −1 | 2 |\\n| max / min column | 1 / −1 | 2 / −2 |\\n\\n`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。\\n\\n### 已知未做（如果以后还想推进）\\n\\n- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。\\n- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。\\n- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。\\n\\n## 其它\\n\\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\", \"originalFile\": \"# 开发模式安装与代码变更生效说明\\n\\n## 问题\\n\\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\\n\\n## 结论\\n\\n可以。`--editable`（即 `pip install -e`）会把项目以\\\"开发模式\\\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\\n\\n## 注意事项\\n\\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\\n4. **两种等价启动方式**，二选一即可：\\n   - `./venv/bin/python -m cola dag`\\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\\n\\n## 排查\\\"改了代码却没生效\\\"\\n\\n多半是以下三种情况：\\n\\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\\n\\n```bash\\nwhich git-cola\\n./venv/bin/python -c \\\"import cola; print(cola.__file__)\\\"\\n```\\n\\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\\n\\n---\\n\\n# DAG 视图定制改动\\n\\n以下所有改动均集中在 `cola/widgets/dag.py`。\\n\\n## 1. 缩短节点垂直间距\\n\\n- `GraphView.y_off`：`-20` → `-12`。\\n- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\\n- 节点垂直距离视觉上缩窄了约 2/3。\\n- 手工调整到 -12 视觉效果更好。\\n\\n## 2. 点击分支/标签复制名字\\n\\n`Label` 类（每个 commit 旁的分支/标签框）改造：\\n\\n- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\\n- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\\n- `mousePressEvent`：左键点击命中某个标签框时——\\n  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\\n  - 其它：弹出菜单（见下条）。\\n  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\\n\\n## 3. agent 分支特殊菜单\\n\\n`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\\n\\n- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\\n  - `agent_foo/bar` → `foo`\\n  - `agent/foo/bar` → `foo`\\n  - `agent_foo` → `foo`\\n  - `main` → `None`\\n- 菜单结构：\\n  - `Copy \\\"完整名\\\"`\\n  - `Copy \\\"agent 段\\\"`（仅在以 `agent_` / `agent/` 起首时出现）\\n  - 分隔线\\n  - `Merge to...`\\n\\n普通分支（非 agent、非 HEAD）的菜单只有 `Copy \\\"完整名\\\"` + `Merge to...`。HEAD 不弹菜单。\\n\\n## 4. Merge to 流程\\n\\n源头：用户在分支菜单选 `Merge to...`。\\n\\n`GraphView` 端：\\n\\n- 类信号 `merge_source_changed = Signal(object)`。\\n- 状态 `self._merge_source`（None 表示未激活）。\\n- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\\n- `exit_merge_mode()`：清状态、`emit(None)`。\\n- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\\n  ```\\n  cmds.do(cmds.CheckoutBranch, context, target_branch)\\n  cmds.do(cmds.MergeBranch, context, source)\\n  ```\\n- `keyPressEvent`：merge 模式下 ESC 取消。\\n- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\\n- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\\n\\n## 5. 工具栏 merge 状态提示\\n\\n不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\\n\\n- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\\n- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\\n  - source 非空：显示 `\\\"<source> → ?\\\"` 并 `show()`。\\n  - source 为 `None`：`clear()` + `hide()`。\\n\\n`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\\n\\n## 6. 无分支节点显示 commit 消息首行\\n\\n为了在没有分支标签的提交点旁边给一些上下文：\\n\\n- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\\n- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\\n- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\\n  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\\n  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\\n  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\\n  - `zValue = -1`。\\n\\n## 7. 同行多节点：只在两端显示消息\\n\\n- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\\n- `_update_summary_labels`：\\n  - 按 `node.row` 分组。\\n  - 行内只 1 个 → 右侧显示。\\n  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\\n\\n每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\\n\\n## 8. 右键菜单新增 \\\"Copy Commit Message\\\"\\n\\n在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\\n\\n- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\\n  ```\\n  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\\n  qtutils.set_clipboard(out.rstrip('\\\\n'))\\n  ```\\n- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\\n- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\\n- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\\n\\n## 其它\\n\\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\\n\", \"structuredPatch\": [{\"oldStart\": 139, \"oldLines\": 6, \"newStart\": 139, \"newLines\": 119, \"lines\": [\" - `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\", \" - `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\", \" \", \"+## 9. orphan 分支列隔离（`--orphan-isolate`）\", \"+\", \"+### 动机\", \"+\", \"+仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：\", \"+\", \"+```\", \"+长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1\", \"+                                       (cfd4542 处 leave_column(1)，col 1 释放)\", \"+orphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1\", \"+```\", \"+\", \"+`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它\\\"想要\\\"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。\", \"+\", \"+### 新参数（CLI / git config / DAG 模型）\", \"+\", \"+| 层 | 名称 | 默认 | 说明 |\", \"+|---|---|---|---|\", \"+| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |\", \"+| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |\", \"+| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / \\\"true\\\"/\\\"yes\\\"/\\\"on\\\"/\\\"1\\\" 字串 |\", \"+| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |\", \"+\", \"+`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。\", \"+\", \"+### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\", \"+\", \"+#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）\", \"+\", \"+主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：\", \"+- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。\", \"+- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。\", \"+\", \"+这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。\", \"+\", \"+```python\", \"+if self.orphan_isolate:\", \"+    for node in list(self.commits):\", \"+        if not node.parents and node.column is None:\", \"+            node.column = self.alloc_column()\", \"+            self._orphan_columns.add(node.column)\", \"+            self._reserved_columns.add(node.column)\", \"+```\", \"+\", \"+#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）\", \"+\", \"+新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。\", \"+\", \"+#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）\", \"+\", \"+原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。\", \"+\", \"+改成根据 `desired` 的正负决定哪一侧先尝试：\", \"+\", \"+```python\", \"+sign = -1 if column < 0 else 1\", \"+for offset in itertools.count(0):\", \"+    same_side = sign * offset\", \"+    if is_free(same_side): col = same_side; break\", \"+    other_side = -sign * offset\", \"+    if is_free(other_side): col = other_side; break\", \"+```\", \"+\", \"+`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。\", \"+\", \"+直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。\", \"+\", \"+#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）\", \"+\", \"+在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：\", \"+1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。\", \"+2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。\", \"+\", \"+```python\", \"+def leave_column(self, column):\", \"+    count = self.columns[column]\", \"+    if count == 1:\", \"+        del self.columns[column]\", \"+        if column in self._orphan_columns:\", \"+            self._orphan_columns.discard(column)\", \"+            if self.orphan_isolate:\", \"+                self._reserved_columns.add(column)\", \"+    else:\", \"+        self.columns[column] = count - 1\", \"+```\", \"+\", \"+#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）\", \"+\", \"+```python\", \"+self.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))\", \"+```\", \"+\", \"+每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。\", \"+\", \"+### 实测对比（Simulation repo，1310 个 commit，`--all`）\", \"+\", \"+| commit | 默认 col | `--orphan-isolate` col |\", \"+|---|---|---|\", \"+| f4b5f1c（老 orphan-root） | 0 | 0 |\", \"+| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |\", \"+| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |\", \"+| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|\", \"+| 7d8040f / e7c4c94 | −1 | 2 |\", \"+| max / min column | 1 / −1 | 2 / −2 |\", \"+\", \"+`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。\", \"+\", \"+### 已知未做（如果以后还想推进）\", \"+\", \"+- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。\", \"+- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。\", \"+- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。\", \"+\", \" ## 其它\", \" \", \" - 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 452915,
+        "completion_tokens": 3850,
+        "cached_tokens": 452914,
+        "extra": {
+          "cache_creation_input_tokens": 3945,
+          "cache_read_input_tokens": 452914,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 3945,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 3850,
+              "cache_read_input_tokens": 452914,
+              "cache_creation_input_tokens": 3945,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 3945
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/NOTE.md",
+            "oldString": "## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。",
+            "newString": "## 9. orphan 分支列隔离（`--orphan-isolate`）\n\n### 动机\n\n仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：\n\n```\n长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1\n                                       (cfd4542 处 leave_column(1)，col 1 释放)\norphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1\n```\n\n`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它\"想要\"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。\n\n### 新参数（CLI / git config / DAG 模型）\n\n| 层 | 名称 | 默认 | 说明 |\n|---|---|---|---|\n| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |\n| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |\n| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / \"true\"/\"yes\"/\"on\"/\"1\" 字串 |\n| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |\n\n`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。\n\n### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n\n#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）\n\n主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：\n- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。\n- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。\n\n这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。\n\n```python\nif self.orphan_isolate:\n    for node in list(self.commits):\n        if not node.parents and node.column is None:\n            node.column = self.alloc_column()\n            self._orphan_columns.add(node.column)\n            self._reserved_columns.add(node.column)\n```\n\n#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）\n\n新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。\n\n#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）\n\n原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。\n\n改成根据 `desired` 的正负决定哪一侧先尝试：\n\n```python\nsign = -1 if column < 0 else 1\nfor offset in itertools.count(0):\n    same_side = sign * offset\n    if is_free(same_side): col = same_side; break\n    other_side = -sign * offset\n    if is_free(other_side): col = other_side; break\n```\n\n`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。\n\n直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。\n\n#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）\n\n在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：\n1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。\n2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。\n\n```python\ndef leave_column(self, column):\n    count = self.columns[column]\n    if count == 1:\n        del self.columns[column]\n        if column in self._orphan_columns:\n            self._orphan_columns.discard(column)\n            if self.orphan_isolate:\n                self._reserved_columns.add(column)\n    else:\n        self.columns[column] = count - 1\n```\n\n#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）\n\n```python\nself.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))\n```\n\n每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。\n\n### 实测对比（Simulation repo，1310 个 commit，`--all`）\n\n| commit | 默认 col | `--orphan-isolate` col |\n|---|---|---|\n| f4b5f1c（老 orphan-root） | 0 | 0 |\n| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |\n| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |\n| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|\n| 7d8040f / e7c4c94 | −1 | 2 |\n| max / min column | 1 / −1 | 2 / −2 |\n\n`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。\n\n### 已知未做（如果以后还想推进）\n\n- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。\n- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。\n- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。\n\n## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。",
+            "originalFile": "# 开发模式安装与代码变更生效说明\n\n## 问题\n\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n\n## 结论\n\n可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n\n## 注意事项\n\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n4. **两种等价启动方式**，二选一即可：\n   - `./venv/bin/python -m cola dag`\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n\n## 排查\"改了代码却没生效\"\n\n多半是以下三种情况：\n\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n\n```bash\nwhich git-cola\n./venv/bin/python -c \"import cola; print(cola.__file__)\"\n```\n\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n\n---\n\n# DAG 视图定制改动\n\n以下所有改动均集中在 `cola/widgets/dag.py`。\n\n## 1. 缩短节点垂直间距\n\n- `GraphView.y_off`：`-20` → `-12`。\n- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\n- 节点垂直距离视觉上缩窄了约 2/3。\n- 手工调整到 -12 视觉效果更好。\n\n## 2. 点击分支/标签复制名字\n\n`Label` 类（每个 commit 旁的分支/标签框）改造：\n\n- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\n- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\n- `mousePressEvent`：左键点击命中某个标签框时——\n  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\n  - 其它：弹出菜单（见下条）。\n  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\n\n## 3. agent 分支特殊菜单\n\n`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\n\n- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\n  - `agent_foo/bar` → `foo`\n  - `agent/foo/bar` → `foo`\n  - `agent_foo` → `foo`\n  - `main` → `None`\n- 菜单结构：\n  - `Copy \"完整名\"`\n  - `Copy \"agent 段\"`（仅在以 `agent_` / `agent/` 起首时出现）\n  - 分隔线\n  - `Merge to...`\n\n普通分支（非 agent、非 HEAD）的菜单只有 `Copy \"完整名\"` + `Merge to...`。HEAD 不弹菜单。\n\n## 4. Merge to 流程\n\n源头：用户在分支菜单选 `Merge to...`。\n\n`GraphView` 端：\n\n- 类信号 `merge_source_changed = Signal(object)`。\n- 状态 `self._merge_source`（None 表示未激活）。\n- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\n- `exit_merge_mode()`：清状态、`emit(None)`。\n- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\n  ```\n  cmds.do(cmds.CheckoutBranch, context, target_branch)\n  cmds.do(cmds.MergeBranch, context, source)\n  ```\n- `keyPressEvent`：merge 模式下 ESC 取消。\n- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\n- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\n\n## 5. 工具栏 merge 状态提示\n\n不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\n\n- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\n- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\n  - source 非空：显示 `\"<source> → ?\"` 并 `show()`。\n  - source 为 `None`：`clear()` + `hide()`。\n\n`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\n\n## 6. 无分支节点显示 commit 消息首行\n\n为了在没有分支标签的提交点旁边给一些上下文：\n\n- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\n- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\n- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\n  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\n  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\n  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\n  - `zValue = -1`。\n\n## 7. 同行多节点：只在两端显示消息\n\n- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\n- `_update_summary_labels`：\n  - 按 `node.row` 分组。\n  - 行内只 1 个 → 右侧显示。\n  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\n\n每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\n\n## 8. 右键菜单新增 \"Copy Commit Message\"\n\n在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\n\n- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\n  ```\n  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\n  qtutils.set_clipboard(out.rstrip('\\n'))\n  ```\n- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\n- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\n- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\n\n## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\n",
+            "structuredPatch": [
+              {
+                "oldStart": 139,
+                "oldLines": 6,
+                "newStart": 139,
+                "newLines": 119,
+                "lines": [
+                  " - `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。",
+                  " - `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。",
+                  " ",
+                  "+## 9. orphan 分支列隔离（`--orphan-isolate`）",
+                  "+",
+                  "+### 动机",
+                  "+",
+                  "+仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：",
+                  "+",
+                  "+```",
+                  "+长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1",
+                  "+                                       (cfd4542 处 leave_column(1)，col 1 释放)",
+                  "+orphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1",
+                  "+```",
+                  "+",
+                  "+`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它\"想要\"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。",
+                  "+",
+                  "+### 新参数（CLI / git config / DAG 模型）",
+                  "+",
+                  "+| 层 | 名称 | 默认 | 说明 |",
+                  "+|---|---|---|---|",
+                  "+| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |",
+                  "+| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |",
+                  "+| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / \"true\"/\"yes\"/\"on\"/\"1\" 字串 |",
+                  "+| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |",
+                  "+",
+                  "+`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。",
+                  "+",
+                  "+### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）",
+                  "+",
+                  "+#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）",
+                  "+",
+                  "+主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：",
+                  "+- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。",
+                  "+- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。",
+                  "+",
+                  "+这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。",
+                  "+",
+                  "+```python",
+                  "+if self.orphan_isolate:",
+                  "+    for node in list(self.commits):",
+                  "+        if not node.parents and node.column is None:",
+                  "+            node.column = self.alloc_column()",
+                  "+            self._orphan_columns.add(node.column)",
+                  "+            self._reserved_columns.add(node.column)",
+                  "+```",
+                  "+",
+                  "+#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）",
+                  "+",
+                  "+新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。",
+                  "+",
+                  "+#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）",
+                  "+",
+                  "+原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。",
+                  "+",
+                  "+改成根据 `desired` 的正负决定哪一侧先尝试：",
+                  "+",
+                  "+```python",
+                  "+sign = -1 if column < 0 else 1",
+                  "+for offset in itertools.count(0):",
+                  "+    same_side = sign * offset",
+                  "+    if is_free(same_side): col = same_side; break",
+                  "+    other_side = -sign * offset",
+                  "+    if is_free(other_side): col = other_side; break",
+                  "+```",
+                  "+",
+                  "+`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。",
+                  "+",
+                  "+直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。",
+                  "+",
+                  "+#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）",
+                  "+",
+                  "+在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：",
+                  "+1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。",
+                  "+2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。",
+                  "+",
+                  "+```python",
+                  "+def leave_column(self, column):",
+                  "+    count = self.columns[column]",
+                  "+    if count == 1:",
+                  "+        del self.columns[column]",
+                  "+        if column in self._orphan_columns:",
+                  "+            self._orphan_columns.discard(column)",
+                  "+            if self.orphan_isolate:",
+                  "+                self._reserved_columns.add(column)",
+                  "+    else:",
+                  "+        self.columns[column] = count - 1",
+                  "+```",
+                  "+",
+                  "+#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）",
+                  "+",
+                  "+```python",
+                  "+self.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))",
+                  "+```",
+                  "+",
+                  "+每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。",
+                  "+",
+                  "+### 实测对比（Simulation repo，1310 个 commit，`--all`）",
+                  "+",
+                  "+| commit | 默认 col | `--orphan-isolate` col |",
+                  "+|---|---|---|",
+                  "+| f4b5f1c（老 orphan-root） | 0 | 0 |",
+                  "+| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |",
+                  "+| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |",
+                  "+| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|",
+                  "+| 7d8040f / e7c4c94 | −1 | 2 |",
+                  "+| max / min column | 1 / −1 | 2 / −2 |",
+                  "+",
+                  "+`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。",
+                  "+",
+                  "+### 已知未做（如果以后还想推进）",
+                  "+",
+                  "+- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。",
+                  "+- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。",
+                  "+- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。",
+                  "+",
+                  " ## 其它",
+                  " ",
+                  " - 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01QYTQv4HkyKXNMYCgo146Wg",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/NOTE.md has been updated successfully. (file state is current in your context — no need to Read it back)"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/NOTE.md",
+            "oldString": "## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。",
+            "newString": "## 9. orphan 分支列隔离（`--orphan-isolate`）\n\n### 动机\n\n仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：\n\n```\n长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1\n                                       (cfd4542 处 leave_column(1)，col 1 释放)\norphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1\n```\n\n`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它\"想要\"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。\n\n### 新参数（CLI / git config / DAG 模型）\n\n| 层 | 名称 | 默认 | 说明 |\n|---|---|---|---|\n| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |\n| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |\n| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / \"true\"/\"yes\"/\"on\"/\"1\" 字串 |\n| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |\n\n`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。\n\n### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n\n#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）\n\n主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：\n- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。\n- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。\n\n这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。\n\n```python\nif self.orphan_isolate:\n    for node in list(self.commits):\n        if not node.parents and node.column is None:\n            node.column = self.alloc_column()\n            self._orphan_columns.add(node.column)\n            self._reserved_columns.add(node.column)\n```\n\n#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）\n\n新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。\n\n#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）\n\n原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。\n\n改成根据 `desired` 的正负决定哪一侧先尝试：\n\n```python\nsign = -1 if column < 0 else 1\nfor offset in itertools.count(0):\n    same_side = sign * offset\n    if is_free(same_side): col = same_side; break\n    other_side = -sign * offset\n    if is_free(other_side): col = other_side; break\n```\n\n`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。\n\n直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。\n\n#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）\n\n在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：\n1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。\n2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。\n\n```python\ndef leave_column(self, column):\n    count = self.columns[column]\n    if count == 1:\n        del self.columns[column]\n        if column in self._orphan_columns:\n            self._orphan_columns.discard(column)\n            if self.orphan_isolate:\n                self._reserved_columns.add(column)\n    else:\n        self.columns[column] = count - 1\n```\n\n#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）\n\n```python\nself.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))\n```\n\n每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。\n\n### 实测对比（Simulation repo，1310 个 commit，`--all`）\n\n| commit | 默认 col | `--orphan-isolate` col |\n|---|---|---|\n| f4b5f1c（老 orphan-root） | 0 | 0 |\n| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |\n| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |\n| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|\n| 7d8040f / e7c4c94 | −1 | 2 |\n| max / min column | 1 / −1 | 2 / −2 |\n\n`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。\n\n### 已知未做（如果以后还想推进）\n\n- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。\n- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。\n- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。\n\n## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。",
+            "originalFile": "# 开发模式安装与代码变更生效说明\n\n## 问题\n\n用 `./venv/bin/pip install --editable '.[extras,pyqt6]'` 安装依赖后，修改代码，`./venv/bin/python -m cola dag` 运行就能看到变化吗？\n\n## 结论\n\n可以。`--editable`（即 `pip install -e`）会把项目以\"开发模式\"装进 venv：site-packages 里只放一个指向源码目录的链接（`.pth` 或 `__editable__` 钩子），`import cola` 实际上是直接从 `/Users/luwei/work/git-cola/cola/` 读文件。所以改完 `.py` 文件，**重新运行** `./venv/bin/python -m cola dag` 立刻就能看到变化，不需要再 `pip install`。\n\n## 注意事项\n\n1. **必须重启进程**。Python 不会热重载模块——改完代码要关掉当前的 git-dag 窗口再重启。\n2. **`pyproject.toml` 里的元数据改动需要重装**。比如修改 `[project.scripts]`、`dependencies`、`optional-dependencies`、入口点等，要再跑一次 `pip install --editable '.[extras,pyqt6]'`，否则 `bin/git-cola` 那种 console_script 包装器不会更新。纯 `.py` 源码改动不受影响。\n3. **非 Python 资源**（`cola/icons/*.svg`、`cola/i18n/*.po`、`cola/data/*.html` 等）也是直接从源码目录读的，改完同样立刻生效；但 `.po` 翻译需要先编译/重载（git-cola 启动时读 `.po`，重启即可）。\n4. **两种等价启动方式**，二选一即可：\n   - `./venv/bin/python -m cola dag`\n   - `./venv/bin/git-cola dag`（或激活 venv 后 `git cola dag` / `git dag`）\n5. **想强制 Qt6**：`QT_API=pyqt6 ./venv/bin/python -m cola dag`，或用项目自带的 `garden run/qt6`。\n\n## 排查\"改了代码却没生效\"\n\n多半是以下三种情况：\n\n- **(a) 没重启进程** —— Python 模块已被加载到内存，必须退出当前进程重新启动。\n- **(b) 改的是 `pyproject.toml` 而没重装** —— 元数据/入口点变更需要再跑一次 `pip install --editable`。\n- **(c) 跑成了系统 `git-cola` 而不是 venv 里的** —— 用以下命令确认：\n\n```bash\nwhich git-cola\n./venv/bin/python -c \"import cola; print(cola.__file__)\"\n```\n\n第二条命令应当输出 `/Users/luwei/work/git-cola/cola/__init__.py`，说明导入路径指向你的源码目录。\n\n---\n\n# DAG 视图定制改动\n\n以下所有改动均集中在 `cola/widgets/dag.py`。\n\n## 1. 缩短节点垂直间距\n\n- `GraphView.y_off`：`-20` → `-12`。\n- 推导：`commit_radius = 12.0` 实际上是节点的渲染**直径**（`QRectF(-r/2, -r/2, r, r)`），原中心距 20 = 直径 12 + 可见空隙 8；空隙缩小到 1/3 ≈ 3，即新中心距 12 + 3 = 15。\n- 节点垂直距离视觉上缩窄了约 2/3。\n- 手工调整到 -12 视觉效果更好。\n\n## 2. 点击分支/标签复制名字\n\n`Label` 类（每个 commit 旁的分支/标签框）改造：\n\n- `__init__`：新增 `_label_hits = []`，光标设为 `Qt.PointingHandCursor`。\n- `paint()`：除了原有绘制，每个标签的 `(QRectF, 显示文本, 是否 HEAD)` 被记录到 `_label_hits`，供命中测试使用。\n- `mousePressEvent`：左键点击命中某个标签框时——\n  - HEAD：直接 `qtutils.set_clipboard('HEAD')`。\n  - 其它：弹出菜单（见下条）。\n  - 处于 merge 模式时（见 §4）：把当前命中标签当作 merge 目标。\n\n## 3. agent 分支特殊菜单\n\n`Label._show_branch_menu` + 模块级 `_agent_branch_part(name)`：\n\n- `_agent_branch_part` 识别 `agent_` / `agent/` 两种前缀，返回前缀后到下一个 `/` 之前的段；否则返回 `None`。例：\n  - `agent_foo/bar` → `foo`\n  - `agent/foo/bar` → `foo`\n  - `agent_foo` → `foo`\n  - `main` → `None`\n- 菜单结构：\n  - `Copy \"完整名\"`\n  - `Copy \"agent 段\"`（仅在以 `agent_` / `agent/` 起首时出现）\n  - 分隔线\n  - `Merge to...`\n\n普通分支（非 agent、非 HEAD）的菜单只有 `Copy \"完整名\"` + `Merge to...`。HEAD 不弹菜单。\n\n## 4. Merge to 流程\n\n源头：用户在分支菜单选 `Merge to...`。\n\n`GraphView` 端：\n\n- 类信号 `merge_source_changed = Signal(object)`。\n- 状态 `self._merge_source`（None 表示未激活）。\n- `enter_merge_mode(source_branch)`：记录 source、`setFocus`、`emit(source)`。\n- `exit_merge_mode()`：清状态、`emit(None)`。\n- `complete_merge(target_branch)`：调用 `Interaction.confirm` 弹一次确认框，OK 后顺序执行：\n  ```\n  cmds.do(cmds.CheckoutBranch, context, target_branch)\n  cmds.do(cmds.MergeBranch, context, source)\n  ```\n- `keyPressEvent`：merge 模式下 ESC 取消。\n- `mousePressEvent`：merge 模式下左键命中非 `Label`（commit 圆点 / 空白）即取消；右键也取消；命中 `Label` 时正常分发，由 `Label.mousePressEvent` 调 `complete_merge`。\n- `Label.mousePressEvent`：merge 模式下命中 HEAD 忽略（HEAD 不能作为目标）。\n\n## 5. 工具栏 merge 状态提示\n\n不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。\n\n- `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。\n- `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：\n  - source 非空：显示 `\"<source> → ?\"` 并 `show()`。\n  - source 为 `None`：`clear()` + `hide()`。\n\n`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。\n\n## 6. 无分支节点显示 commit 消息首行\n\n为了在没有分支标签的提交点旁边给一些上下文：\n\n- 模块常量 `_SUMMARY_MAX_CHARS = 50`。\n- `Commit.__init__`：保留原有 `Label` 的创建（仅当 `commit.tags` 非空）；同时初始化 `summary_label = None`、`_summary_side = None`。\n- `Commit.update_summary_label(side)`：`side ∈ {'right', 'left', None}`。和上次相同的 side 直接返回；否则移除已有 `summary_label` 并按需新建：\n  - 取 `commit.summary` 第一行；超 50 字截到 49 + `…`。\n  - 用 `QGraphicsSimpleTextItem`，`Cache.label_font()`，`QApplication.palette().text()` 作 brush（兼容暗色主题）。\n  - `right`：`x = commit_radius/2 + 2`；`left`：`x = -commit_radius/2 - 2 - text_width`。\n  - `zValue = -1`。\n\n## 7. 同行多节点：只在两端显示消息\n\n- `GraphView.layout_commits` 末尾调用新增方法 `_update_summary_labels()`。\n- `_update_summary_labels`：\n  - 按 `node.row` 分组。\n  - 行内只 1 个 → 右侧显示。\n  - ≥2 个 → 按 `node.column` 排序：列号最大 = 视觉最左（因 `x_off=-18`）→ 左侧显示；列号最小 = 视觉最右 → 右侧显示；中间节点 `update_summary_label(None)` 清除。\n\n每次 `add_commits` 触发的 `layout_commits` 都会重算，所以增量加载也会动态调整。\n\n## 8. 右键菜单新增 \"Copy Commit Message\"\n\n在 `treewidget` / `graphview` 的右键菜单（`viewer_actions` 共享）中，`Copy Commit` 之下加 `Copy Commit Message`，复制完整 commit message。\n\n- `ViewerMixin.copy_commit_message_to_clipboard` + `_copy_commit_message(oid)`：\n  ```\n  status, out, _ = context.git.log('-1', '--format=%B', oid, _readonly=True)\n  qtutils.set_clipboard(out.rstrip('\\n'))\n  ```\n- `viewer_actions` 字典新增 `'copy_message'` 条目（`icons.copy()` icon，`N_('Copy Commit Message')`）。\n- `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。\n- `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。\n\n## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。\n",
+            "structuredPatch": [
+              {
+                "oldStart": 139,
+                "oldLines": 6,
+                "newStart": 139,
+                "newLines": 119,
+                "lines": [
+                  " - `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。",
+                  " - `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。",
+                  " ",
+                  "+## 9. orphan 分支列隔离（`--orphan-isolate`）",
+                  "+",
+                  "+### 动机",
+                  "+",
+                  "+仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：",
+                  "+",
+                  "+```",
+                  "+长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1",
+                  "+                                       (cfd4542 处 leave_column(1)，col 1 释放)",
+                  "+orphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1",
+                  "+```",
+                  "+",
+                  "+`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它\"想要\"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。",
+                  "+",
+                  "+### 新参数（CLI / git config / DAG 模型）",
+                  "+",
+                  "+| 层 | 名称 | 默认 | 说明 |",
+                  "+|---|---|---|---|",
+                  "+| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |",
+                  "+| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |",
+                  "+| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / \"true\"/\"yes\"/\"on\"/\"1\" 字串 |",
+                  "+| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |",
+                  "+",
+                  "+`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。",
+                  "+",
+                  "+### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）",
+                  "+",
+                  "+#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）",
+                  "+",
+                  "+主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：",
+                  "+- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。",
+                  "+- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。",
+                  "+",
+                  "+这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。",
+                  "+",
+                  "+```python",
+                  "+if self.orphan_isolate:",
+                  "+    for node in list(self.commits):",
+                  "+        if not node.parents and node.column is None:",
+                  "+            node.column = self.alloc_column()",
+                  "+            self._orphan_columns.add(node.column)",
+                  "+            self._reserved_columns.add(node.column)",
+                  "+```",
+                  "+",
+                  "+#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）",
+                  "+",
+                  "+新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。",
+                  "+",
+                  "+#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）",
+                  "+",
+                  "+原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。",
+                  "+",
+                  "+改成根据 `desired` 的正负决定哪一侧先尝试：",
+                  "+",
+                  "+```python",
+                  "+sign = -1 if column < 0 else 1",
+                  "+for offset in itertools.count(0):",
+                  "+    same_side = sign * offset",
+                  "+    if is_free(same_side): col = same_side; break",
+                  "+    other_side = -sign * offset",
+                  "+    if is_free(other_side): col = other_side; break",
+                  "+```",
+                  "+",
+                  "+`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。",
+                  "+",
+                  "+直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。",
+                  "+",
+                  "+#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）",
+                  "+",
+                  "+在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：",
+                  "+1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。",
+                  "+2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。",
+                  "+",
+                  "+```python",
+                  "+def leave_column(self, column):",
+                  "+    count = self.columns[column]",
+                  "+    if count == 1:",
+                  "+        del self.columns[column]",
+                  "+        if column in self._orphan_columns:",
+                  "+            self._orphan_columns.discard(column)",
+                  "+            if self.orphan_isolate:",
+                  "+                self._reserved_columns.add(column)",
+                  "+    else:",
+                  "+        self.columns[column] = count - 1",
+                  "+```",
+                  "+",
+                  "+#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）",
+                  "+",
+                  "+```python",
+                  "+self.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))",
+                  "+```",
+                  "+",
+                  "+每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。",
+                  "+",
+                  "+### 实测对比（Simulation repo，1310 个 commit，`--all`）",
+                  "+",
+                  "+| commit | 默认 col | `--orphan-isolate` col |",
+                  "+|---|---|---|",
+                  "+| f4b5f1c（老 orphan-root） | 0 | 0 |",
+                  "+| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |",
+                  "+| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |",
+                  "+| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|",
+                  "+| 7d8040f / e7c4c94 | −1 | 2 |",
+                  "+| max / min column | 1 / −1 | 2 / −2 |",
+                  "+",
+                  "+`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。",
+                  "+",
+                  "+### 已知未做（如果以后还想推进）",
+                  "+",
+                  "+- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。",
+                  "+- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。",
+                  "+- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。",
+                  "+",
+                  " ## 其它",
+                  " ",
+                  " - 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01QYTQv4HkyKXNMYCgo146Wg",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/NOTE.md has been updated successfully. (file state is current in your context — no need to Read it back)"
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/NOTE.md",
+          "old_string": "## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。",
+          "new_string": "## 9. orphan 分支列隔离（`--orphan-isolate`）\n\n### 动机\n\n仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：\n\n```\n长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1\n                                       (cfd4542 处 leave_column(1)，col 1 释放)\norphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1\n```\n\n`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它\"想要\"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。\n\n### 新参数（CLI / git config / DAG 模型）\n\n| 层 | 名称 | 默认 | 说明 |\n|---|---|---|---|\n| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |\n| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |\n| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / \"true\"/\"yes\"/\"on\"/\"1\" 字串 |\n| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |\n\n`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。\n\n### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n\n#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）\n\n主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：\n- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。\n- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。\n\n这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。\n\n```python\nif self.orphan_isolate:\n    for node in list(self.commits):\n        if not node.parents and node.column is None:\n            node.column = self.alloc_column()\n            self._orphan_columns.add(node.column)\n            self._reserved_columns.add(node.column)\n```\n\n#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）\n\n新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。\n\n#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）\n\n原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。\n\n改成根据 `desired` 的正负决定哪一侧先尝试：\n\n```python\nsign = -1 if column < 0 else 1\nfor offset in itertools.count(0):\n    same_side = sign * offset\n    if is_free(same_side): col = same_side; break\n    other_side = -sign * offset\n    if is_free(other_side): col = other_side; break\n```\n\n`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。\n\n直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。\n\n#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）\n\n在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：\n1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。\n2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。\n\n```python\ndef leave_column(self, column):\n    count = self.columns[column]\n    if count == 1:\n        del self.columns[column]\n        if column in self._orphan_columns:\n            self._orphan_columns.discard(column)\n            if self.orphan_isolate:\n                self._reserved_columns.add(column)\n    else:\n        self.columns[column] = count - 1\n```\n\n#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）\n\n```python\nself.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))\n```\n\n每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。\n\n### 实测对比（Simulation repo，1310 个 commit，`--all`）\n\n| commit | 默认 col | `--orphan-isolate` col |\n|---|---|---|\n| f4b5f1c（老 orphan-root） | 0 | 0 |\n| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |\n| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |\n| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|\n| 7d8040f / e7c4c94 | −1 | 2 |\n| max / min column | 1 / −1 | 2 / −2 |\n\n`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。\n\n### 已知未做（如果以后还想推进）\n\n- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。\n- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。\n- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。\n\n## 其它\n\n- 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。\n- 没有改动 `pyproject.toml` 等元数据；纯 `.py` 改动，重启进程即可生效。"
+        }
+      }
+    },
+    {
+      "step_id": 557,
+      "timestamp": "2026-05-06T11:15:34.491Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01P3npUTKgJwF1HJ4bkj4UmR",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01P3npUTKgJwF1HJ4bkj4UmR",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "wc -l NOTE.md && grep -nE \"^## |^### \" NOTE.md",
+            "description": "Sanity check structure"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01P3npUTKgJwF1HJ4bkj4UmR",
+            "content": "258 NOTE.md\n3:## 问题\n7:## 结论\n11:## 注意事项\n21:## 排查\"改了代码却没生效\"\n42:## 1. 缩短节点垂直间距\n49:## 2. 点击分支/标签复制名字\n60:## 3. agent 分支特殊菜单\n77:## 4. Merge to 流程\n96:## 5. 工具栏 merge 状态提示\n107:## 6. 无分支节点显示 commit 消息首行\n119:## 7. 同行多节点：只在两端显示消息\n129:## 8. 右键菜单新增 \"Copy Commit Message\"\n142:## 9. orphan 分支列隔离（`--orphan-isolate`）\n144:### 动机\n156:### 新参数（CLI / git config / DAG 模型）\n167:### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n236:### 实测对比（Simulation repo，1310 个 commit，`--all`）\n249:### 已知未做（如果以后还想推进）\n255:## 其它\n\n[stdout]\n     258 NOTE.md\n3:## 问题\n7:## 结论\n11:## 注意事项\n21:## 排查\"改了代码却没生效\"\n42:## 1. 缩短节点垂直间距\n49:## 2. 点击分支/标签复制名字\n60:## 3. agent 分支特殊菜单\n77:## 4. Merge to 流程\n96:## 5. 工具栏 merge 状态提示\n107:## 6. 无分支节点显示 commit 消息首行\n119:## 7. 同行多节点：只在两端显示消息\n129:## 8. 右键菜单新增 \"Copy Commit Message\"\n142:## 9. orphan 分支列隔离（`--orphan-isolate`）\n144:### 动机\n156:### 新参数（CLI / git config / DAG 模型）\n167:### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n236:### 实测对比（Simulation repo，1310 个 commit，`--all`）\n249:### 已知未做（如果以后还想推进）\n255:## 其它\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 456860,
+        "completion_tokens": 118,
+        "cached_tokens": 456859,
+        "extra": {
+          "cache_creation_input_tokens": 3910,
+          "cache_read_input_tokens": 456859,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 3910,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 118,
+              "cache_read_input_tokens": 456859,
+              "cache_creation_input_tokens": 3910,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 3910
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "     258 NOTE.md\n3:## 问题\n7:## 结论\n11:## 注意事项\n21:## 排查\"改了代码却没生效\"\n42:## 1. 缩短节点垂直间距\n49:## 2. 点击分支/标签复制名字\n60:## 3. agent 分支特殊菜单\n77:## 4. Merge to 流程\n96:## 5. 工具栏 merge 状态提示\n107:## 6. 无分支节点显示 commit 消息首行\n119:## 7. 同行多节点：只在两端显示消息\n129:## 8. 右键菜单新增 \"Copy Commit Message\"\n142:## 9. orphan 分支列隔离（`--orphan-isolate`）\n144:### 动机\n156:### 新参数（CLI / git config / DAG 模型）\n167:### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n236:### 实测对比（Simulation repo，1310 个 commit，`--all`）\n249:### 已知未做（如果以后还想推进）\n255:## 其它",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01P3npUTKgJwF1HJ4bkj4UmR",
+            "type": "tool_result",
+            "content": "     258 NOTE.md\n3:## 问题\n7:## 结论\n11:## 注意事项\n21:## 排查\"改了代码却没生效\"\n42:## 1. 缩短节点垂直间距\n49:## 2. 点击分支/标签复制名字\n60:## 3. agent 分支特殊菜单\n77:## 4. Merge to 流程\n96:## 5. 工具栏 merge 状态提示\n107:## 6. 无分支节点显示 commit 消息首行\n119:## 7. 同行多节点：只在两端显示消息\n129:## 8. 右键菜单新增 \"Copy Commit Message\"\n142:## 9. orphan 分支列隔离（`--orphan-isolate`）\n144:### 动机\n156:### 新参数（CLI / git config / DAG 模型）\n167:### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n236:### 实测对比（Simulation repo，1310 个 commit，`--all`）\n249:### 已知未做（如果以后还想推进）\n255:## 其它",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "     258 NOTE.md\n3:## 问题\n7:## 结论\n11:## 注意事项\n21:## 排查\"改了代码却没生效\"\n42:## 1. 缩短节点垂直间距\n49:## 2. 点击分支/标签复制名字\n60:## 3. agent 分支特殊菜单\n77:## 4. Merge to 流程\n96:## 5. 工具栏 merge 状态提示\n107:## 6. 无分支节点显示 commit 消息首行\n119:## 7. 同行多节点：只在两端显示消息\n129:## 8. 右键菜单新增 \"Copy Commit Message\"\n142:## 9. orphan 分支列隔离（`--orphan-isolate`）\n144:### 动机\n156:### 新参数（CLI / git config / DAG 模型）\n167:### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n236:### 实测对比（Simulation repo，1310 个 commit，`--all`）\n249:### 已知未做（如果以后还想推进）\n255:## 其它",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01P3npUTKgJwF1HJ4bkj4UmR",
+            "type": "tool_result",
+            "content": "     258 NOTE.md\n3:## 问题\n7:## 结论\n11:## 注意事项\n21:## 排查\"改了代码却没生效\"\n42:## 1. 缩短节点垂直间距\n49:## 2. 点击分支/标签复制名字\n60:## 3. agent 分支特殊菜单\n77:## 4. Merge to 流程\n96:## 5. 工具栏 merge 状态提示\n107:## 6. 无分支节点显示 commit 消息首行\n119:## 7. 同行多节点：只在两端显示消息\n129:## 8. 右键菜单新增 \"Copy Commit Message\"\n142:## 9. orphan 分支列隔离（`--orphan-isolate`）\n144:### 动机\n156:### 新参数（CLI / git config / DAG 模型）\n167:### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）\n236:### 实测对比（Simulation repo，1310 个 commit，`--all`）\n249:### 已知未做（如果以后还想推进）\n255:## 其它",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "wc -l NOTE.md && grep -nE \"^## |^### \" NOTE.md",
+          "description": "Sanity check structure"
+        }
+      }
+    },
+    {
+      "step_id": 558,
+      "timestamp": "2026-05-06T11:15:47.573Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "NOTE.md 已扩展。新加的 §9 \"orphan 分支列隔离 (`--orphan-isolate`)\" 包括：\n\n- **动机**：解释 orphan 链和长链 fork 在 GraphView 撞列的成因（`CommitFactory.root_generation` 把无父 commit 的 gen 推高，导致 orphan 在主循环里排到很后才 alloc）。\n- **新参数**：四层（CLI / git config / `DAG` 模型 / `GraphView` 字段）的字段名、默认、文件位置和优先级，并明确说明左侧 inline graph 已回退、不受影响。\n- **算法改动**（4 处全在 `cola/widgets/dag.py::GraphView`）：\n  - 9.1 `recompute_grid` 主循环前的 orphan 列预分配。\n  - 9.2 `alloc_column` 引入 `is_free()` 跳过 `_reserved_columns`。\n  - 9.3 `alloc_column` Phase 2 同侧优先（`desired<0` 时序列改成 `0, 0, -1, 1, -2, 2, ...`）。\n  - 9.4 `leave_column` 永久 reserve 兜底（与 9.1 配合保持不变量）。\n  - 9.5 `GitDAG.set_params` 把 `params.orphan_isolate` 透传给 graphview。\n- **实测对比**：Simulation repo `--all` 下 13 个目标 commit 默认 vs isolate 的列分配表，max/min column 变化。\n- **已知未做**：列出 `7d8040f → 2d9d1d3` 仍跨 col 1（但 y 不重叠，不影响 orphan 链可读性）、若需进一步可以上方案 B（orphan 链专属颜色 + 虚线）的代码入口、以及左侧 inline graph 重新启用 isolate 需要重写 `lane_reserved` 这一注意事项。",
+      "metrics": {
+        "prompt_tokens": 460770,
+        "completion_tokens": 663,
+        "cached_tokens": 460769,
+        "extra": {
+          "cache_creation_input_tokens": 487,
+          "cache_read_input_tokens": 460769,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 487,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 663,
+              "cache_read_input_tokens": 460769,
+              "cache_creation_input_tokens": 487,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 487
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 130474889,
-    "total_completion_tokens": 833170,
-    "total_cached_tokens": 130474159,
-    "total_steps": 550,
+    "total_prompt_tokens": 133654644,
+    "total_completion_tokens": 842111,
+    "total_cached_tokens": 133653897,
+    "total_steps": 558,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 949719,
-      "total_cache_read_input_tokens": 130474159
+      "total_cache_creation_input_tokens": 963914,
+      "total_cache_read_input_tokens": 133653897
     }
   }
 }

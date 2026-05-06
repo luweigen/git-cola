@@ -139,6 +139,119 @@ which git-cola
 - `context_menu_event`：在 `copy_short` / `copy` 之后追加 `copy_message`。
 - `update_menu_actions`：和其它 copy 项一致，按 `has_single_selection_or_clicked and has_oid` 启用。
 
+## 9. orphan 分支列隔离（`--orphan-isolate`）
+
+### 动机
+
+仓库里如果有 orphan 分支（`git checkout --orphan ...` 建出来的、没有共同祖先的链），它和其它链在 GraphView（右侧 dock）里经常会被画到**同一列**——视觉上看起来像一条共享的纵线，紫线还可能撞色，让人误以为两条链是连接在一起的。例：
+
+```
+长链 fork → 07e7305 → ... → 6e45127 → a5eb66d → cfd4542   全在 col 1
+                                       (cfd4542 处 leave_column(1)，col 1 释放)
+orphan tip → 696ea85 → 745d4cc → ... → b33df90              紧接着也拿到 col 1
+```
+
+`recompute_grid` 按 `generation` 升序遍历，但 `CommitFactory` 给无父 commit 的 generation 设成当前 `root_generation`（已建过 commit 的最大 gen），所以 orphan 自己的迭代步反而排到很后——前面长链的 fork 早就把它"想要"的列拿走又放回去了，等 orphan 来时刚好捡到同一列。
+
+### 新参数（CLI / git config / DAG 模型）
+
+| 层 | 名称 | 默认 | 说明 |
+|---|---|---|---|
+| CLI | `--orphan-isolate`（`cola/main.py:171`） | 关 | `python -m cola dag --orphan-isolate --all` |
+| git config | `cola.dag.orphanisolate`（`cola/widgets/dag.py:55`，`git_dag()` 启动时读） | `false` | 持久化默认值；CLI 优先 |
+| `DAG` 模型 | `DAG.orphan_isolate: bool` + `set_orphan_isolate(value)`（`cola/models/dag.py:48-90`） | `False` | 接受 bool / "true"/"yes"/"on"/"1" 字串 |
+| `GraphView` 字段 | `GraphView.orphan_isolate`（`cola/widgets/dag.py:2628`） | `False` | 在 `GitDAG.set_params` 中从 `params.orphan_isolate` 同步 |
+
+`CommitTreeWidget`（左侧 inline graph）**不受**这个参数影响——左侧用的是 `cola/models/graph.py::build_graph`，本来就没有这个视觉问题，2025-XX 的回退把 `build_graph` 恢复到 a4d121b 之前的版本。
+
+### 算法改动（全部在 `cola/widgets/dag.py::GraphView`）
+
+#### 9.1 `recompute_grid` 前置 orphan 列预分配（`dag.py:3289-3304`）
+
+主循环之前先扫一遍 `self.commits`，给所有无父 commit 用 `alloc_column()` 各占一个列号，并立刻：
+- 加入 `self._orphan_columns`：标记「这是 orphan 链占的列」。
+- 加入 `self._reserved_columns`：让后续 `alloc_column` 永远跳过它。
+
+这样 orphan 还没轮到主循环时它的列就已经被锁住——长链 fork 的第二个子分支再 `alloc_column` 时会绕开这一列，cfd4542 一类的链不会再撞进 orphan 列。
+
+```python
+if self.orphan_isolate:
+    for node in list(self.commits):
+        if not node.parents and node.column is None:
+            node.column = self.alloc_column()
+            self._orphan_columns.add(node.column)
+            self._reserved_columns.add(node.column)
+```
+
+#### 9.2 `alloc_column` 跳过 reserved 列（`dag.py:3198-3242`）
+
+新增 `is_free(c) := c not in self.columns and c not in self._reserved_columns`，Phase 1（`desired → 0`）和 Phase 2（从中心扩散）都用它替代原来的 `c not in columns`。reserved 列就是 9.1 预分配的 orphan 列——对所有非 orphan 的 fork/分配都不可见。
+
+#### 9.3 `alloc_column` Phase 2 同侧优先（`dag.py:3219-3239`）
+
+原 Phase 2 的展开顺序是 `0, 1, -1, 2, -2, …` 围绕中心对称。当 desired 是负数（fork 的次级支线想留在父亲所在的负半边）时，原顺序会先去到 `+offset` 再到 `-offset`，结果次级支线被弹到正半边，必须横穿 col 0/1 才能连回父亲。
+
+改成根据 `desired` 的正负决定哪一侧先尝试：
+
+```python
+sign = -1 if column < 0 else 1
+for offset in itertools.count(0):
+    same_side = sign * offset
+    if is_free(same_side): col = same_side; break
+    other_side = -sign * offset
+    if is_free(other_side): col = other_side; break
+```
+
+`desired ≥ 0` 时序列还是 `0, 0, 1, -1, 2, -2, …`（与原版一致）；`desired < 0` 时变成 `0, 0, -1, 1, -2, 2, …`，次级支线优先落在负侧。
+
+直接受益：在 isolate=True 下，2d9d1d3 fork 的两个子之一（次级 7d8040f）以前被推到 col 2（跨过 orphan col 1），现在留在 col -2，与父链同侧；`cfd4542 → d06c8b7` 这条边整段都在负半边，**不再穿越 col 1 的 orphan 链**。
+
+#### 9.4 `leave_column` 永久 reserve 兜底（`dag.py:3274-3287`）
+
+在 9.1 已经把 orphan 列写进 `_orphan_columns` + `_reserved_columns`。orphan 链跑到 leaf（`b33df90` 之类）触发 `leave_column(col)` 时，`self.columns[col]` 计数归零、被 `del`，但只要 isolate 还开着且这个列在 `_orphan_columns`，就 `_reserved_columns.add(col)`（实际已经在里面，等价 no-op）。这是历史上唯一一次 reserve 路径，9.1 加上之后它退化成「冗余但安全」——保留是为了：
+1. 让代码意图自洽：「leave 一个 orphan 列就是不能再被复用」是个独立的不变量。
+2. 万一以后改 9.1 的预分配策略，这一行仍能兜底。
+
+```python
+def leave_column(self, column):
+    count = self.columns[column]
+    if count == 1:
+        del self.columns[column]
+        if column in self._orphan_columns:
+            self._orphan_columns.discard(column)
+            if self.orphan_isolate:
+                self._reserved_columns.add(column)
+    else:
+        self.columns[column] = count - 1
+```
+
+#### 9.5 `GitDAG.set_params` 同步给 GraphView（`dag.py:1599-1601`）
+
+```python
+self.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))
+```
+
+每次 `set_params` 都会把 `params.orphan_isolate` 传给 graphview；后续 `recompute_grid()` 直接读这个字段。
+
+### 实测对比（Simulation repo，1310 个 commit，`--all`）
+
+| commit | 默认 col | `--orphan-isolate` col |
+|---|---|---|
+| f4b5f1c（老 orphan-root） | 0 | 0 |
+| 6e45127 / a5eb66d / ee6ec7d / 4222070 / cfd4542 | 1 | **−1** |
+| 2d9d1d3 / d06c8b7 | 0 / 0 | **−2** / **−2** |
+| 696ea85 / 745d4cc / b33df90（orphan 链） | 1（撞 cfd4542） | **1**（独占）|
+| 7d8040f / e7c4c94 | −1 | 2 |
+| max / min column | 1 / −1 | 2 / −2 |
+
+`cfd4542 → d06c8b7` 这条边在默认下从 col 1 →（cfd4542 离开）→ col 0，再加颜色 cycle 撞到 696ea85 链同色，视觉上像 696ea85 的延续；isolate 后整段在 col -1 / -2 上，与 col 1 的 orphan 链彻底分开。
+
+### 已知未做（如果以后还想推进）
+
+- `7d8040f → 2d9d1d3` 这条 task-notification 链的边在 isolate 下从 col 2 跨到 col -2，会斜穿过 col 1。但它的 row 范围（≈1216–1217）低于 orphan 链（≈1220–1226），y 上不重叠，视觉上和 orphan 链分得开，没继续修。
+- 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。
+- `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。
+
 ## 其它
 
 - 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。
