@@ -2608,9 +2608,12 @@ def _prompt_wide(msg, title, text='', width_factor=1):
 
 
 def _branch_tip_basenames(context, oid):
-    """Return de-duplicated basenames of files at ``oid`` whose relative
-    paths do not start with an underscore. Used to build a "Rename to"
-    suggestion that tags a branch with the work it currently holds.
+    """Return de-duplicated basenames of files **changed by** the commit
+    at ``oid`` (vs. its first parent, falling back to the empty tree for
+    root commits) whose relative paths do not start with an underscore.
+
+    Used to build a "Rename to" suggestion that tags a branch with the
+    work introduced by its tip commit.
 
     Returns ``[]`` when no eligible files are found, in which case the
     caller hides the "Rename to" menu entry entirely.
@@ -2618,7 +2621,7 @@ def _branch_tip_basenames(context, oid):
     if not oid:
         return []
     try:
-        paths = gitcmds.ls_tree_paths(context, oid)
+        paths = gitcmds.changed_files(context, oid)
     except Exception:
         return []
     seen = set()

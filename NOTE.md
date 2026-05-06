@@ -337,11 +337,11 @@ view.graphview.arc_edges = _config_truthy(
 
 ### 动机
 
-agent 自动化经常把当前正在处理的文档/脚本作为分支的语义标识。手工把 `agent/<id>` 改名成 `agent/<id>/foo.md,bar.py` 这种格式可以一眼看到这条分支当前在搞什么——但每次都要手动敲文件名。新加的 `Rename to ...` 直接读分支 tip commit 的文件树，把不以 `_` 起首的相对路径的 basename 拼好，作为重命名建议预填到弹窗里。
+agent 自动化经常把当前正在处理的文档/脚本作为分支的语义标识。手工把 `agent/<id>` 改名成 `agent/<id>/foo.md,bar.py` 这种格式可以一眼看到这条分支当前在搞什么——但每次都要手动敲文件名。新加的 `Rename to ...` 直接读分支 tip commit **本次修改了哪些文件**，把不以 `_` 起首的相对路径的 basename 拼好，作为重命名建议预填到弹窗里。
 
 ### 触发位置
 
-点 commit 旁边的 branch 标签（`Label`），弹出菜单，紧跟 `Rename "<full>"...` 之后（仅本地分支）。如果该 commit 树里没有任何符合条件的文件，**这条菜单不出现**——避免出现 `branch/`（空建议）这种没用的形态。
+点 commit 旁边的 branch 标签（`Label`），弹出菜单，紧跟 `Rename "<full>"...` 之后（仅本地分支）。如果该 commit 没有任何符合条件的修改文件，**这条菜单不出现**——避免出现 `branch/`（空建议）这种没用的形态。
 
 ### 实现
 
@@ -352,7 +352,7 @@ def _branch_tip_basenames(context, oid):
     if not oid:
         return []
     try:
-        paths = gitcmds.ls_tree_paths(context, oid)
+        paths = gitcmds.changed_files(context, oid)
     except Exception:
         return []
     seen = set()
@@ -367,8 +367,8 @@ def _branch_tip_basenames(context, oid):
     return out
 ```
 
-- 走已有的 `gitcmds.ls_tree_paths(context, ref)`：内部 `git ls-tree -r --name-only -z <ref>` 拿到 tip commit 整棵树的相对路径。
-- 过滤 `path.startswith('_')`：只看相对路径**首字符**不是下划线的（`_tmp/foo.py` 整条丢；`tmp/_foo.py` 保留——因为 path 首字符是 `t`）。
+- 走已有的 `gitcmds.changed_files(context, oid)`：底层 `git diff-tree --no-commit-id --name-only -r -z <oid>~ <oid>`；root commit 时自动回退到对 `empty_tree_oid` 的 diff（即把 initial commit 当作"全部新增"）。merge commit 默认返回空。
+- 过滤 `path.startswith('_')`：只看**相对路径首字符**不是下划线的（`_traj/x.json` 整条丢；`tmp/_foo.py` 保留——因为 path 首字符是 `t`）。
 - `path.rsplit('/', 1)[-1]` 取 basename。
 - 用 `seen` 去重并保留首次出现顺序（同名文件出现在多个目录时，结果里只留一份）。
 - 任何 git 错误返回 `[]`，调用方据此隐藏菜单项。
@@ -426,15 +426,18 @@ def _rename_branch(self, full_name, suggestion):
 
 ### 实测
 
-`/Users/luwei/work/AI/Simulation` 当前 HEAD（`24253ee2`）调 `_branch_tip_basenames`：
+本仓库 `agent/98f9b71f-2af1-4088-a254-12b95ee60c2a` 分支的最新 commit `4f86d1678c46` 改动了：
 
 ```
-basenames: ['hn-judge.md', 'hackernews-harvest.md', 'ibis-dashboard.md',
-            'ibis-deepen.md', 'ibis-pin.md', 'ibis-prune.md', 'ibis-status.md',
-            'ibis-tick.md', 'ibis-verify.md', 'ibis.md', ...]
+NOTE.md
+_traj/98f9b71f-2af1-4088-a254-12b95ee60c2a.json
+_traj/98f9b71f-2af1-4088-a254-12b95ee60c2a.jsonl
+cola/widgets/dag.py
 ```
 
-orphan root `696ea85`（空 tree，"Initial commit"）调同函数返回 `[]`——菜单不出现。
+`_branch_tip_basenames(context, '4f86d1678c46...')` 返回 `['NOTE.md', 'dag.py']`——`_traj/...` 两条因为相对路径首字符是 `_` 被过滤，剩下两条取 basename 后即得。建议名 `agent/98f9b71f-2af1-4088-a254-12b95ee60c2a/NOTE.md,dag.py`。
+
+orphan root（如 Simulation repo 的 `696ea85`，"Initial commit"，空 tree、对空树 diff 也是空）→ 返回 `[]`，菜单不出现。
 
 220 个测试全过。
 
