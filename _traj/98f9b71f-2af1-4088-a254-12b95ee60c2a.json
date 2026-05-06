@@ -4769,19 +4769,127 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 67,
+      "timestamp": "2026-05-06T07:35:15.051Z",
+      "source": "user",
+      "message": "如何当orphan branch 696ea8524d8a上745d4cc46379上55c1d48d4808，与cfd45426c309右上d06c8b7c992e 隔离得足够远？",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 68,
+      "timestamp": "2026-05-06T07:35:32.510Z",
+      "source": "user",
+      "message": "如何确保orphan branch 696ea8524d8a上745d4cc46379上55c1d48d4808，与cfd45426c309右上d06c8b7c992e 隔离得足够远？",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 69,
+      "timestamp": "2026-05-06T07:37:41.360Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 105690,
+        "completion_tokens": 12544,
+        "cached_tokens": 105684,
+        "extra": {
+          "cache_creation_input_tokens": 6989,
+          "cache_read_input_tokens": 105684,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 6989,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 12544,
+              "cache_read_input_tokens": 105684,
+              "cache_creation_input_tokens": 6989,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 6989
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 70,
+      "timestamp": "2026-05-06T07:38:20.571Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "先把这个 repo 在 `build_graph` 里的实际列分配跑一遍，看「为什么会挨着」：\n\n```\n处理顺序（topo 输出方向 / newest→oldest）              active_lanes 状态                col\ne7c4c94 → e920b6d → 7d8040f                            [2d9d1d3]                       0\nb33df90  ← 新 tip，append 到末尾                        [2d9d1d3, b33df90]              1\n665fbf2 → 55c1d48 → 745d4cc → 696ea85                  [2d9d1d3, …chain…]              1\n696ea85 orphan：active_lanes[1] = None                 [2d9d1d3, None]                  \n                              ↓ graph.py:126-127       [2d9d1d3]                       ← 末尾 None 被 pop！\nd06c8b7  ← 新 tip，append 到末尾                        [2d9d1d3, d06c8b7]              1  ← 同一个列号回收了\ncfd4542 → 4222070 → ee6ec7d                            [2d9d1d3, …chain…]              1\n```\n\n也就是说 696ea85 这条链（行 4–8，col 1）和 d06c8b7 / cfd4542 这条链（行 9–13，col 1）**字面上就在同一列**，只是行段不重叠；屏幕上你看到一条上下相接的紫色纵线，就是这两段共享 col 1 的视觉效果，并不是它们拓扑上有边。\n\n让它们「隔离得够远」=「让 d06c8b7 不要落到 col 1」。决定是否复用 col 1 的关键就这三处（都在 `cola/models/graph.py`）：\n\n1. **graph.py:120-121**（orphan 关 lane）— 696ea85 没有 parent，所以 `active_lanes[commit_column] = None`。\n2. **graph.py:126-127**（trim 末尾 None）— 上面置 None 之后，列 1 已经是末尾，被 `pop()` 掉，`active_lanes` 缩回 `[2d9d1d3]`。\n3. **graph.py:53-55**（新 tip 直接 append）— 下一行 d06c8b7 是新 tip，按 `len(active_lanes)` 取列号，因为前面 trim 完只剩 1 个元素，d06c8b7 就拿到 col 1。\n\n**只要打断这三步里的任意一步，两条链就不会共用列**。下面几种思路按改动量和副作用排序：\n\n### A. 不动代码：从输入侧避免\n\n- **单独打开 orphan 分支**：`git-dag <orphan-ref>`，让 RepoReader 的 commit 集合里根本不出现 d06c8b7 / cfd4542。这样 b33df90 chain 自己占 col 0，没人来抢列。最简单但代价是看不到另一条链。\n- **rebase 掉 orphan**：把 696ea85 的链 rebase 到一个真实 parent 上（不再 orphan）。它的 lane 就不会以 `None` 结束、也不会触发 trim → reuse；它会在某个真实祖先处合入主链，那条 col 自然终止于 merge edge，不会跟下一个新 tip 撞。\n\n### B. 改 `build_graph`：不要 trim \"刚被 orphan 关掉\"的列\n\n最小补丁——在 graph.py:120-121 标记一下 \"我是 orphan 关的\"，让 graph.py:126-127 在那一行不要 pop：\n\n```python\n# 替换原来的 active_lanes[commit_column] = None\nif not parent_oids:\n    active_lanes[commit_column] = None\n    orphan_just_closed = True\nelse:\n    orphan_just_closed = False\n\n# trim 段改成\nif not orphan_just_closed:\n    while active_lanes and active_lanes[-1] is None:\n        active_lanes.pop()\n```\n\n效果：696ea85 行结束时 `active_lanes = [2d9d1d3, None]`，**保留**这个 None。d06c8b7 来时 `len(active_lanes) == 2`，`append` 到 col 2，cfd4542 chain 整条占 col 2。col 1 在 696ea85 之后是一段空白，视觉上断开。代价：图整体宽 1 列，仅在出现 orphan 关闭时多 1 列。\n\n### C. 改\"new tip\"分配策略：tip 不复用任何 trim 出来的列\n\n把 graph.py:53-55 改成 \"用一个永不回退的 next_column 计数器\"：\n\n```python\n# 类似 next_color 的写法\ncommit_column = next_column\nnext_column += 1\n# 然后 active_lanes 用 dict[col -> oid] 而不是 list，或者保留 list 但 grow-only。\n```\n\n效果：每条新 tip 都拿一个全新列号，永不和任何已结束的链共享列。最强的隔离，代价是图会变宽（每个 fresh tip 都吃一个新列；很多 task-notification 风格的提交会让图宽度爆涨）。\n\n### D. 留一个\"冷却带\"\n\n在 B 的基础上更激进一点：orphan 关的列，再保留 N 行（比如 3）才允许下一个新 tip 复用。可以加一个 `col_cooldown: dict[int, int]` 计数器，每行 -1，到 0 才能被 append 选中。视觉上能保证 orphan 终点和下一条链之间至少留 N 行的空白带。\n\n---\n\n**实务推荐**：\n\n- 如果只是偶尔被绊到，**A**（单独看 orphan 分支）最省事。\n- 想从源头治理、改动最小，**B** 就够了——它针对性修掉「orphan 关闭立刻被 trim」这一种最容易让人误读的形态，别的合并/正常关闭的列继续 trim，图不会无谓变宽。\n- 别上 **C**——这个 repo 里 task-notification 风格的孤立提交太多，每条 dispatch 都会单独占一列，整张图会变成阶梯。\n- **D** 适合做成一个可调选项（比如 `git config cola.dag.orphanCooldown=3`），但需要在 `cola/widgets/dag.py` 那边把\"留白行\"也画出来（不能让 trim 掉的 None 列在 row 行高上被压缩掉）。\n\n最后再提一句视觉层面的：即便逻辑上分到不同列，`build_graph` 的 `next_color` 永不回收，所以两条不相关的链仍可能撞同色。要彻底视觉隔离，B/C/D 之外还需要在 `EdgeColor.colors[idx % N]` 之外加一个\"最近活跃色\"集合，新 tip 选色时避开这个集合（类似 `git log --graph` 的实现），否则即便列分开了，紫色还是可能继续在另一列出现。",
+      "metrics": {
+        "prompt_tokens": 105690,
+        "completion_tokens": 12544,
+        "cached_tokens": 105684,
+        "extra": {
+          "cache_creation_input_tokens": 6989,
+          "cache_read_input_tokens": 105684,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 6989,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 12544,
+              "cache_read_input_tokens": 105684,
+              "cache_creation_input_tokens": 6989,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 6989
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 3535379,
-    "total_completion_tokens": 143708,
-    "total_cached_tokens": 3535278,
-    "total_steps": 66,
+    "total_prompt_tokens": 3746759,
+    "total_completion_tokens": 168796,
+    "total_cached_tokens": 3746646,
+    "total_steps": 70,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 121595,
-      "total_cache_read_input_tokens": 3535278
+      "total_cache_creation_input_tokens": 135573,
+      "total_cache_read_input_tokens": 3746646
     }
   }
 }
