@@ -62,11 +62,25 @@ def git_dag(context, args=None, existing_view=None, show=True):
     else:
         view = existing_view
         view.set_params(params)
+    # ``cola.dag.arcedges`` is a render-only preference (no CLI flag, no
+    # DAG-model field). Read it once at startup and stick it on the
+    # GraphView before commits get loaded; ``link()`` will pass it to
+    # each Edge as it is created.
+    view.graphview.arc_edges = _config_truthy(
+        context.cfg.get('cola.dag.arcedges', default=False)
+    )
     if show:
         view.show()
     if params.ref:
         view.display()
     return view
+
+
+def _config_truthy(value) -> bool:
+    """Coerce a git-config value (bool or string) to a boolean."""
+    if isinstance(value, str):
+        return value.strip().lower() in ('1', 'true', 'yes', 'on')
+    return bool(value)
 
 
 class FocusRedirectProxy:
@@ -2001,13 +2015,14 @@ class Cache:
 class Edge(QtWidgets.QGraphicsItem):
     item_type = qtutils.standard_item_type_value(1)
 
-    def __init__(self, source, dest):
+    def __init__(self, source, dest, arc_edges=False):
         QtWidgets.QGraphicsItem.__init__(self)
 
         self.setAcceptedMouseButtons(Qt.NoButton)
         self.source = source
         self.dest = dest
         self.commit = source.commit
+        self.arc_edges = arc_edges
         self.setZValue(-2)
 
         self.recompute_bound()
@@ -2060,15 +2075,20 @@ class Edge(QtWidgets.QGraphicsItem):
         QRectF = QtCore.QRectF
         QPointF = QtCore.QPointF
 
-        arc_rect = 10
-        connector_length = 5
-
         path = QtGui.QPainterPath()
 
-        if self.source.x() == self.dest.x():
+        if not self.arc_edges or self.source.x() == self.dest.x():
+            # Straight line: same-column edges always go vertical, and
+            # diagonal edges go directly from source dot to dest dot when
+            # the user opted out of the arc style. The Edge's z-value is
+            # below the Commit dots so the line ends are hidden under the
+            # circles, leaving a clean point-to-point segment in between.
             path.moveTo(self.source.x(), self.source.y())
             path.lineTo(self.dest.x(), self.dest.y())
         else:
+            arc_rect = 10
+            connector_length = 5
+
             # Define points starting from the source.
             point1 = QPointF(self.source.x(), self.source.y())
             point2 = QPointF(point1.x(), point1.y() - connector_length)
@@ -2626,6 +2646,11 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         # chains processed at much higher generations cannot land on the
         # same x position (which would visually merge the two chains).
         self.orphan_isolate = False
+        # When true, diagonal edges are drawn with the historical
+        # vertical-stub-plus-quarter-arcs path. When false (default),
+        # diagonal edges are drawn as a straight segment from source dot
+        # to dest dot. Toggled via ``cola.dag.arcedges``.
+        self.arc_edges = False
         # Populated transiently inside recompute_grid().
         self._orphan_columns: set[int] = set()
         self._reserved_columns: set[int] = set()
@@ -3002,7 +3027,7 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
                 try:
                     edge = parent_item.edges[commit.oid]
                 except KeyError:
-                    edge = Edge(parent_item, commit_item)
+                    edge = Edge(parent_item, commit_item, arc_edges=self.arc_edges)
                 else:
                     continue
                 parent_item.edges[commit.oid] = edge

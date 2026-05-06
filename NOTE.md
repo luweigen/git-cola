@@ -252,6 +252,87 @@ self.graphview.orphan_isolate = bool(getattr(params, 'orphan_isolate', False))
 - 如果撞色仍然让人混淆，下一步可以加方案 B（orphan 链的边走专属色 + `Qt.DashLine`），实现位置在 `Edge.__init__`（`cola/widgets/dag.py:2001-2028`）+ `recompute_grid` 末尾给 commit 打个 `is_orphan_chain` 标志位。
 - `cola/models/graph.py::build_graph` 已回退到 a4d121b 之前，不再接受任何 isolate 类参数；以后若要让左侧 inline graph 也支持，需另起一套 lane-reserved 标志（先前实现已被回退掉）。
 
+## 10. 边走直线还是弧线（`cola.dag.arcedges`）
+
+### 动机
+
+GraphView 原来对所有 `source.x() != dest.x()` 的边一律走"垂直短桩 + 两个 90° 圆角 + 中间水平段"的弧形路径（`Edge.recompute_path` 老版）。在没有 fork 的简单图上没问题，但只要源和目标列差距大，弧线就会**先朝上"逃离"源点几个像素再向右走水平段**——结果它会从一个不相关分支的 commit 圆点正上方/正下方贴着穿过，看起来像是弧线"经过"了那个 commit。例：
+
+```
+6e45127(col 0) ─┐                a5eb66d(col -1) ●
+                │ ↑ 先垂直 5px       │
+                └→─→─→─→─→─→─→─→─→─→●  2d9d1d3(col -2)
+```
+
+`6e45127 → 2d9d1d3` 弧线先向上、再水平、向上跨过 a5eb66d，再下到 2d9d1d3，肉眼以为 a5eb66d 也在这条边上。
+
+### 新参数
+
+| 层 | 名称 | 默认 | 说明 |
+|---|---|---|---|
+| git config | `cola.dag.arcedges` | `false` | `git_dag()` 启动时读，`bool` / `"true"`/`"yes"`/`"on"`/`"1"` 都识别（`_config_truthy`） |
+| `GraphView` 字段 | `GraphView.arc_edges` | `False` | 启动时由 `git_dag()` 直接 set 到 graphview，没经过 `DAG` 模型（纯渲染偏好） |
+| `Edge` 构造参数 | `Edge.__init__(..., arc_edges=False)` | `False` | `GraphView.link()` 创建 Edge 时传 `self.arc_edges` |
+
+**没有 CLI 选项**——这是渲染样式偏好，不是数据层选项。要切换风格用：
+
+```bash
+git config --global cola.dag.arcedges true   # 保留旧的弧形风格
+git config --global --unset cola.dag.arcedges  # 回到默认直线
+```
+
+注意：和 `--orphan-isolate` 一样，配置只在 `git_dag()` 启动时读一次；改完 git config 要重启 git-dag 才生效。
+
+### 算法改动
+
+#### 10.1 `Edge.recompute_path` 直线分支（`cola/widgets/dag.py:2059-2107`）
+
+把原来的 `if source.x == dest.x: 直线 else: 弧形` 改成 `if not arc_edges or source.x == dest.x: 直线 else: 弧形`：
+
+```python
+if not self.arc_edges or self.source.x() == self.dest.x():
+    path.moveTo(self.source.x(), self.source.y())
+    path.lineTo(self.dest.x(), self.dest.y())
+else:
+    # ... 原弧形路径不动 ...
+```
+
+直线就是 `moveTo(source.center) + lineTo(dest.center)`。`Edge.setZValue(-2)` 让边低于 commit 圆点（z=0），所以线的两端被两个圆点遮住，中间是干净的点对点斜线段——不会贴着源点起步往上"逃"，自然也不会从其它分支头顶蹭过去。
+
+#### 10.2 `GraphView.link()` 透传到 Edge（`cola/widgets/dag.py:3016`）
+
+```python
+edge = Edge(parent_item, commit_item, arc_edges=self.arc_edges)
+```
+
+#### 10.3 `git_dag()` 在 `set_params` 之后写入 graphview（`cola/widgets/dag.py:60-77`）
+
+紧接 `view = GitDAG(...)` / `view.set_params(...)`，在 `view.show()` / `view.display()` 之前：
+
+```python
+view.graphview.arc_edges = _config_truthy(
+    context.cfg.get('cola.dag.arcedges', default=False)
+)
+```
+
+放这里是因为：
+1. `view.display()` 之后 ReaderThread 才启动 → `add_commits` → `link()` 创建 Edge，所以 `arc_edges` 必须早于 `display()` 设好。
+2. 不走 `DAG` 模型 / `set_params` 链路：`arc_edges` 是渲染偏好，不像 `orphan_isolate` 那样会改 row/col 数据，没必要污染数据层。
+
+新增模块级辅助函数 `_config_truthy(value)`：把 git config 的字符串值（`"true"` / `"yes"` / `"on"` / `"1"`）和 Python bool 都规范成 bool。
+
+### 实测对比（Simulation repo）
+
+`cfg unset` 时：`view.graphview.arc_edges == False` → 默认直线。
+`cfg cola.dag.arcedges true` 后：`view.graphview.arc_edges == True` → 老弧形回来。
+
+视觉上：默认直线模式下 `6e45127 → 2d9d1d3` 不再贴着 a5eb66d 走 ┐ 形，而是从源圆点中心直接拉一条斜线到目标圆点中心，中间不再"绕过"任何无关分支。
+
+### 已知未做
+
+- 直线模式下，commit 圆点和边线的接触点是数学上的圆心而非圆周——`zValue=-2` 让圆点把这段遮住，但放大很多倍时仍可能露出极短一段。如果以后想做得更精致，可以在 `recompute_path` 把端点截到圆周（`commit_radius/2` 半径外的交点），不过当前缩放下没必要。
+- `arc_edges=True` 时仍是老弧形路径，问题（绕过其它分支头顶）依旧存在。这条路径只服务于"想要旧视觉"的用户，没改它的几何。
+
 ## 其它
 
 - 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。
