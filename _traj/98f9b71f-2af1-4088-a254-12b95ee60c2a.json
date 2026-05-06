@@ -36276,19 +36276,118 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 445,
+      "timestamp": "2026-05-06T09:51:04.360Z",
+      "source": "user",
+      "message": "696ea8524d8a往上的链条是col 0吗？避开它为什么从-1开始不从1开始一直为正值？",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 446,
+      "timestamp": "2026-05-06T09:52:14.530Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 326806,
+        "completion_tokens": 6197,
+        "cached_tokens": 326800,
+        "extra": {
+          "cache_creation_input_tokens": 593,
+          "cache_read_input_tokens": 326800,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 593,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 6197,
+              "cache_read_input_tokens": 326800,
+              "cache_creation_input_tokens": 593,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 593
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 447,
+      "timestamp": "2026-05-06T09:52:32.253Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "两个问题分别答：\n\n## 1. 696ea85 链不在 col 0，在 col 1\n\n我前面的实测输出就能看到：\n\n```\n696ea85 col 1\nb33df90 col 1   (整条 696ea85 链都是 col 1)\n```\n\n原因：`recompute_grid` 按 generation 升序遍历，处理顺序是「先所有 gen-0、再所有 gen-1、…」。这个 repo 里 gen-0 commit 至少有两个：\n- **长链最深的祖先**（在源 commits 列表里更靠前出现，stable sort 让它先被处理）\n- **696ea85**（孤儿根，第二个被处理）\n\n第一个 gen-0 commit 调 `alloc_column()`，desired=0，`is_free(0) == True`，拿走 col 0。它的整条后裔（一直到 6e45127、2d9d1d3、d06c8b7 这边）都从 col 0 继承下来——这就是为什么 d06c8b7 / 2d9d1d3 在 col 0。\n\n到 696ea85 时再调 `alloc_column()`，desired=0，但 col 0 已经被占。落到 phase 2，按 `0, 1, -1, 2, -2, ...` 找，col 1 空 → 拿 col 1。所以整条 696ea85 链是 col 1。\n\n## 2. 为什么避让走 -1 而不是 2\n\n这是 `alloc_column` 的\"从中心向两边扩散\"策略，目的是把图视觉上**围绕 col 0 居中铺开**，不全堆到一边。看 `cola/widgets/dag.py:3194-3220` 的核心循环：\n\n```python\ndef alloc_column(self, column=0):\n    # phase 1: 从 desired 朝 0 走\n    for col in range(column, 0, -1 if column > 0 else 1):\n        if is_free(col): ... break\n    else:\n        # phase 2: 从 0 出发，正负交替向外扩散\n        for col in itertools.count(0):\n            if is_free(col): ... break\n            col = -col\n            if is_free(col): ... break\n```\n\nphase 2 的实际遍历顺序是：\n\n```\n0, -0(=0), 1, -1, 2, -2, 3, -3, …\n```\n\n正负**交替**而不是单调正向。所以当 col 1 被 696ea85 链占住（或 isolate=True 下被永久 reserve），下一个尝试的是 -1，而不是 2。这就是为什么：\n\n- **isolate=False**：cfd4542 链需要新列时（a5eb66d 在 6e45127 fork 下做 alloc_column），col 0 被占、col 1 空（696ea85 链已经在 b33df90 那里 leave 掉了），直接拿 col 1，于是和 696ea85 链撞同一列。\n- **isolate=True**：col 1 被 `_reserved_columns` 锁住，`is_free(1)=False`，按上面顺序下一格是 -1，cfd4542 链拿到 col -1。再后面 7d8040f 那条又来 alloc 时，col 0 占、col 1 锁、col -1 占，于是落到 col 2。\n\n所以输出里 cfd4542 在 col -1 / e7c4c94 在 col 2 是正负交替推出来的次序，并不是\"先穷尽正向再走负向\"。这个设计的初衷就是 GraphView 想要一张围绕 0 居中、左右铺开的 DAG，不希望像 build_graph 的内联图那样只往右长。",
+      "metrics": {
+        "prompt_tokens": 326806,
+        "completion_tokens": 6197,
+        "cached_tokens": 326800,
+        "extra": {
+          "cache_creation_input_tokens": 593,
+          "cache_read_input_tokens": 326800,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 593,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 6197,
+              "cache_read_input_tokens": 326800,
+              "cache_creation_input_tokens": 593,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 593
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 90121365,
-    "total_completion_tokens": 556419,
-    "total_cached_tokens": 90120792,
-    "total_steps": 444,
+    "total_prompt_tokens": 90774977,
+    "total_completion_tokens": 568813,
+    "total_cached_tokens": 90774392,
+    "total_steps": 447,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 713878,
-      "total_cache_read_input_tokens": 90120792
+      "total_cache_creation_input_tokens": 715064,
+      "total_cache_read_input_tokens": 90774392
     }
   }
 }
