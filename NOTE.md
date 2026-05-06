@@ -441,6 +441,105 @@ orphan root（如 Simulation repo 的 `696ea85`，"Initial commit"，空 tree、
 
 220 个测试全过。
 
+## 12. 分支标签按 lane 上色（`cola.dag.legacylabelcolors`）
+
+### 动机
+
+GraphView 里 `Label` 原本用三档固定色：
+- HEAD / `tags/*` / 当前 local branch → `remote_color = yellow`
+- 其它 `heads/*`（非当前）→ `head_color = green`
+- `remotes/*` 等 → `other_color = white`
+
+每条 lane 的 commit 圆圈连线已经按调色板循环着色（红/青/紫/绿/橙），但分支标签自己还是上面三档不变，结果 dot 是紫线、label 却是白底/绿底，肉眼对不上"哪条 lane 是哪个 branch"。
+
+### 行为
+
+- **HEAD 和当前 local branch 永远黄色**（不变，这是用户当前位置的强信号）。
+- `tags/*` 仍黄色（标签不是分支，保留原配色）。
+- `heads/<非当前>` 和 `remotes/*`：**默认改成"该 commit 出去那条边的颜色"**，让标签和 lane 视觉对齐。
+- 想要回到旧三档配色：`git config --global cola.dag.legacylabelcolors true`。
+
+### 新参数
+
+| 层 | 名称 | 默认 | 说明 |
+|---|---|---|---|
+| git config | `cola.dag.legacylabelcolors` | `false` | `_config_truthy` 解析（`true/yes/on/1`） |
+| `GraphView` 字段 | `GraphView.legacy_label_colors` | `False` | `git_dag()` 启动时 set 一次；`Label.paint()` 里读 |
+
+没有 CLI 选项。和 `arc_edges` 一样，改 git config 后要重启 git-dag 才生效。
+
+### 实现
+
+#### 12.1 `Label._edge_color()`（`cola/widgets/dag.py:Label._edge_color`）
+
+```python
+def _edge_color(self):
+    commit_item = self.parentItem()
+    if commit_item is None:
+        return None
+    commit = getattr(commit_item, 'commit', None)
+    parents = getattr(commit, 'parents', None) if commit else None
+    edges = getattr(commit_item, 'edges', None)
+    if not parents or not edges:
+        return None
+    edge = edges.get(parents[0].oid)
+    if edge is None or edge.pen is None:
+        return None
+    color = QtGui.QColor(edge.pen.color())
+    color.setAlpha(255)
+    return color
+```
+
+- `Label.parentItem()` 是该 commit 的 `Commit` graphics item（在 `Commit.__init__` 里 `label.setParentItem(self)` 设的）。
+- `Commit` 的 `edges` dict 在 `GraphView.link()` 中填充，键是父 oid，值是 `Edge`。取**第一父**那条边的 `pen.color()`。
+- root commit（`parents == []`）→ 没边 → 返回 `None`，调用方退回老配色。
+- `Edge.pen` 的颜色 alpha 是 128（半透明，画线时柔和），但作为标签底色用 alpha=128 会让场景背景透出来，所以拷贝一份 `QColor` 后 `setAlpha(255)` 改成不透明。
+
+#### 12.2 `Label.paint()` 三处分支挂上 `edge_color`（`cola/widgets/dag.py:Label.paint`）
+
+每次 paint 起点：
+
+```python
+graph_view = self._graph_view()
+use_edge_colors = bool(
+    graph_view and not getattr(graph_view, 'legacy_label_colors', False)
+)
+edge_color = self._edge_color() if use_edge_colors else None
+```
+
+- `remotes/*`：`edge_color is not None → 用 edge_color；否则 → other_color`（白）。
+- `tags/*`：保持 `remote_color`（黄），不动。
+- `heads/<X>`：`X == current_branch → remote_color`（黄）；否则 `edge_color is not None → 用 edge_color`；最后兜底 `head_color`（绿）。
+- HEAD 和其它默认分支：保持原色。
+
+每个 commit 的所有非当前分支/远端标签共享同一个 `edge_color`（一个 commit 出去只有一条 first-parent 边），所以一行多个 label 会"同色一致"。
+
+#### 12.3 `git_dag()` 读 config 后挂到 graphview（`cola/widgets/dag.py:git_dag`）
+
+```python
+view.graphview.legacy_label_colors = _config_truthy(
+    context.cfg.get('cola.dag.legacylabelcolors', default=False)
+)
+```
+
+复用了 §10 的 `_config_truthy`。
+
+### 实测
+
+`cfg unset` → `legacy_label_colors == False`，新行为生效。
+`git config cola.dag.legacylabelcolors true` → `legacy_label_colors == True`，三档配色回来。
+
+视觉上：在 Simulation repo `--orphan-isolate --all` 下，`agent/cc998470-...` 这个分支位于 col -1（cfd4542 lane，调色板里的紫色 lane），它的 label 默认就显示紫色底；`agent/db620589-...` 在另一条 lane（红色），label 显示红色底；只有 HEAD 和 `current_branch` 仍是黄色。
+
+220 个测试全过。
+
+### 边角
+
+- 文本笔仍是黑色（`text_pen`）。调色板的 5 种基础色（红/青/紫/绿/橙）配黑字都可读；如果以后加了暗色或低对比度色，可能要按背景亮度切换 text_pen 的颜色。
+- root commit 的分支标签（无父 → 无 edge）会落到老配色（绿/白）。
+- 多条标签同 commit 时，所有非 current 标签都用同一个 lane 色。这是按"这个 commit 在哪条 lane"决定的，不是按各自分支的 lane（实际上多个分支头都指着同一个 commit，它们物理上就是同一条 lane）。
+- 法外狂徒：`Edge.recompute_path()` 用直线（§10 默认）时，pen color 仍按 `EdgeColor.cycle/current` 选取，与本节读取方式无关。
+
 ## 其它
 
 - 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。

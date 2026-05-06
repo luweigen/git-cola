@@ -69,6 +69,9 @@ def git_dag(context, args=None, existing_view=None, show=True):
     view.graphview.arc_edges = _config_truthy(
         context.cfg.get('cola.dag.arcedges', default=False)
     )
+    view.graphview.legacy_label_colors = _config_truthy(
+        context.cfg.get('cola.dag.legacylabelcolors', default=False)
+    )
     if show:
         view.show()
     if params.ref:
@@ -2401,6 +2404,28 @@ class Label(QtWidgets.QGraphicsItem):
 
         return item_shape.boundingRect()
 
+    def _edge_color(self):
+        """Return the brush color of the edge leaving this commit toward
+        its first parent. Returns ``None`` if the commit is a root or the
+        edge is unavailable.
+        """
+        commit_item = self.parentItem()
+        if commit_item is None:
+            return None
+        commit = getattr(commit_item, 'commit', None)
+        parents = getattr(commit, 'parents', None) if commit else None
+        edges = getattr(commit_item, 'edges', None)
+        if not parents or not edges:
+            return None
+        edge = edges.get(parents[0].oid)
+        if edge is None or edge.pen is None:
+            return None
+        # Edge pen alpha is 128 for the line; bump to fully opaque so the
+        # filled label box doesn't bleed the scene background through it.
+        color = QtGui.QColor(edge.pen.color())
+        color.setAlpha(255)
+        return color
+
     def paint(self, painter, _option, _widget, cache=Cache):
         # Draw tags and branches
         font = cache.label_font()
@@ -2422,6 +2447,13 @@ class Label(QtWidgets.QGraphicsItem):
         heads_len = len(heads_prefix)
 
         current_branch = self._current_branch_name()
+        graph_view = self._graph_view()
+        use_edge_colors = bool(
+            graph_view and not getattr(graph_view, 'legacy_label_colors', False)
+        )
+        # Resolve the per-commit edge color once: every non-current branch
+        # / remote label on this commit shares the lane color.
+        edge_color = self._edge_color() if use_edge_colors else None
         hits = []
         for tag in self.commit.tags:
             display_tag = tag
@@ -2433,7 +2465,10 @@ class Label(QtWidgets.QGraphicsItem):
             elif tag.startswith(remotes_prefix):
                 display_tag = tag[remotes_len:]
                 painter.setPen(self.text_pen)
-                painter.setBrush(self.other_color)
+                if edge_color is not None:
+                    painter.setBrush(edge_color)
+                else:
+                    painter.setBrush(self.other_color)
             elif tag.startswith(tags_prefix):
                 display_tag = tag[tags_len:]
                 painter.setPen(self.text_pen)
@@ -2443,6 +2478,9 @@ class Label(QtWidgets.QGraphicsItem):
                 if current_branch and display_tag == current_branch:
                     painter.setPen(self.text_pen)
                     painter.setBrush(self.remote_color)
+                elif edge_color is not None:
+                    painter.setPen(self.text_pen)
+                    painter.setBrush(edge_color)
                 else:
                     painter.setPen(self.head_pen)
                     painter.setBrush(self.head_color)
@@ -2697,6 +2735,13 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         # diagonal edges are drawn as a straight segment from source dot
         # to dest dot. Toggled via ``cola.dag.arcedges``.
         self.arc_edges = False
+        # When true, branch / remote labels keep the legacy fixed palette
+        # (green / white / yellow). When false (default), heads/non-current
+        # and remotes/* labels are tinted with the color of the edge that
+        # leaves their commit, so each chain's labels match its lane.
+        # HEAD and the current local branch always stay yellow.
+        # Toggled via ``cola.dag.legacylabelcolors``.
+        self.legacy_label_colors = False
         # Populated transiently inside recompute_grid().
         self._orphan_columns: set[int] = set()
         self._reserved_columns: set[int] = set()
