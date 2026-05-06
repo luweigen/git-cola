@@ -169,6 +169,18 @@ def add_dag_command(subparser: argparse._SubParsersAction) -> None:
         default=False,
     )
     parser.add_argument(
+        '--orphan-cooldown',
+        metavar='<N>',
+        dest='orphan_cooldown',
+        type=int,
+        default=None,
+        help=(
+            'reserve N rows of empty lane after an orphan-branch root closes, '
+            'so unrelated chains do not reuse the same column '
+            '(default: cola.dag.orphancooldown, or 0 to keep the historical behavior)'
+        ),
+    )
+    parser.add_argument(
         'args', nargs=argparse.REMAINDER, metavar='<args>', help='git log arguments'
     )
 

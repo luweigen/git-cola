@@ -250,6 +250,29 @@ def test_two_independent_histories():
     assert result.max_columns == 1
 
 
+def test_orphan_cooldown_isolates_next_tip():
+    # An orphan tip's column would normally be reused immediately by the
+    # next unrelated tip; orphan_cooldown=1 must push the new tip into a
+    # fresh column so the two chains do not visually share a lane.
+    commits = [
+        ('A', []),       # orphan root, processed last (bottom of view)
+        ('B', ['A']),
+        ('C', []),       # unrelated root processed before A in display order
+        ('D', ['C']),
+    ]
+    # Without cooldown both chains share col 0.
+    baseline = build_graph(commits)
+    assert_rows(baseline, [('D', 0), ('C', 0), ('B', 0), ('A', 0)])
+    assert baseline.max_columns == 1
+
+    # With cooldown the chain processed first (D-C, an orphan via C's empty
+    # parents) keeps its column reserved while B is allocated, pushing
+    # B/A into col 1.
+    cooled = build_graph(commits, orphan_cooldown=1)
+    assert_rows(cooled, [('D', 0), ('C', 0), ('B', 1), ('A', 1)])
+    assert cooled.max_columns == 2
+
+
 def test_ten_commit_chain():
     # J-I-H-G-F-E-D-C-B-A
     oids = [chr(ord('A') + i) for i in range(10)]

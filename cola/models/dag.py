@@ -50,6 +50,10 @@ class DAG:
         self.ref = ref
         self.count = count
         self.display_status = True
+        # Number of rows to keep an orphan-closed lane reserved before the
+        # column may be recycled by a later chain. ``0`` (the default) keeps
+        # the historical "trim immediately" behavior.
+        self.orphan_cooldown = 0
         self.overrides = {}
 
     def set_ref(self, ref: str) -> bool:
@@ -70,10 +74,24 @@ class DAG:
         if self.set_count(args.count):
             self.overrides['count'] = args.count
 
+        cooldown = getattr(args, 'orphan_cooldown', None)
+        if cooldown is not None and self.set_orphan_cooldown(cooldown):
+            self.overrides['orphan_cooldown'] = cooldown
+
         if hasattr(args, 'args') and args.args:
             ref = core.list2cmdline(args.args)
             if self.set_ref(ref):
                 self.overrides['ref'] = ref
+
+    def set_orphan_cooldown(self, value: int) -> bool:
+        try:
+            value = max(0, int(value))
+        except (TypeError, ValueError):
+            return False
+        if value == self.orphan_cooldown:
+            return False
+        self.orphan_cooldown = value
+        return True
 
     def set_display_status(self, enabled: bool) -> None:
         """Should we display the worktree status?"""
