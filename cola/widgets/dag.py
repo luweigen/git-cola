@@ -3292,6 +3292,21 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         self._orphan_columns = set()
         self._reserved_columns = set()
 
+        if self.orphan_isolate:
+            # Pre-allocate columns for orphan-root commits before the main
+            # iteration so unrelated chains processed at lower generations
+            # cannot land on the same column. Without this pre-pass, an
+            # orphan-root's generation is inflated to ``root_generation``
+            # by CommitFactory (no-parent commits keep the in-progress
+            # max-generation seen so far), so the orphan reaches its main
+            # iteration step late -- by which point a long-chain fork has
+            # already grabbed the column the orphan would have wanted.
+            for node in list(self.commits):
+                if not node.parents and node.column is None:
+                    node.column = self.alloc_column()
+                    self._orphan_columns.add(node.column)
+                    self._reserved_columns.add(node.column)
+
         for node in sort_by_generation(list(self.commits)):
             if node.column is None:
                 # Node is either root or its parent is not in items. This
@@ -3300,7 +3315,7 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
                 node.column = self.alloc_column()
                 if not node.parents:
                     # Mark this column as the start of an orphan chain so
-                    # leave_column() can apply cooldown when it ends.
+                    # leave_column() can apply isolation when it ends.
                     self._orphan_columns.add(node.column)
 
             node.row = self.alloc_cell(node.column, node.tags)
