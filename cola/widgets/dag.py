@@ -3213,16 +3213,26 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
                 break
         else:
             # If no free column was found between graph center and desired
-            # column then look for free one by moving from center along both
-            # directions simultaneously.
-            for col in itertools.count(0):
-                if is_free(col):
+            # column, spread from the center but try the side that matches
+            # the desired sign first. This keeps a fork's secondary branch
+            # close to its parent's column instead of jumping across the
+            # graph and visually crossing unrelated chains.
+            sign = -1 if column < 0 else 1
+            for offset in itertools.count(0):
+                same_side = sign * offset
+                if is_free(same_side):
+                    col = same_side
                     if col > self.max_column:
                         self.max_column = col
+                    elif col < self.min_column:
+                        self.min_column = col
                     break
-                col = -col
-                if is_free(col):
-                    if col < self.min_column:
+                other_side = -sign * offset
+                if is_free(other_side):
+                    col = other_side
+                    if col > self.max_column:
+                        self.max_column = col
+                    elif col < self.min_column:
                         self.min_column = col
                     break
         self.declare_column(col)
