@@ -1072,7 +1072,6 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
         self.menu_actions = None
         self.selecting = False
         self.commits = []
-        self.orphan_isolate = False
         self._column_init_state = ColumnInitState.NONE
         self.action_up = qtutils.add_action(
             self, N_('Go Up'), self.go_up, hotkeys.MOVE_UP
@@ -1236,7 +1235,6 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
                 for commit in commits
             ],
             head_oid=head_oid,
-            orphan_isolate=self.orphan_isolate,
         )
         self.apply_graph_result(graph_result)
 
@@ -1598,9 +1596,9 @@ class GitDAG(standard.MainWindow):
         # Update fields affected by model
         self.revtext.setText(params.ref)
         self.maxresults.setValue(params.count)
-        isolate = bool(getattr(params, 'orphan_isolate', False))
-        self.treewidget.orphan_isolate = isolate
-        self.graphview.orphan_isolate = isolate
+        self.graphview.orphan_isolate = bool(
+            getattr(params, 'orphan_isolate', False)
+        )
         self.update_window_title()
 
         self._stop_reader_thread()
