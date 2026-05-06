@@ -58869,19 +58869,118 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 696,
+      "timestamp": "2026-05-06T18:32:04.079Z",
+      "source": "user",
+      "message": "线条的红色看起来比标签的浅，是有半透明渲染吗",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 697,
+      "timestamp": "2026-05-06T18:32:43.160Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 15265,
+        "completion_tokens": 2949,
+        "cached_tokens": 15259,
+        "extra": {
+          "cache_creation_input_tokens": 519460,
+          "cache_read_input_tokens": 15259,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 519460,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 2949,
+              "cache_read_input_tokens": 15259,
+              "cache_creation_input_tokens": 519460,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 519460
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 698,
+      "timestamp": "2026-05-06T18:33:00.007Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "是的，**线条是半透明渲染**，alpha = 128（50% 透明）。我画 label 时手动改回 255，所以一红一深一浅。\n\n## 来源\n\n`cola/widgets/dag.py:2151` 的 `EdgeColor.cycle()`：\n\n```python\n@classmethod\ndef cycle(cls):\n    cls.current_color_index += 1\n    cls.current_color_index %= len(cls.colors)\n    color = cls.colors[cls.current_color_index]\n    color.setAlpha(128)            # ← 这里\n    return color\n```\n\n而且这里有个隐式副作用——`color` 是 `cls.colors[idx]` 的共享实例，`setAlpha(128)` 直接改的就是调色板里那份 QColor。所以一旦 `cycle()` 跑过一次，`EdgeColor.current()` 和后续每一次 `cycle()` 拿到的都是 alpha=128 的版本，**所有 edge 都是半透明**。\n\n## label 为啥不透明\n\n我加 `_edge_color()` 时是这样写的（`cola/widgets/dag.py` Label 类）：\n\n```python\ncolor = QtGui.QColor(edge.pen.color())   # 拷贝一份（避免共享）\ncolor.setAlpha(255)                      # 改回不透明\nreturn color\n```\n\n理由：label 是带边框的小色块，背景透了一半的话场景底色（白/暗主题底）会从 label 后面透上来，红色变粉、暗主题里直接发灰，可读性会糟。所以我**故意**让 label 比线饱和。\n\n## 想让它们看起来一致的话，三种做法可选\n\n**A. label 也用 alpha=128（最直接对齐）**：把 `_edge_color()` 里 `setAlpha(255)` 删掉。代价：label 颜色被场景底色\"洗淡\"，暗主题下红/紫会发灰、青/绿会泛白。可读性下降。\n\n**B. label 用 alpha 中间档（比如 192）**：折中，label 还能看清，又比纯 255 浅一档贴近线。\n\n**C. 把线本身改成不透明**：`EdgeColor.cycle()` 去掉 `setAlpha(128)`，所有线变饱和。问题是线一密就会盖掉 commit 圆点的轮廓，原作者 alpha=128 应该就是为了避免这个。\n\n我个人感受：**默认现状（label 饱和、线柔和）反而是合理的视觉层次**——label 是 UI 一等公民（能点、能 hover、有意义），线只是连接示意。\"label 比线显眼\"是种刻意的强调。但这是审美问题，你要哪种我都能改。\n\n要我做的话，倾向 B：label 用 alpha 192，看起来和线一个色系但又比线深、可读。或者加个 `cola.dag.labelopacity = 128|192|255` 配置让用户选档。说一声哪种就实施。",
+      "metrics": {
+        "prompt_tokens": 15265,
+        "completion_tokens": 2949,
+        "cached_tokens": 15259,
+        "extra": {
+          "cache_creation_input_tokens": 519460,
+          "cache_read_input_tokens": 15259,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 519460,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 2949,
+              "cache_read_input_tokens": 15259,
+              "cache_creation_input_tokens": 519460,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 519460
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 195165239,
-    "total_completion_tokens": 990102,
-    "total_cached_tokens": 195164263,
-    "total_steps": 695,
+    "total_prompt_tokens": 195195769,
+    "total_completion_tokens": 996000,
+    "total_cached_tokens": 195194781,
+    "total_steps": 698,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 3438694,
-      "total_cache_read_input_tokens": 195164263
+      "total_cache_creation_input_tokens": 4477614,
+      "total_cache_read_input_tokens": 195194781
     }
   }
 }
