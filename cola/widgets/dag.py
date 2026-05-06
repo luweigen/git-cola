@@ -2520,8 +2520,20 @@ class Label(QtWidgets.QGraphicsItem):
         menu.addSeparator()
         checkout = menu.addAction(N_('Checkout "%s"') % full_name)
         rename = None
+        rename_to = None
+        rename_to_target = None
         if is_local_branch:
             rename = menu.addAction(N_('Rename "%s"...') % full_name)
+            graph_view = self._graph_view()
+            if graph_view is not None:
+                basenames = _branch_tip_basenames(
+                    graph_view.context, getattr(self.commit, 'oid', None)
+                )
+                if basenames:
+                    rename_to_target = '%s/%s' % (full_name, ','.join(basenames))
+                    rename_to = menu.addAction(
+                        N_('Rename to "%s"...') % rename_to_target
+                    )
         merge_to = menu.addAction(N_('Merge to...'))
         chosen = menu.exec_(event.screenPos())
         if chosen is None:
@@ -2538,29 +2550,34 @@ class Label(QtWidgets.QGraphicsItem):
             if result and result[0] == 0:
                 graph_view.merge_finished.emit()
         elif rename is not None and chosen is rename:
-            graph_view = self._graph_view()
-            if graph_view is None:
-                return
-            new_name, ok = _prompt_wide(
-                N_('Enter new branch name'),
-                title=N_('Rename "%s"') % full_name,
-                text=full_name,
-                width_factor=4,
-            )
-            if not ok:
-                return
-            new_name = new_name.strip()
-            if not new_name or new_name == full_name:
-                return
-            result = cmds.do(
-                cmds.RenameBranch, graph_view.context, full_name, new_name
-            )
-            if result and result[0] == 0:
-                graph_view.merge_finished.emit()
+            self._rename_branch(full_name, suggestion=full_name)
+        elif rename_to is not None and chosen is rename_to:
+            self._rename_branch(full_name, suggestion=rename_to_target)
         elif chosen is merge_to:
             graph_view = self._graph_view()
             if graph_view is not None:
                 graph_view.enter_merge_mode(full_name)
+
+    def _rename_branch(self, full_name, suggestion):
+        graph_view = self._graph_view()
+        if graph_view is None:
+            return
+        new_name, ok = _prompt_wide(
+            N_('Enter new branch name'),
+            title=N_('Rename "%s"') % full_name,
+            text=suggestion,
+            width_factor=4,
+        )
+        if not ok:
+            return
+        new_name = new_name.strip()
+        if not new_name or new_name == full_name:
+            return
+        result = cmds.do(
+            cmds.RenameBranch, graph_view.context, full_name, new_name
+        )
+        if result and result[0] == 0:
+            graph_view.merge_finished.emit()
 
 
 def _prompt_wide(msg, title, text='', width_factor=1):
@@ -2588,6 +2605,32 @@ def _prompt_wide(msg, title, text='', width_factor=1):
     dialog.resize(int(reference * width_factor), dialog.sizeHint().height())
     accepted = dialog.exec_() == QtWidgets.QDialog.Accepted
     return line_edit.text(), accepted
+
+
+def _branch_tip_basenames(context, oid):
+    """Return de-duplicated basenames of files at ``oid`` whose relative
+    paths do not start with an underscore. Used to build a "Rename to"
+    suggestion that tags a branch with the work it currently holds.
+
+    Returns ``[]`` when no eligible files are found, in which case the
+    caller hides the "Rename to" menu entry entirely.
+    """
+    if not oid:
+        return []
+    try:
+        paths = gitcmds.ls_tree_paths(context, oid)
+    except Exception:
+        return []
+    seen = set()
+    out = []
+    for path in paths:
+        if not path or path.startswith('_'):
+            continue
+        name = path.rsplit('/', 1)[-1]
+        if name and name not in seen:
+            seen.add(name)
+            out.append(name)
+    return out
 
 
 def _agent_branch_part(name):

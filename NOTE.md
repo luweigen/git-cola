@@ -333,6 +333,111 @@ view.graphview.arc_edges = _config_truthy(
 - 直线模式下，commit 圆点和边线的接触点是数学上的圆心而非圆周——`zValue=-2` 让圆点把这段遮住，但放大很多倍时仍可能露出极短一段。如果以后想做得更精致，可以在 `recompute_path` 把端点截到圆周（`commit_radius/2` 半径外的交点），不过当前缩放下没必要。
 - `arc_edges=True` 时仍是老弧形路径，问题（绕过其它分支头顶）依旧存在。这条路径只服务于"想要旧视觉"的用户，没改它的几何。
 
+## 11. "Rename to ..." 菜单（按 commit 文件命名）
+
+### 动机
+
+agent 自动化经常把当前正在处理的文档/脚本作为分支的语义标识。手工把 `agent/<id>` 改名成 `agent/<id>/foo.md,bar.py` 这种格式可以一眼看到这条分支当前在搞什么——但每次都要手动敲文件名。新加的 `Rename to ...` 直接读分支 tip commit 的文件树，把不以 `_` 起首的相对路径的 basename 拼好，作为重命名建议预填到弹窗里。
+
+### 触发位置
+
+点 commit 旁边的 branch 标签（`Label`），弹出菜单，紧跟 `Rename "<full>"...` 之后（仅本地分支）。如果该 commit 树里没有任何符合条件的文件，**这条菜单不出现**——避免出现 `branch/`（空建议）这种没用的形态。
+
+### 实现
+
+#### 11.1 helper：`_branch_tip_basenames(context, oid)`（`cola/widgets/dag.py:_branch_tip_basenames`）
+
+```python
+def _branch_tip_basenames(context, oid):
+    if not oid:
+        return []
+    try:
+        paths = gitcmds.ls_tree_paths(context, oid)
+    except Exception:
+        return []
+    seen = set()
+    out = []
+    for path in paths:
+        if not path or path.startswith('_'):
+            continue
+        name = path.rsplit('/', 1)[-1]
+        if name and name not in seen:
+            seen.add(name)
+            out.append(name)
+    return out
+```
+
+- 走已有的 `gitcmds.ls_tree_paths(context, ref)`：内部 `git ls-tree -r --name-only -z <ref>` 拿到 tip commit 整棵树的相对路径。
+- 过滤 `path.startswith('_')`：只看相对路径**首字符**不是下划线的（`_tmp/foo.py` 整条丢；`tmp/_foo.py` 保留——因为 path 首字符是 `t`）。
+- `path.rsplit('/', 1)[-1]` 取 basename。
+- 用 `seen` 去重并保留首次出现顺序（同名文件出现在多个目录时，结果里只留一份）。
+- 任何 git 错误返回 `[]`，调用方据此隐藏菜单项。
+
+#### 11.2 `_show_branch_menu` 加菜单条目（`cola/widgets/dag.py:_show_branch_menu`）
+
+在 `is_local_branch` 分支里现有的 `rename = menu.addAction(...)` 之后：
+
+```python
+graph_view = self._graph_view()
+if graph_view is not None:
+    basenames = _branch_tip_basenames(
+        graph_view.context, getattr(self.commit, 'oid', None)
+    )
+    if basenames:
+        rename_to_target = '%s/%s' % (full_name, ','.join(basenames))
+        rename_to = menu.addAction(
+            N_('Rename to "%s"...') % rename_to_target
+        )
+```
+
+`Label.commit` 是这个标签所属的模型 commit（直接构造时存的，见 `Label.__init__:2368`），oid 即分支 tip。
+
+#### 11.3 抽出 `_rename_branch(full_name, suggestion)`（`cola/widgets/dag.py`）
+
+原来的 `Rename` 处理路径直接内联在 `_show_branch_menu` 里。现在 `Rename` 和 `Rename to` 共用同一段「弹 `_prompt_wide` → strip → 跑 `cmds.RenameBranch` → 触发 `merge_finished` 让图刷新」的流程，差别只是 **预填的 `text=` 不同**：
+
+```python
+def _rename_branch(self, full_name, suggestion):
+    graph_view = self._graph_view()
+    if graph_view is None:
+        return
+    new_name, ok = _prompt_wide(
+        N_('Enter new branch name'),
+        title=N_('Rename "%s"') % full_name,
+        text=suggestion,
+        width_factor=4,
+    )
+    if not ok:
+        return
+    new_name = new_name.strip()
+    if not new_name or new_name == full_name:
+        return
+    result = cmds.do(cmds.RenameBranch, graph_view.context, full_name, new_name)
+    if result and result[0] == 0:
+        graph_view.merge_finished.emit()
+```
+
+调用：
+
+- `Rename "..."` → `self._rename_branch(full_name, suggestion=full_name)`（弹窗预填原名，等价旧行为）。
+- `Rename to "..."` → `self._rename_branch(full_name, suggestion=rename_to_target)`（弹窗预填 `<full>/<basenames>`）。
+
+弹窗给用户最后一次确认/编辑的机会——分支命名规则会拒绝某些字符（`~`、`^`、`:`、空格等），如果文件名里含这些，提交时 `git branch -m` 会报错，此时用户可以在弹窗里改掉。
+
+### 实测
+
+`/Users/luwei/work/AI/Simulation` 当前 HEAD（`24253ee2`）调 `_branch_tip_basenames`：
+
+```
+basenames: ['hn-judge.md', 'hackernews-harvest.md', 'ibis-dashboard.md',
+            'ibis-deepen.md', 'ibis-pin.md', 'ibis-prune.md', 'ibis-status.md',
+            'ibis-tick.md', 'ibis-verify.md', 'ibis.md', ...]
+```
+
+orphan root `696ea85`（空 tree，"Initial commit"）调同函数返回 `[]`——菜单不出现。
+
+220 个测试全过。
+
 ## 其它
 
 - 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。
