@@ -1598,7 +1598,9 @@ class GitDAG(standard.MainWindow):
         # Update fields affected by model
         self.revtext.setText(params.ref)
         self.maxresults.setValue(params.count)
-        self.treewidget.orphan_cooldown = getattr(params, 'orphan_cooldown', 0)
+        cooldown = getattr(params, 'orphan_cooldown', 0)
+        self.treewidget.orphan_cooldown = cooldown
+        self.graphview.orphan_cooldown = cooldown
         self.update_window_title()
 
         self._stop_reader_thread()
@@ -2621,6 +2623,19 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         self.min_column = 0
         self.frontier = {}
         self.tagged_cells = set()
+        # When non-zero, a freed orphan-chain column is held off-limits
+        # for the rest of the current ``recompute_grid()`` so unrelated
+        # chains processed at much higher generations cannot land on the
+        # same x position (which would visually merge the two chains).
+        # The numeric value is preserved for symmetry with the inline
+        # graph's per-row counter, but in this view any value >= 1
+        # behaves as "permanent within the build" -- generation-driven
+        # iteration would otherwise burn through any small N within the
+        # very next handful of steps.
+        self.orphan_cooldown = 0
+        # Populated transiently inside recompute_grid().
+        self._orphan_columns: set[int] = set()
+        self._reserved_columns: set[int] = set()
 
         self.x_start = 24
         self.x_min = 24
@@ -3189,10 +3204,15 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
 
     def alloc_column(self, column=0):
         columns = self.columns
+        reserved = self._reserved_columns
+
+        def is_free(c):
+            return c not in columns and c not in reserved
+
         # First, look for free column by moving from desired column to graph
         # center (column 0).
         for col in range(column, 0, -1 if column > 0 else 1):
-            if col not in columns:
+            if is_free(col):
                 if col > self.max_column:
                     self.max_column = col
                 elif col < self.min_column:
@@ -3203,12 +3223,12 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
             # column then look for free one by moving from center along both
             # directions simultaneously.
             for col in itertools.count(0):
-                if col not in columns:
+                if is_free(col):
                     if col > self.max_column:
                         self.max_column = col
                     break
                 col = -col
-                if col not in columns:
+                if is_free(col):
                     if col < self.min_column:
                         self.min_column = col
                     break
@@ -3262,12 +3282,22 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         count = self.columns[column]
         if count == 1:
             del self.columns[column]
+            # If this column belonged to an orphan-rooted chain, hold it
+            # reserved for the remainder of this rebuild so an unrelated
+            # chain processed many generations later cannot reuse it and
+            # visually fuse with the orphan chain.
+            if column in self._orphan_columns:
+                self._orphan_columns.discard(column)
+                if self.orphan_cooldown > 0:
+                    self._reserved_columns.add(column)
         else:
             self.columns[column] = count - 1
 
     def recompute_grid(self):
         self.reset_columns()
         self.reset_rows()
+        self._orphan_columns = set()
+        self._reserved_columns = set()
 
         for node in sort_by_generation(list(self.commits)):
             if node.column is None:
@@ -3275,6 +3305,10 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
                 # happens when tree loading is in progress. Allocate new
                 # columns for such nodes.
                 node.column = self.alloc_column()
+                if not node.parents:
+                    # Mark this column as the start of an orphan chain so
+                    # leave_column() can apply cooldown when it ends.
+                    self._orphan_columns.add(node.column)
 
             node.row = self.alloc_cell(node.column, node.tags)
 

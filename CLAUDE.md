@@ -111,3 +111,8 @@ garden po                   # 用 pot 更新各 .po 文件（提交翻译前必�
 - 使用 `cercis`（基于 black 的格式化器）+ `isort --force-single-line-imports --py=39 --no-lines-before=STDLIB`。提交前 `garden fmt`。
 - 命名使用 `snake_case`；只有覆盖 Qt 方法时才允许 `camelCase`。
 - 提交信息使用 `area: short imperative` 格式（例如 `dag: fix line overlap`）。
+
+## 任务约定
+
+当开发者描述左边dag图时，指的是运行python -m cola dag后，左 dock (log_dock)：CommitTreeWidget 列表 + GraphDelegate 内联。
+描述右边dag图时，指的是运行python -m cola dag后，右 dock (graphview_dock)：GraphView (QGraphicsScene 节点+连线) 。

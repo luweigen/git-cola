@@ -175,9 +175,12 @@ def add_dag_command(subparser: argparse._SubParsersAction) -> None:
         type=int,
         default=None,
         help=(
-            'reserve N rows of empty lane after an orphan-branch root closes, '
-            'so unrelated chains do not reuse the same column '
-            '(default: cola.dag.orphancooldown, or 0 to keep the historical behavior)'
+            'isolate orphan-branch chains in their own column so unrelated '
+            'chains processed later cannot reuse it (0 = off, the historical '
+            'behavior; any positive value turns isolation on -- the inline '
+            'graph honors N as a per-row counter while the graph view '
+            'reserves the column for the rest of the rebuild). '
+            'Default: cola.dag.orphancooldown, falling back to 0.'
         ),
     )
     parser.add_argument(
