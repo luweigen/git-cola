@@ -187,34 +187,25 @@ def test_find_rewind_target_deletion_combined_with_modification(app_context):
 
 def test_unique_rewind_branch_name_no_conflict(app_context):
     name = rewind.unique_rewind_branch_name(app_context, 'feature')
-    assert name == 'rewind_feature'
+    assert name == 'rewind_feature/0'
 
 
 def test_unique_rewind_branch_name_increments_on_conflict(app_context):
     _write('a.txt', b'a1\n')
     _commit('c1')
-    helper.run_git('branch', 'rewind_feature')
+    helper.run_git('branch', 'rewind_feature/0')
     name = rewind.unique_rewind_branch_name(app_context, 'feature')
-    assert name == 'rewind-1_feature'
+    assert name == 'rewind_feature/1'
 
-    helper.run_git('branch', 'rewind-1_feature')
+    helper.run_git('branch', 'rewind_feature/1')
     name = rewind.unique_rewind_branch_name(app_context, 'feature')
-    assert name == 'rewind-2_feature'
-
-
-def test_unique_rewind_branch_name_handles_dir_prefix_conflict(app_context):
-    """If "rewind_feature/x" exists git won't allow "rewind_feature" — skip it."""
-    _write('a.txt', b'a1\n')
-    _commit('c1')
-    helper.run_git('branch', 'rewind_feature/sub')
-    name = rewind.unique_rewind_branch_name(app_context, 'feature')
-    assert name == 'rewind-1_feature'
+    assert name == 'rewind_feature/2'
 
 
 def test_unique_rewind_branch_name_supports_branch_with_slashes(app_context):
-    """Agent-style branch names with slashes use the underscore-prefix form."""
+    """Agent-style branch names with slashes get /N appended at the very end."""
     name = rewind.unique_rewind_branch_name(app_context, 'agent/abc/dag.py')
-    assert name == 'rewind_agent/abc/dag.py'
+    assert name == 'rewind_agent/abc/dag.py/0'
 
 
 @pytest.mark.skipif(

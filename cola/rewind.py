@@ -15,8 +15,7 @@ from typing import Optional
 from .git import STDOUT
 
 
-_REWIND_FIRST_PREFIX = 'rewind_'
-_REWIND_NUMBERED_PREFIX = 'rewind-'
+_REWIND_PREFIX = 'rewind_'
 _MAX_BRANCH_SUFFIX = 99
 
 # Sentinel for dirty paths that have been removed from the worktree. A
@@ -204,11 +203,12 @@ def existing_local_branches(context) -> set[str]:
 def unique_rewind_branch_name(context, branch: str) -> Optional[str]:
     """Return a non-conflicting backup branch name for rewinding ``branch``.
 
-    Tries ``rewind_<branch>`` first, then ``rewind-1_<branch>`` ..
-    ``rewind-99_<branch>``. A name is considered to conflict if it equals an
-    existing branch name, is a path-prefix of one, or has one as its prefix
-    (git's directory/file ref conflict). Returns ``None`` if all candidates
-    up to the limit are taken.
+    Always uses the form ``rewind_<branch>/<N>`` starting at ``N=0`` and
+    incrementing on conflict, so the ``rewind_<branch>`` namespace stays a
+    directory of refs (avoiding git's directory/file ref conflict). A
+    candidate conflicts if it equals an existing branch name or is a
+    path-prefix of one. Returns ``None`` if all candidates up to the limit
+    are taken.
     """
     existing = existing_local_branches(context)
 
@@ -220,11 +220,8 @@ def unique_rewind_branch_name(context, branch: str) -> Optional[str]:
                 return True
         return False
 
-    candidate = f'{_REWIND_FIRST_PREFIX}{branch}'
-    if not _conflicts(candidate):
-        return candidate
-    for n in range(1, _MAX_BRANCH_SUFFIX + 1):
-        candidate = f'{_REWIND_NUMBERED_PREFIX}{n}_{branch}'
+    for n in range(0, _MAX_BRANCH_SUFFIX + 1):
+        candidate = f'{_REWIND_PREFIX}{branch}/{n}'
         if not _conflicts(candidate):
             return candidate
     return None

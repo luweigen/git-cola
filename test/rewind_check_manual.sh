@@ -7,7 +7,7 @@
 #   python -m cola dag        # or: garden -C /path/to/git-cola run
 #   In the right DAG, click the "feature" branch label -> "Rewind check".
 #   The search should hit c3, prompt to confirm, and on accept create
-#   "rewind_feature" backup branch and reset --hard to c3.
+#   "rewind_feature/0" backup branch and reset --hard to c3.
 
 set -euo pipefail
 
@@ -58,4 +58,4 @@ echo "Next steps:"
 echo "  cd $DEMO"
 echo "  python -m cola dag"
 echo "  -> right DAG: click 'feature' label -> 'Rewind check'"
-echo "  -> confirm; verify a new 'rewind_feature' branch and HEAD at c3."
+echo "  -> confirm; verify a new 'rewind_feature/0' branch and HEAD at c3."
