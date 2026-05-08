@@ -14,9 +14,19 @@ from ..i18n import N_
 from ..interaction import Interaction
 
 
-def _commit_summary(context, oid: str) -> str:
-    out = context.git.log('-1', '--pretty=%h %s', oid, _readonly=True)[STDOUT]
-    return (out or oid).strip()
+def _commit_summary(context, oid: str, max_lines: int = 4) -> str:
+    """Return ``"<short-hash>\\n<up to max_lines of full commit message>"``."""
+    short = context.git.log(
+        '-1', '--pretty=%h', oid, _readonly=True
+    )[STDOUT].strip() or oid[:12]
+    body = context.git.log(
+        '-1', '--pretty=%B', oid, _readonly=True
+    )[STDOUT]
+    lines = [line for line in body.splitlines() if line is not None]
+    head = '\n'.join(lines[:max_lines]).rstrip()
+    if head:
+        return f'{short}\n{head}'
+    return short
 
 
 def _format_dirty_listing(context, dirty_paths: list[str], limit: int = 20) -> str:
@@ -76,7 +86,7 @@ def run_rewind_check(context, branch: str, dirty_paths: list[str]) -> None:
     summary = _commit_summary(context, target_oid)
     dirty_listing = _format_dirty_listing(context, dirty_paths)
     title = N_('Rewind check')
-    question = N_('Rewind "%(branch)s" to %(summary)s?') % {
+    question = N_('Rewind %(branch)s to %(summary)s') % {
         'branch': branch,
         'summary': summary,
     }
