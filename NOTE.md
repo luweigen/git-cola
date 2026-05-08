@@ -100,11 +100,20 @@ which git-cola
 - `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。
 - `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：
   - source 非空：
-    - **stylesheet**：黄底（`#FFD60A`，沿用 git-cola HEAD/current-branch 的"活跃"黄）+ 黑字 + `padding: 2px 8px` + `border-radius: 8px` + `font-weight: bold`，整体是个圆角 pill / chip。
-    - **text**（rich text，所以模块顶用 `import html` 做 escape）：`<b>{source} → <span style="color:#B00020">?</span> <span style="color:#222">⬉</span></b>`。
-      - branch 名加粗黑字。
-      - "?" 用深红 `#B00020` 加粗——明确"这里**等你**点目标"。
-      - "⬉" (`U+2B09`，NORTH WEST BLACK ARROW) 是经典 idle 鼠标指针的形状，点缀在 "?" 之后，强化"用鼠标点这里"的视觉提示。
+    - **stylesheet**：黄底（`#FFD60A`，沿用 git-cola HEAD/current-branch 的"活跃"黄）+ 黑字 + `padding: 2px 8px` + `border-radius: 8px`，整体是个圆角 pill / chip。**注意没有 `font-weight`**——baseline 走 normal，让下面 rich text 里的 `font-weight: 900` 可以拉出权重对比。
+    - **text**（rich text，所以模块顶用 `import html` 做 escape）：
+
+      ```html
+      {source}
+      <span style="font-weight:900"> → </span>
+      <span style="font-weight:900;color:#B00020">?</span>
+      <span style="font-weight:900;color:#222"> ⬉</span>
+      ```
+
+      - branch 名走 baseline normal weight。
+      - `→` / `?` / `⬉` 全用 `font-weight: 900`（最黑），比 branch 名明显粗一档——视觉重心拉到"需要用户做事"的那一段。
+      - "?" 用深红 `#B00020` ——明确"这里**等你**点目标"。
+      - "⬉" (`U+2B09`，NORTH WEST BLACK ARROW) 是经典 idle 鼠标指针的形状，点缀在 "?" 之后，强化"用鼠标点这里"的视觉提示；深灰 `#222` 与黑字略区分。
     - 然后 `show()`。
   - source 为 `None`：`setStyleSheet('')`（清掉 pill）+ `clear()` + `hide()`。
 

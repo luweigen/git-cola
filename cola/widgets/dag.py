@@ -1742,23 +1742,25 @@ class GitDAG(standard.MainWindow):
     def _update_merge_source_label(self, source):
         """Show or hide the "<branch> -> ?" hint while picking a merge target."""
         if source:
-            # Yellow pill (matches the "current/active" yellow already used
-            # for HEAD/current-branch labels) + red bold "?" calling out the
-            # placeholder + a NW-arrow cursor glyph hinting "click here".
+            # Yellow pill (matches the "current/active" yellow used for
+            # HEAD/current-branch labels). The branch name stays at normal
+            # weight; the arrow, "?" placeholder, and ⬉ cursor glyph use
+            # font-weight: 900 so they visually outweigh the branch name
+            # and pull the eye toward "the part that needs your action".
             self.merge_source_label.setStyleSheet(
                 'QLabel {'
                 ' background: #FFD60A;'
                 ' color: black;'
                 ' padding: 2px 8px;'
                 ' border-radius: 8px;'
-                ' font-weight: bold;'
                 '}'
             )
             self.merge_source_label.setText(
-                '<b>%s → '
-                '<span style="color:#B00020">?</span>'
-                ' <span style="color:#222">⬉</span>'
-                '</b>' % html.escape(source)
+                '%s'
+                '<span style="font-weight:900"> → </span>'
+                '<span style="font-weight:900;color:#B00020">?</span>'
+                '<span style="font-weight:900;color:#222"> ⬉</span>'
+                % html.escape(source)
             )
             self.merge_source_label.show()
         else:
