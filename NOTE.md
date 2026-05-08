@@ -95,14 +95,20 @@ which git-cola
 
 ## 5. 工具栏 merge 状态提示
 
-不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示文字。
+不再用光标变化提示 merge 模式，而是在 graph 工具栏 `Zoom Out` 按钮**左侧**显示一个 pill-style "徽章"。
 
 - `GitDAG.__init__`：新建隐藏 `QLabel self.merge_source_label`，作为 `graph_controls_layout` 的第一个元素。
 - `graphview.merge_source_changed` 连到 `GitDAG._update_merge_source_label`：
-  - source 非空：显示 `"<source> → ?"` 并 `show()`。
-  - source 为 `None`：`clear()` + `hide()`。
+  - source 非空：
+    - **stylesheet**：黄底（`#FFD60A`，沿用 git-cola HEAD/current-branch 的"活跃"黄）+ 黑字 + `padding: 2px 8px` + `border-radius: 8px` + `font-weight: bold`，整体是个圆角 pill / chip。
+    - **text**（rich text，所以模块顶用 `import html` 做 escape）：`<b>{source} → <span style="color:#B00020">?</span> <span style="color:#222">⬉</span></b>`。
+      - branch 名加粗黑字。
+      - "?" 用深红 `#B00020` 加粗——明确"这里**等你**点目标"。
+      - "⬉" (`U+2B09`，NORTH WEST BLACK ARROW) 是经典 idle 鼠标指针的形状，点缀在 "?" 之后，强化"用鼠标点这里"的视觉提示。
+    - 然后 `show()`。
+  - source 为 `None`：`setStyleSheet('')`（清掉 pill）+ `clear()` + `hide()`。
 
-`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor。
+`enter_merge_mode` / `exit_merge_mode` 不再修改 `viewport()` 的 cursor——徽章在工具栏里就足够醒目，光标变形反而会干扰其它操作。
 
 ## 6. 无分支节点显示 commit 消息首行
 

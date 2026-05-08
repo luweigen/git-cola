@@ -1,4 +1,5 @@
 import collections
+import html
 import itertools
 import math
 from functools import partial
@@ -1739,11 +1740,29 @@ class GitDAG(standard.MainWindow):
         self.update_window_title()
 
     def _update_merge_source_label(self, source):
-        """Show or hide the "<branch> -> " hint while picking a merge target."""
+        """Show or hide the "<branch> -> ?" hint while picking a merge target."""
         if source:
-            self.merge_source_label.setText('%s → ?' % source)
+            # Yellow pill (matches the "current/active" yellow already used
+            # for HEAD/current-branch labels) + red bold "?" calling out the
+            # placeholder + a NW-arrow cursor glyph hinting "click here".
+            self.merge_source_label.setStyleSheet(
+                'QLabel {'
+                ' background: #FFD60A;'
+                ' color: black;'
+                ' padding: 2px 8px;'
+                ' border-radius: 8px;'
+                ' font-weight: bold;'
+                '}'
+            )
+            self.merge_source_label.setText(
+                '<b>%s → '
+                '<span style="color:#B00020">?</span>'
+                ' <span style="color:#222">⬉</span>'
+                '</b>' % html.escape(source)
+            )
             self.merge_source_label.show()
         else:
+            self.merge_source_label.setStyleSheet('')
             self.merge_source_label.clear()
             self.merge_source_label.hide()
 
