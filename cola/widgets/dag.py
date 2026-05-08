@@ -2567,6 +2567,15 @@ class Label(QtWidgets.QGraphicsItem):
             return None
         return getattr(model, 'currentbranch', None) or None
 
+    def _modified_paths(self):
+        view = self._graph_view()
+        if view is None or view.context is None:
+            return []
+        model = view.context.model
+        if model is None:
+            return []
+        return list(getattr(model, 'modified', None) or [])
+
     def _show_branch_menu(self, event, full_name, original_tag):
         is_local_branch = original_tag.startswith('heads/')
         agent_part = _agent_branch_part(full_name)
@@ -2580,6 +2589,8 @@ class Label(QtWidgets.QGraphicsItem):
         rename = None
         rename_to = None
         rename_to_target = None
+        rewind_check = None
+        rewind_paths = []
         if is_local_branch:
             rename = menu.addAction(N_('Rename "%s"...') % full_name)
             graph_view = self._graph_view()
@@ -2592,6 +2603,10 @@ class Label(QtWidgets.QGraphicsItem):
                     rename_to = menu.addAction(
                         N_('Rename to "%s"...') % rename_to_target
                     )
+            if self._current_branch_name() == full_name:
+                rewind_paths = self._modified_paths()
+                if rewind_paths:
+                    rewind_check = menu.addAction(N_('Rewind check'))
         merge_to = menu.addAction(N_('Merge to...'))
         chosen = menu.exec_(event.screenPos())
         if chosen is None:
@@ -2611,6 +2626,15 @@ class Label(QtWidgets.QGraphicsItem):
             self._rename_branch(full_name, suggestion=full_name)
         elif rename_to is not None and chosen is rename_to:
             self._rename_branch(full_name, suggestion=rename_to_target)
+        elif rewind_check is not None and chosen is rewind_check:
+            graph_view = self._graph_view()
+            if graph_view is not None:
+                from . import rewind as rewind_widget
+
+                rewind_widget.run_rewind_check(
+                    graph_view.context, full_name, rewind_paths
+                )
+                graph_view.merge_finished.emit()
         elif chosen is merge_to:
             graph_view = self._graph_view()
             if graph_view is not None:
