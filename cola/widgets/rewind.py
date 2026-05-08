@@ -15,18 +15,26 @@ from ..interaction import Interaction
 
 
 def _commit_summary(context, oid: str, max_lines: int = 4) -> str:
-    """Return ``"<short-hash>\\n<up to max_lines of full commit message>"``."""
+    """Return ``"<short-hash> <subject>\\n<rest of up to max_lines>"``.
+
+    The short hash and the commit's subject (message line 1) are joined on
+    the same line; any additional message lines (up to ``max_lines`` total)
+    follow on their own lines.
+    """
     short = context.git.log(
         '-1', '--pretty=%h', oid, _readonly=True
     )[STDOUT].strip() or oid[:12]
     body = context.git.log(
         '-1', '--pretty=%B', oid, _readonly=True
     )[STDOUT]
-    lines = [line for line in body.splitlines() if line is not None]
-    head = '\n'.join(lines[:max_lines]).rstrip()
-    if head:
-        return f'{short}\n{head}'
-    return short
+    lines = body.splitlines()[:max_lines]
+    if not lines:
+        return short
+    first, rest = lines[0], lines[1:]
+    head = f'{short} {first}'.rstrip()
+    if rest:
+        head = head + '\n' + '\n'.join(rest).rstrip()
+    return head
 
 
 def _format_dirty_listing(context, dirty_paths: list[str], limit: int = 20) -> str:
