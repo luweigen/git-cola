@@ -61887,19 +61887,118 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 742,
+      "timestamp": "2026-05-08T06:38:43.712Z",
+      "source": "user",
+      "message": "选择branch label上的Merge to菜单后工具栏显示的“{branch name}→?\"有什么特殊风格可以起到提醒注意的作用？",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 743,
+      "timestamp": "2026-05-08T06:39:26.317Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 14964,
+        "completion_tokens": 3184,
+        "cached_tokens": 14958,
+        "extra": {
+          "cache_creation_input_tokens": 534140,
+          "cache_read_input_tokens": 14958,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 534140,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 3184,
+              "cache_read_input_tokens": 14958,
+              "cache_creation_input_tokens": 534140,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 534140
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 744,
+      "timestamp": "2026-05-08T06:39:49.454Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "先看看现状再给你列选项。当前实现（NOTE.md §5）：`QLabel self.merge_source_label` 放在 graph_controls_layout 的最左，显示 `\"<source> → ?\"`，没设任何样式 → 就是默认的纯文本，颜色随系统主题，不抢眼。\n\n下面几种风格按\"醒目度从轻到重\"列，都能用一行 stylesheet（或加一两行）实现，不需要动画/计时器：\n\n## A. 加粗着色文字（最低侵入）\n\n```python\nself.merge_source_label.setStyleSheet(\n    'font-weight: bold; color: #FF6B00;'  # 橙\n)\n```\n\n- 不改背景，只让文字变粗变橙。\n- 优点：和工具栏其它控件视觉协调，不喧宾夺主。\n- 缺点：暗主题下橙字可能不够亮。\n\n## B. Pill / chip 风格（推荐）\n\n```python\nself.merge_source_label.setStyleSheet(\n    'background: #FFD60A;'        # 黄底（沿用 git-cola \"current\" 色）\n    'color: black;'\n    'padding: 2px 8px;'\n    'border-radius: 8px;'\n    'font-weight: bold;'\n)\n```\n\n- 工具栏里跳出一个圆角黄底加粗黑字小标签，像 GitHub 的 \"Open\" / \"Draft\" 状态徽章。\n- 颜色可以换：\n  - 黄底黑字：和 `remote_color`/HEAD/current 同语义档（\"当前/活跃\"）。\n  - 橙底白字：更\"action required\"感，`background: #FF6B00; color: white;`。\n  - 红底白字：最强警示，`background: #DC3545; color: white;`——如果你想强调\"merge 是危险动作，别忘了 ESC\"。\n- 优点：黄色和现有色调系统一致，不引入新色。\n- 缺点：占的横向宽度比纯文字稍大。\n\n## C. 把 \"?\" 单独高亮（rich text）\n\nQLabel 支持 HTML，`setText('<b><span style=\"color:#0066CC\">main</span> → <span style=\"color:#DC3545;font-weight:bold\">?</span></b>')`：\n\n- branch 名蓝粗，\"?\" 红粗。\n- \"?\" 红色明确传达\"这里**等你**点目标\"。\n- 优点：把视觉焦点引向真正需要用户决定的位置（target 占位）。\n- 缺点：稍微 fancy，不一定贴主题。\n\n## D. 加 merge 符号前缀\n\n`setText('⤥ <source> → ?')` 或 `🔀 <source> → ?` 或 `⇉ <source> → ?`：\n\n- 在文字前面挂一个 unicode merge 风格符号。\n- 优点：扫一眼就识别出\"这是 merge 模式\"。\n- 缺点：emoji 跨主题/字体风险（macOS 上 🔀 是彩色 emoji，Linux 字体可能缺）。\n\n## E. 组合：B + C + 图标\n\n```python\nself.merge_source_label.setStyleSheet(\n    'background: #FFD60A; color: black;'\n    'padding: 2px 8px; border-radius: 8px;'\n    'font-weight: bold;'\n)\nself.merge_source_label.setText(\n    f'⤥ <span>{source}</span> → '\n    f'<span style=\"color:#B00020\">?</span>'\n)\n```\n\n最醒目的组合：黄 pill + 加粗 + merge 图标 + 红\"?\"。代价是写得稍多。\n\n## 我的建议\n\n**B（黄底黑字 pill）** 性价比最高：\n- 和 git-cola 现有 `remote_color = yellow` 同色系，完全融入现有设计语言。\n- 一行 stylesheet 就完事，不引入新依赖、不引入新色。\n- 黄底加粗黑字在亮/暗主题下都不会失败。\n\n如果你觉得\"merge 是有破坏性的操作、需要更强警示\"，换成**橙/红 pill**就行（同样一行 stylesheet）。\n\n如果还想再加一档（\"?\"明显是占位符等用户点），叠加 C 的 rich text 即可。\n\n要我直接实现 B（默认黄 pill），还是你想先选 A/C/D/E 里另一种？要不要再加一个 `cola.dag.mergebadgestyle = pill|text|...` 之类配置切档？",
+      "metrics": {
+        "prompt_tokens": 14964,
+        "completion_tokens": 3184,
+        "cached_tokens": 14958,
+        "extra": {
+          "cache_creation_input_tokens": 534140,
+          "cache_read_input_tokens": 14958,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 534140,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 3184,
+              "cache_read_input_tokens": 14958,
+              "cache_creation_input_tokens": 534140,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 534140
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 214199938,
-    "total_completion_tokens": 1029633,
-    "total_cached_tokens": 214198845,
-    "total_steps": 741,
+    "total_prompt_tokens": 214229866,
+    "total_completion_tokens": 1036001,
+    "total_cached_tokens": 214228761,
+    "total_steps": 744,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 4538288,
-      "total_cache_read_input_tokens": 214198845
+      "total_cache_creation_input_tokens": 5606568,
+      "total_cache_read_input_tokens": 214228761
     }
   }
 }

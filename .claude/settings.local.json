@@ -25,6 +25,16 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/luwei/work/sources/venv/bin/python /Users/luwei/work/sources/userpromptsubmit_hook.py"
+          }
+        ]
+      }
     ]
   },
   "autoMemoryEnabled": false
