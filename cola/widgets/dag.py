@@ -2,6 +2,7 @@ import collections
 import html
 import itertools
 import math
+import sys
 from functools import partial
 from typing import Optional
 
@@ -1538,6 +1539,12 @@ class GitDAG(standard.MainWindow):
         self.menubar = QtWidgets.QMenuBar(self)
         self.setMenuBar(self.menubar)
 
+        # File Menu
+        self.file_menu = qtutils.add_menu(N_('&File'), self.menubar)
+        self.open_recent_menu = self.file_menu.addMenu(N_('Open Recent'))
+        self.open_recent_menu.setIcon(icons.folder())
+        self.open_recent_menu.aboutToShow.connect(self._build_open_recent_menu)
+
         # View Menu
         self.view_menu = qtutils.add_menu(N_('View'), self.menubar)
         self.view_menu.addAction(self.refresh_action)
@@ -1632,6 +1639,55 @@ class GitDAG(standard.MainWindow):
             self.thread.requestInterruption()
             QtCore.QThread.currentThread().yieldCurrentThread()
             self.thread.wait(100)
+
+    def _build_open_recent_menu(self):
+        """Populate the Open Recent submenu from settings.recent."""
+        context = self.context
+        settings = context.settings
+        settings.load()
+        menu = self.open_recent_menu
+        menu.clear()
+        worktree = context.git.worktree()
+
+        added = False
+        for entry in settings.recent:
+            directory = entry['path']
+            if directory == worktree:
+                continue
+            name = entry['name']
+            text = f'{name} {chr(0x2192)} {directory}'
+            menu.addAction(text, partial(self._open_repo_in_new_dag, directory))
+            added = True
+
+        if not added:
+            empty_action = menu.addAction(N_('No recent repositories'))
+            empty_action.setEnabled(False)
+
+    def _open_repo_in_new_dag(self, repo_path):
+        """Launch a new dag process for ``repo_path`` reusing current argv."""
+        argv = []
+        skip_next = False
+        for arg in sys.argv:
+            if skip_next:
+                skip_next = False
+                continue
+            if arg in ('--repo', '-r'):
+                skip_next = True
+                continue
+            if arg.startswith('--repo=') or arg.startswith('-r='):
+                continue
+            argv.append(arg)
+
+        # ``--repo`` is a sub-command argument; insert it after the
+        # ``dag`` subcommand if we were launched via ``git cola dag``,
+        # otherwise right after argv[0] (e.g. ``bin/git-dag``).
+        try:
+            insert_at = argv.index('dag', 1) + 1
+        except ValueError:
+            insert_at = 1
+        argv[insert_at:insert_at] = ['--repo', repo_path]
+
+        core.fork([sys.executable] + argv)
 
     def _display_worktree_status(self, enabled):
         """Enable and disable the display of the WORKTREE and STAGE pseudo-commits"""

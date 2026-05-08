@@ -12,7 +12,8 @@
       "Bash(venv/bin/pytest cola/models cola/cmd.py cola/cmds.py --doctest-modules -q --no-header)",
       "Bash(venv/bin/python -m cola dag --help)",
       "Bash(venv/bin/pytest test/graph_test.py -q --no-header)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "Bash(garden test *)"
     ]
   },
   "hooks": {
