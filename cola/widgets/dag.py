@@ -1665,9 +1665,26 @@ class GitDAG(standard.MainWindow):
 
     def _open_repo_in_new_dag(self, repo_path):
         """Launch a new dag process for ``repo_path`` reusing current argv."""
-        argv = []
+        # Detect whether we were launched via ``python -m <pkg>``; in that
+        # case sys.argv[0] is the package's ``__main__.py`` and re-running
+        # it as a plain script breaks ``from .`` relative imports.
+        import __main__
+
+        spec = getattr(__main__, '__spec__', None)
+        if spec is not None and getattr(spec, 'name', None):
+            module_name = spec.name
+            if module_name.endswith('.__main__'):
+                module_name = module_name[: -len('.__main__')]
+            launcher = [sys.executable, '-m', module_name]
+            tail = list(sys.argv[1:])
+        else:
+            launcher = [sys.executable, sys.argv[0]]
+            tail = list(sys.argv[1:])
+
+        # Strip any existing ``-r`` / ``--repo`` flag from the tail.
+        rest = []
         skip_next = False
-        for arg in sys.argv:
+        for arg in tail:
             if skip_next:
                 skip_next = False
                 continue
@@ -1676,18 +1693,17 @@ class GitDAG(standard.MainWindow):
                 continue
             if arg.startswith('--repo=') or arg.startswith('-r='):
                 continue
-            argv.append(arg)
+            rest.append(arg)
 
         # ``--repo`` is a sub-command argument; insert it after the
-        # ``dag`` subcommand if we were launched via ``git cola dag``,
-        # otherwise right after argv[0] (e.g. ``bin/git-dag``).
+        # ``dag`` subcommand if present, otherwise at the start of ``rest``.
         try:
-            insert_at = argv.index('dag', 1) + 1
+            insert_at = rest.index('dag') + 1
         except ValueError:
-            insert_at = 1
-        argv[insert_at:insert_at] = ['--repo', repo_path]
+            insert_at = 0
+        rest[insert_at:insert_at] = ['--repo', repo_path]
 
-        core.fork([sys.executable] + argv)
+        core.fork(launcher + rest)
 
     def _display_worktree_status(self, enabled):
         """Enable and disable the display of the WORKTREE and STAGE pseudo-commits"""

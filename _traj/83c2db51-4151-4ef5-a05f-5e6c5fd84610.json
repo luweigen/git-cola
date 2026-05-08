@@ -5643,19 +5643,549 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 68,
+      "timestamp": "2026-05-08T13:40:07.601Z",
+      "source": "user",
+      "message": "选择一个repo后得到以下错误，新进程用的跟本进程一样的python执行文件路径吗？Traceback (most recent call last):\n  File \"/Users/luwei/work/git-cola/cola/i18n.py\", line 7, in <module>\n    import polib\n  File \"/Users/luwei/work/git-cola/cola/polib.py\", line 21, in <module>\n    import textwrap\n  File \"/Users/luwei/work/git-cola/cola/textwrap.py\", line 5, in <module>\n    from .compat import ustr\nImportError: attempted relative import with no known parent package\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/luwei/work/git-cola/cola/__main__.py\", line 6, in <module>\n    from cola import main\n  File \"/Users/luwei/work/git-cola/cola/main.py\", line 8, in <module>\n    from . import app\n  File \"/Users/luwei/work/git-cola/cola/app.py\", line 49, in <module>\n    from . import cmds\n  File \"/Users/luwei/work/git-cola/cola/cmds.py\", line 19, in <module>\n    from . import display\n  File \"/Users/luwei/work/git-cola/cola/display.py\", line 17, in <module>\n    from .models import prefs\n  File \"/Users/luwei/work/git-cola/cola/models/prefs.py\", line 8, in <module>\n    from .. import hidpi\n  File \"/Users/luwei/work/git-cola/cola/hidpi.py\", line 7, in <module>\n    from . import version\n  File \"/Users/luwei/work/git-cola/cola/version.py\", line 11, in <module>\n    from .git import STDOUT\n  File \"/Users/luwei/work/git-cola/cola/git.py\", line 17, in <module>\n    from .interaction import Interaction\n  File \"/Users/luwei/work/git-cola/cola/interaction.py\", line 7, in <module>\n    from .i18n import N_\n  File \"/Users/luwei/work/git-cola/cola/i18n.py\", line 9, in <module>\n    from . import polib\n  File \"/Users/luwei/work/git-cola/cola/polib.py\", line 21, in <module>\n    import textwrap\n  File \"/Users/luwei/work/git-cola/cola/textwrap.py\", line 5, in <module>\n    from .compat import ustr\nImportError: attempted relative import with no known parent package",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 69,
+      "timestamp": "2026-05-08T13:40:26.420Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 64989,
+        "completion_tokens": 2540,
+        "cached_tokens": 64983,
+        "extra": {
+          "cache_creation_input_tokens": 1364,
+          "cache_read_input_tokens": 64983,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1364,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 2540,
+              "cache_read_input_tokens": 64983,
+              "cache_creation_input_tokens": 1364,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1364
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 70,
+      "timestamp": "2026-05-08T13:40:28.426Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "确实是这个问题：用户用 `python -m cola dag` 启动时，`sys.argv[0]` 是 `/Users/luwei/work/git-cola/cola/__main__.py`，我直接 fork `[python, __main__.py, ...]` 会绕过包初始化，导致 `from .` 相对导入失败。需要检测 `-m` 启动并改用 `[python, -m, cola, ...]`。",
+      "metrics": {
+        "prompt_tokens": 64989,
+        "completion_tokens": 2540,
+        "cached_tokens": 64983,
+        "extra": {
+          "cache_creation_input_tokens": 1364,
+          "cache_read_input_tokens": 64983,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1364,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 2540,
+              "cache_read_input_tokens": 64983,
+              "cache_creation_input_tokens": 1364,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1364
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 71,
+      "timestamp": "2026-05-08T13:40:37.289Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01VjRW96391AyTmvxM2P3UUA",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01VjRW96391AyTmvxM2P3UUA",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "    def _open_repo_in_new_dag(self, repo_path):\n        \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"\n        argv = []\n        skip_next = False\n        for arg in sys.argv:\n            if skip_next:\n                skip_next = False\n                continue\n            if arg in ('--repo', '-r'):\n                skip_next = True\n                continue\n            if arg.startswith('--repo=') or arg.startswith('-r='):\n                continue\n            argv.append(arg)\n\n        # ``--repo`` is a sub-command argument; insert it after the\n        # ``dag`` subcommand if we were launched via ``git cola dag``,\n        # otherwise right after argv[0] (e.g. ``bin/git-dag``).\n        try:\n            insert_at = argv.index('dag', 1) + 1\n        except ValueError:\n            insert_at = 1\n        argv[insert_at:insert_at] = ['--repo', repo_path]\n\n        core.fork([sys.executable] + argv)",
+            "new_string": "    def _open_repo_in_new_dag(self, repo_path):\n        \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"\n        # Detect whether we were launched via ``python -m <pkg>``; in that\n        # case sys.argv[0] is the package's ``__main__.py`` and re-running\n        # it as a plain script breaks ``from .`` relative imports.\n        import __main__\n\n        spec = getattr(__main__, '__spec__', None)\n        if spec is not None and getattr(spec, 'name', None):\n            module_name = spec.name\n            if module_name.endswith('.__main__'):\n                module_name = module_name[: -len('.__main__')]\n            launcher = [sys.executable, '-m', module_name]\n            tail = list(sys.argv[1:])\n        else:\n            launcher = [sys.executable, sys.argv[0]]\n            tail = list(sys.argv[1:])\n\n        # Strip any existing ``-r`` / ``--repo`` flag from the tail.\n        rest = []\n        skip_next = False\n        for arg in tail:\n            if skip_next:\n                skip_next = False\n                continue\n            if arg in ('--repo', '-r'):\n                skip_next = True\n                continue\n            if arg.startswith('--repo=') or arg.startswith('-r='):\n                continue\n            rest.append(arg)\n\n        # ``--repo`` is a sub-command argument; insert it after the\n        # ``dag`` subcommand if present, otherwise at the start of ``rest``.\n        try:\n            insert_at = rest.index('dag') + 1\n        except ValueError:\n            insert_at = 0\n        rest[insert_at:insert_at] = ['--repo', repo_path]\n\n        core.fork(launcher + rest)"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01VjRW96391AyTmvxM2P3UUA",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"    def _open_repo_in_new_dag(self, repo_path):\\n        \\\"\\\"\\\"Launch a new dag process for ``repo_path`` reusing current argv.\\\"\\\"\\\"\\n        argv = []\\n        skip_next = False\\n        for arg in sys.argv:\\n            if skip_next:\\n                skip_next = False\\n                continue\\n            if arg in ('--repo', '-r'):\\n                skip_next = True\\n                continue\\n            if arg.startswith('--repo=') or arg.startswith('-r='):\\n                continue\\n            argv.append(arg)\\n\\n        # ``--repo`` is a sub-command argument; insert it after the\\n        # ``dag`` subcommand if we were launched via ``git cola dag``,\\n        # otherwise right after argv[0] (e.g. ``bin/git-dag``).\\n        try:\\n            insert_at = argv.index('dag', 1) + 1\\n        except ValueError:\\n            insert_at = 1\\n        argv[insert_at:insert_at] = ['--repo', repo_path]\\n\\n        core.fork([sys.executable] + argv)\", \"newString\": \"    def _open_repo_in_new_dag(self, repo_path):\\n        \\\"\\\"\\\"Launch a new dag process for ``repo_path`` reusing current argv.\\\"\\\"\\\"\\n        # Detect whether we were launched via ``python -m <pkg>``; in that\\n        # case sys.argv[0] is the package's ``__main__.py`` and re-running\\n        # it as a plain script breaks ``from .`` relative imports.\\n        import __main__\\n\\n        spec = getattr(__main__, '__spec__', None)\\n        if spec is not None and getattr(spec, 'name', None):\\n            module_name = spec.name\\n            if module_name.endswith('.__main__'):\\n                module_name = module_name[: -len('.__main__')]\\n            launcher = [sys.executable, '-m', module_name]\\n            tail = list(sys.argv[1:])\\n        else:\\n            launcher = [sys.executable, sys.argv[0]]\\n            tail = list(sys.argv[1:])\\n\\n        # Strip any existing ``-r`` / ``--repo`` flag from the tail.\\n        rest = []\\n        skip_next = False\\n        for arg in tail:\\n            if skip_next:\\n                skip_next = False\\n                continue\\n            if arg in ('--repo', '-r'):\\n                skip_next = True\\n                continue\\n            if arg.startswith('--repo=') or arg.startswith('-r='):\\n                continue\\n            rest.append(arg)\\n\\n        # ``--repo`` is a sub-command argument; insert it after the\\n        # ``dag`` subcommand if present, otherwise at the start of ``rest``.\\n        try:\\n            insert_at = rest.index('dag') + 1\\n        except ValueError:\\n            insert_at = 0\\n        rest[insert_at:insert_at] = ['--repo', repo_path]\\n\\n        core.fork(launcher + rest)\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 1665, \"oldLines\": 9, \"newStart\": 1665, \"newLines\": 26, \"lines\": [\" \", \"     def _open_repo_in_new_dag(self, repo_path):\", \"         \\\"\\\"\\\"Launch a new dag process for ``repo_path`` reusing current argv.\\\"\\\"\\\"\", \"-        argv = []\", \"+        # Detect whether we were launched via ``python -m <pkg>``; in that\", \"+        # case sys.argv[0] is the package's ``__main__.py`` and re-running\", \"+        # it as a plain script breaks ``from .`` relative imports.\", \"+        import __main__\", \"+\", \"+        spec = getattr(__main__, '__spec__', None)\", \"+        if spec is not None and getattr(spec, 'name', None):\", \"+            module_name = spec.name\", \"+            if module_name.endswith('.__main__'):\", \"+                module_name = module_name[: -len('.__main__')]\", \"+            launcher = [sys.executable, '-m', module_name]\", \"+            tail = list(sys.argv[1:])\", \"+        else:\", \"+            launcher = [sys.executable, sys.argv[0]]\", \"+            tail = list(sys.argv[1:])\", \"+\", \"+        # Strip any existing ``-r`` / ``--repo`` flag from the tail.\", \"+        rest = []\", \"         skip_next = False\", \"-        for arg in sys.argv:\", \"+        for arg in tail:\", \"             if skip_next:\", \"                 skip_next = False\", \"                 continue\"]}, {\"oldStart\": 1676, \"oldLines\": 18, \"newStart\": 1693, \"newLines\": 17, \"lines\": [\"                 continue\", \"             if arg.startswith('--repo=') or arg.startswith('-r='):\", \"                 continue\", \"-            argv.append(arg)\", \"+            rest.append(arg)\", \" \", \"         # ``--repo`` is a sub-command argument; insert it after the\", \"-        # ``dag`` subcommand if we were launched via ``git cola dag``,\", \"-        # otherwise right after argv[0] (e.g. ``bin/git-dag``).\", \"+        # ``dag`` subcommand if present, otherwise at the start of ``rest``.\", \"         try:\", \"-            insert_at = argv.index('dag', 1) + 1\", \"+            insert_at = rest.index('dag') + 1\", \"         except ValueError:\", \"-            insert_at = 1\", \"-        argv[insert_at:insert_at] = ['--repo', repo_path]\", \"+            insert_at = 0\", \"+        rest[insert_at:insert_at] = ['--repo', repo_path]\", \" \", \"-        core.fork([sys.executable] + argv)\", \"+        core.fork(launcher + rest)\", \" \", \"     def _display_worktree_status(self, enabled):\", \"         \\\"\\\"\\\"Enable and disable the display of the WORKTREE and STAGE pseudo-commits\\\"\\\"\\\"\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 64989,
+        "completion_tokens": 2540,
+        "cached_tokens": 64983,
+        "extra": {
+          "cache_creation_input_tokens": 1364,
+          "cache_read_input_tokens": 64983,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1364,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 2540,
+              "cache_read_input_tokens": 64983,
+              "cache_creation_input_tokens": 1364,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1364
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "    def _open_repo_in_new_dag(self, repo_path):\n        \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"\n        argv = []\n        skip_next = False\n        for arg in sys.argv:\n            if skip_next:\n                skip_next = False\n                continue\n            if arg in ('--repo', '-r'):\n                skip_next = True\n                continue\n            if arg.startswith('--repo=') or arg.startswith('-r='):\n                continue\n            argv.append(arg)\n\n        # ``--repo`` is a sub-command argument; insert it after the\n        # ``dag`` subcommand if we were launched via ``git cola dag``,\n        # otherwise right after argv[0] (e.g. ``bin/git-dag``).\n        try:\n            insert_at = argv.index('dag', 1) + 1\n        except ValueError:\n            insert_at = 1\n        argv[insert_at:insert_at] = ['--repo', repo_path]\n\n        core.fork([sys.executable] + argv)",
+            "newString": "    def _open_repo_in_new_dag(self, repo_path):\n        \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"\n        # Detect whether we were launched via ``python -m <pkg>``; in that\n        # case sys.argv[0] is the package's ``__main__.py`` and re-running\n        # it as a plain script breaks ``from .`` relative imports.\n        import __main__\n\n        spec = getattr(__main__, '__spec__', None)\n        if spec is not None and getattr(spec, 'name', None):\n            module_name = spec.name\n            if module_name.endswith('.__main__'):\n                module_name = module_name[: -len('.__main__')]\n            launcher = [sys.executable, '-m', module_name]\n            tail = list(sys.argv[1:])\n        else:\n            launcher = [sys.executable, sys.argv[0]]\n            tail = list(sys.argv[1:])\n\n        # Strip any existing ``-r`` / ``--repo`` flag from the tail.\n        rest = []\n        skip_next = False\n        for arg in tail:\n            if skip_next:\n                skip_next = False\n                continue\n            if arg in ('--repo', '-r'):\n                skip_next = True\n                continue\n            if arg.startswith('--repo=') or arg.startswith('-r='):\n                continue\n            rest.append(arg)\n\n        # ``--repo`` is a sub-command argument; insert it after the\n        # ``dag`` subcommand if present, otherwise at the start of ``rest``.\n        try:\n            insert_at = rest.index('dag') + 1\n        except ValueError:\n            insert_at = 0\n        rest[insert_at:insert_at] = ['--repo', repo_path]\n\n        core.fork(launcher + rest)",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 1665,
+                "oldLines": 9,
+                "newStart": 1665,
+                "newLines": 26,
+                "lines": [
+                  " ",
+                  "     def _open_repo_in_new_dag(self, repo_path):",
+                  "         \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"",
+                  "-        argv = []",
+                  "+        # Detect whether we were launched via ``python -m <pkg>``; in that",
+                  "+        # case sys.argv[0] is the package's ``__main__.py`` and re-running",
+                  "+        # it as a plain script breaks ``from .`` relative imports.",
+                  "+        import __main__",
+                  "+",
+                  "+        spec = getattr(__main__, '__spec__', None)",
+                  "+        if spec is not None and getattr(spec, 'name', None):",
+                  "+            module_name = spec.name",
+                  "+            if module_name.endswith('.__main__'):",
+                  "+                module_name = module_name[: -len('.__main__')]",
+                  "+            launcher = [sys.executable, '-m', module_name]",
+                  "+            tail = list(sys.argv[1:])",
+                  "+        else:",
+                  "+            launcher = [sys.executable, sys.argv[0]]",
+                  "+            tail = list(sys.argv[1:])",
+                  "+",
+                  "+        # Strip any existing ``-r`` / ``--repo`` flag from the tail.",
+                  "+        rest = []",
+                  "         skip_next = False",
+                  "-        for arg in sys.argv:",
+                  "+        for arg in tail:",
+                  "             if skip_next:",
+                  "                 skip_next = False",
+                  "                 continue"
+                ]
+              },
+              {
+                "oldStart": 1676,
+                "oldLines": 18,
+                "newStart": 1693,
+                "newLines": 17,
+                "lines": [
+                  "                 continue",
+                  "             if arg.startswith('--repo=') or arg.startswith('-r='):",
+                  "                 continue",
+                  "-            argv.append(arg)",
+                  "+            rest.append(arg)",
+                  " ",
+                  "         # ``--repo`` is a sub-command argument; insert it after the",
+                  "-        # ``dag`` subcommand if we were launched via ``git cola dag``,",
+                  "-        # otherwise right after argv[0] (e.g. ``bin/git-dag``).",
+                  "+        # ``dag`` subcommand if present, otherwise at the start of ``rest``.",
+                  "         try:",
+                  "-            insert_at = argv.index('dag', 1) + 1",
+                  "+            insert_at = rest.index('dag') + 1",
+                  "         except ValueError:",
+                  "-            insert_at = 1",
+                  "-        argv[insert_at:insert_at] = ['--repo', repo_path]",
+                  "+            insert_at = 0",
+                  "+        rest[insert_at:insert_at] = ['--repo', repo_path]",
+                  " ",
+                  "-        core.fork([sys.executable] + argv)",
+                  "+        core.fork(launcher + rest)",
+                  " ",
+                  "     def _display_worktree_status(self, enabled):",
+                  "         \"\"\"Enable and disable the display of the WORKTREE and STAGE pseudo-commits\"\"\""
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01VjRW96391AyTmvxM2P3UUA",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "    def _open_repo_in_new_dag(self, repo_path):\n        \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"\n        argv = []\n        skip_next = False\n        for arg in sys.argv:\n            if skip_next:\n                skip_next = False\n                continue\n            if arg in ('--repo', '-r'):\n                skip_next = True\n                continue\n            if arg.startswith('--repo=') or arg.startswith('-r='):\n                continue\n            argv.append(arg)\n\n        # ``--repo`` is a sub-command argument; insert it after the\n        # ``dag`` subcommand if we were launched via ``git cola dag``,\n        # otherwise right after argv[0] (e.g. ``bin/git-dag``).\n        try:\n            insert_at = argv.index('dag', 1) + 1\n        except ValueError:\n            insert_at = 1\n        argv[insert_at:insert_at] = ['--repo', repo_path]\n\n        core.fork([sys.executable] + argv)",
+            "newString": "    def _open_repo_in_new_dag(self, repo_path):\n        \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"\n        # Detect whether we were launched via ``python -m <pkg>``; in that\n        # case sys.argv[0] is the package's ``__main__.py`` and re-running\n        # it as a plain script breaks ``from .`` relative imports.\n        import __main__\n\n        spec = getattr(__main__, '__spec__', None)\n        if spec is not None and getattr(spec, 'name', None):\n            module_name = spec.name\n            if module_name.endswith('.__main__'):\n                module_name = module_name[: -len('.__main__')]\n            launcher = [sys.executable, '-m', module_name]\n            tail = list(sys.argv[1:])\n        else:\n            launcher = [sys.executable, sys.argv[0]]\n            tail = list(sys.argv[1:])\n\n        # Strip any existing ``-r`` / ``--repo`` flag from the tail.\n        rest = []\n        skip_next = False\n        for arg in tail:\n            if skip_next:\n                skip_next = False\n                continue\n            if arg in ('--repo', '-r'):\n                skip_next = True\n                continue\n            if arg.startswith('--repo=') or arg.startswith('-r='):\n                continue\n            rest.append(arg)\n\n        # ``--repo`` is a sub-command argument; insert it after the\n        # ``dag`` subcommand if present, otherwise at the start of ``rest``.\n        try:\n            insert_at = rest.index('dag') + 1\n        except ValueError:\n            insert_at = 0\n        rest[insert_at:insert_at] = ['--repo', repo_path]\n\n        core.fork(launcher + rest)",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 1665,
+                "oldLines": 9,
+                "newStart": 1665,
+                "newLines": 26,
+                "lines": [
+                  " ",
+                  "     def _open_repo_in_new_dag(self, repo_path):",
+                  "         \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"",
+                  "-        argv = []",
+                  "+        # Detect whether we were launched via ``python -m <pkg>``; in that",
+                  "+        # case sys.argv[0] is the package's ``__main__.py`` and re-running",
+                  "+        # it as a plain script breaks ``from .`` relative imports.",
+                  "+        import __main__",
+                  "+",
+                  "+        spec = getattr(__main__, '__spec__', None)",
+                  "+        if spec is not None and getattr(spec, 'name', None):",
+                  "+            module_name = spec.name",
+                  "+            if module_name.endswith('.__main__'):",
+                  "+                module_name = module_name[: -len('.__main__')]",
+                  "+            launcher = [sys.executable, '-m', module_name]",
+                  "+            tail = list(sys.argv[1:])",
+                  "+        else:",
+                  "+            launcher = [sys.executable, sys.argv[0]]",
+                  "+            tail = list(sys.argv[1:])",
+                  "+",
+                  "+        # Strip any existing ``-r`` / ``--repo`` flag from the tail.",
+                  "+        rest = []",
+                  "         skip_next = False",
+                  "-        for arg in sys.argv:",
+                  "+        for arg in tail:",
+                  "             if skip_next:",
+                  "                 skip_next = False",
+                  "                 continue"
+                ]
+              },
+              {
+                "oldStart": 1676,
+                "oldLines": 18,
+                "newStart": 1693,
+                "newLines": 17,
+                "lines": [
+                  "                 continue",
+                  "             if arg.startswith('--repo=') or arg.startswith('-r='):",
+                  "                 continue",
+                  "-            argv.append(arg)",
+                  "+            rest.append(arg)",
+                  " ",
+                  "         # ``--repo`` is a sub-command argument; insert it after the",
+                  "-        # ``dag`` subcommand if we were launched via ``git cola dag``,",
+                  "-        # otherwise right after argv[0] (e.g. ``bin/git-dag``).",
+                  "+        # ``dag`` subcommand if present, otherwise at the start of ``rest``.",
+                  "         try:",
+                  "-            insert_at = argv.index('dag', 1) + 1",
+                  "+            insert_at = rest.index('dag') + 1",
+                  "         except ValueError:",
+                  "-            insert_at = 1",
+                  "-        argv[insert_at:insert_at] = ['--repo', repo_path]",
+                  "+            insert_at = 0",
+                  "+        rest[insert_at:insert_at] = ['--repo', repo_path]",
+                  " ",
+                  "-        core.fork([sys.executable] + argv)",
+                  "+        core.fork(launcher + rest)",
+                  " ",
+                  "     def _display_worktree_status(self, enabled):",
+                  "         \"\"\"Enable and disable the display of the WORKTREE and STAGE pseudo-commits\"\"\""
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01VjRW96391AyTmvxM2P3UUA",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)"
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "    def _open_repo_in_new_dag(self, repo_path):\n        \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"\n        argv = []\n        skip_next = False\n        for arg in sys.argv:\n            if skip_next:\n                skip_next = False\n                continue\n            if arg in ('--repo', '-r'):\n                skip_next = True\n                continue\n            if arg.startswith('--repo=') or arg.startswith('-r='):\n                continue\n            argv.append(arg)\n\n        # ``--repo`` is a sub-command argument; insert it after the\n        # ``dag`` subcommand if we were launched via ``git cola dag``,\n        # otherwise right after argv[0] (e.g. ``bin/git-dag``).\n        try:\n            insert_at = argv.index('dag', 1) + 1\n        except ValueError:\n            insert_at = 1\n        argv[insert_at:insert_at] = ['--repo', repo_path]\n\n        core.fork([sys.executable] + argv)",
+          "new_string": "    def _open_repo_in_new_dag(self, repo_path):\n        \"\"\"Launch a new dag process for ``repo_path`` reusing current argv.\"\"\"\n        # Detect whether we were launched via ``python -m <pkg>``; in that\n        # case sys.argv[0] is the package's ``__main__.py`` and re-running\n        # it as a plain script breaks ``from .`` relative imports.\n        import __main__\n\n        spec = getattr(__main__, '__spec__', None)\n        if spec is not None and getattr(spec, 'name', None):\n            module_name = spec.name\n            if module_name.endswith('.__main__'):\n                module_name = module_name[: -len('.__main__')]\n            launcher = [sys.executable, '-m', module_name]\n            tail = list(sys.argv[1:])\n        else:\n            launcher = [sys.executable, sys.argv[0]]\n            tail = list(sys.argv[1:])\n\n        # Strip any existing ``-r`` / ``--repo`` flag from the tail.\n        rest = []\n        skip_next = False\n        for arg in tail:\n            if skip_next:\n                skip_next = False\n                continue\n            if arg in ('--repo', '-r'):\n                skip_next = True\n                continue\n            if arg.startswith('--repo=') or arg.startswith('-r='):\n                continue\n            rest.append(arg)\n\n        # ``--repo`` is a sub-command argument; insert it after the\n        # ``dag`` subcommand if present, otherwise at the start of ``rest``.\n        try:\n            insert_at = rest.index('dag') + 1\n        except ValueError:\n            insert_at = 0\n        rest[insert_at:insert_at] = ['--repo', repo_path]\n\n        core.fork(launcher + rest)"
+        }
+      }
+    },
+    {
+      "step_id": 72,
+      "timestamp": "2026-05-08T13:40:39.698Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "验证两种调用形式：",
+      "metrics": {
+        "prompt_tokens": 66348,
+        "completion_tokens": 699,
+        "cached_tokens": 66347,
+        "extra": {
+          "cache_creation_input_tokens": 2610,
+          "cache_read_input_tokens": 66347,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 2610,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 699,
+              "cache_read_input_tokens": 66347,
+              "cache_creation_input_tokens": 2610,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 2610
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 73,
+      "timestamp": "2026-05-08T13:40:47.397Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01N543ms2HXL5ixbDLPGDySm",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01N543ms2HXL5ixbDLPGDySm",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "venv/bin/python << 'EOF' 2>&1 | tail -20\nimport sys, types\n# Case 1: launched via `python -m cola dag --repo X`\nsys.argv = ['/Users/luwei/work/git-cola/cola/__main__.py', 'dag', '--repo', '/orig', '--all', '-c', '50']\nimport __main__\n__main__.__spec__ = types.SimpleNamespace(name='cola.__main__')\n\nfrom qtpy import QtWidgets\napp = QtWidgets.QApplication(['cola'])\nimport os; os.chdir('/Users/luwei/work/git-cola')\nfrom cola import dag as dagentry\nns = dagentry.parse_args(['--repo', '/Users/luwei/work/git-cola'])\nfrom cola import app as cola_app\nctx = cola_app.application_init(ns, app_name='Git DAG', setup_repo=True)\nsys.argv = ['/Users/luwei/work/git-cola/cola/__main__.py', 'dag', '--repo', '/orig', '--all', '-c', '50']\nfrom cola.widgets import dag as dagw\nview = dagw.git_dag(ctx, args=ns, show=False)\nimport cola.core as core\ncore.fork = lambda a, *x, **y: print('Case1 (python -m cola):', a)\nview._open_repo_in_new_dag('/tmp/new')\n\n# Case 2: bin/git-dag\nsys.argv = ['/Users/luwei/work/git-cola/bin/git-dag', '--repo', '/orig']\n__main__.__spec__ = None\ncore.fork = lambda a, *x, **y: print('Case2 (bin/git-dag):', a)\nview._open_repo_in_new_dag('/tmp/new')\nEOF",
+            "description": "Verify both invocation forms produce correct argv"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01N543ms2HXL5ixbDLPGDySm",
+            "content": "Case1 (python -m cola): ['/Users/luwei/work/git-cola/venv/bin/python', '-m', 'cola', 'dag', '--repo', '/tmp/new', '--all', '-c', '50']\nCase2 (bin/git-dag): ['/Users/luwei/work/git-cola/venv/bin/python', '/Users/luwei/work/git-cola/bin/git-dag', '--repo', '/tmp/new']\nQBasicTimer::start: current thread's event dispatcher has already been destroyed\n\n[stdout]\nCase1 (python -m cola): ['/Users/luwei/work/git-cola/venv/bin/python', '-m', 'cola', 'dag', '--repo', '/tmp/new', '--all', '-c', '50']\nCase2 (bin/git-dag): ['/Users/luwei/work/git-cola/venv/bin/python', '/Users/luwei/work/git-cola/bin/git-dag', '--repo', '/tmp/new']\nQBasicTimer::start: current thread's event dispatcher has already been destroyed\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 66348,
+        "completion_tokens": 699,
+        "cached_tokens": 66347,
+        "extra": {
+          "cache_creation_input_tokens": 2610,
+          "cache_read_input_tokens": 66347,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 2610,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 699,
+              "cache_read_input_tokens": 66347,
+              "cache_creation_input_tokens": 2610,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 2610
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "Case1 (python -m cola): ['/Users/luwei/work/git-cola/venv/bin/python', '-m', 'cola', 'dag', '--repo', '/tmp/new', '--all', '-c', '50']\nCase2 (bin/git-dag): ['/Users/luwei/work/git-cola/venv/bin/python', '/Users/luwei/work/git-cola/bin/git-dag', '--repo', '/tmp/new']\nQBasicTimer::start: current thread's event dispatcher has already been destroyed",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01N543ms2HXL5ixbDLPGDySm",
+            "type": "tool_result",
+            "content": "Case1 (python -m cola): ['/Users/luwei/work/git-cola/venv/bin/python', '-m', 'cola', 'dag', '--repo', '/tmp/new', '--all', '-c', '50']\nCase2 (bin/git-dag): ['/Users/luwei/work/git-cola/venv/bin/python', '/Users/luwei/work/git-cola/bin/git-dag', '--repo', '/tmp/new']\nQBasicTimer::start: current thread's event dispatcher has already been destroyed",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "Case1 (python -m cola): ['/Users/luwei/work/git-cola/venv/bin/python', '-m', 'cola', 'dag', '--repo', '/tmp/new', '--all', '-c', '50']\nCase2 (bin/git-dag): ['/Users/luwei/work/git-cola/venv/bin/python', '/Users/luwei/work/git-cola/bin/git-dag', '--repo', '/tmp/new']\nQBasicTimer::start: current thread's event dispatcher has already been destroyed",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01N543ms2HXL5ixbDLPGDySm",
+            "type": "tool_result",
+            "content": "Case1 (python -m cola): ['/Users/luwei/work/git-cola/venv/bin/python', '-m', 'cola', 'dag', '--repo', '/tmp/new', '--all', '-c', '50']\nCase2 (bin/git-dag): ['/Users/luwei/work/git-cola/venv/bin/python', '/Users/luwei/work/git-cola/bin/git-dag', '--repo', '/tmp/new']\nQBasicTimer::start: current thread's event dispatcher has already been destroyed",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "venv/bin/python << 'EOF' 2>&1 | tail -20\nimport sys, types\n# Case 1: launched via `python -m cola dag --repo X`\nsys.argv = ['/Users/luwei/work/git-cola/cola/__main__.py', 'dag', '--repo', '/orig', '--all', '-c', '50']\nimport __main__\n__main__.__spec__ = types.SimpleNamespace(name='cola.__main__')\n\nfrom qtpy import QtWidgets\napp = QtWidgets.QApplication(['cola'])\nimport os; os.chdir('/Users/luwei/work/git-cola')\nfrom cola import dag as dagentry\nns = dagentry.parse_args(['--repo', '/Users/luwei/work/git-cola'])\nfrom cola import app as cola_app\nctx = cola_app.application_init(ns, app_name='Git DAG', setup_repo=True)\nsys.argv = ['/Users/luwei/work/git-cola/cola/__main__.py', 'dag', '--repo', '/orig', '--all', '-c', '50']\nfrom cola.widgets import dag as dagw\nview = dagw.git_dag(ctx, args=ns, show=False)\nimport cola.core as core\ncore.fork = lambda a, *x, **y: print('Case1 (python -m cola):', a)\nview._open_repo_in_new_dag('/tmp/new')\n\n# Case 2: bin/git-dag\nsys.argv = ['/Users/luwei/work/git-cola/bin/git-dag', '--repo', '/orig']\n__main__.__spec__ = None\ncore.fork = lambda a, *x, **y: print('Case2 (bin/git-dag):', a)\nview._open_repo_in_new_dag('/tmp/new')\nEOF",
+          "description": "Verify both invocation forms produce correct argv"
+        }
+      }
+    },
+    {
+      "step_id": 74,
+      "timestamp": "2026-05-08T13:40:56.278Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "两种启动方式都正确：\n\n- `python -m cola dag …` → `python -m cola dag --repo /tmp/new --all -c 50` ✓\n- `bin/git-dag …` → `python bin/git-dag --repo /tmp/new` ✓\n\n回答你的问题：是的，新进程用的是同一个 `sys.executable`（当前进程的 Python 解释器路径）。问题不是 Python 路径错，而是当用 `python -m cola` 启动时 `sys.argv[0]` 变成了 `cola/__main__.py`，把它当普通脚本再跑一次会让 `from .` 相对导入找不到父包。改用 `[python, -m, cola, ...]` 后包上下文得以保留。",
+      "metrics": {
+        "prompt_tokens": 68958,
+        "completion_tokens": 248,
+        "cached_tokens": 68957,
+        "extra": {
+          "cache_creation_input_tokens": 889,
+          "cache_read_input_tokens": 68957,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 889,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 248,
+              "cache_read_input_tokens": 68957,
+              "cache_creation_input_tokens": 889,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 889
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 3121584,
-    "total_completion_tokens": 30661,
-    "total_cached_tokens": 3121494,
-    "total_steps": 67,
+    "total_prompt_tokens": 3518205,
+    "total_completion_tokens": 39927,
+    "total_cached_tokens": 3518094,
+    "total_steps": 74,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 85195,
-      "total_cache_read_input_tokens": 3121494
+      "total_cache_creation_input_tokens": 95396,
+      "total_cache_read_input_tokens": 3518094
     }
   }
 }
