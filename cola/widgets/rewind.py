@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from qtpy import QtGui
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt
@@ -15,6 +17,20 @@ from ..interaction import Interaction
 def _commit_summary(context, oid: str) -> str:
     out = context.git.log('-1', '--pretty=%h %s', oid, _readonly=True)[STDOUT]
     return (out or oid).strip()
+
+
+def _format_dirty_listing(context, dirty_paths: list[str], limit: int = 20) -> str:
+    """Build a human-readable list of dirty paths, marking deletions."""
+    worktree = context.git.worktree() or context.git.getcwd()
+    lines = []
+    for path in dirty_paths[:limit]:
+        if worktree and not os.path.lexists(os.path.join(worktree, path)):
+            lines.append(f'    D  {path}')
+        else:
+            lines.append(f'    M  {path}')
+    if len(dirty_paths) > limit:
+        lines.append(N_('    ... and %d more') % (len(dirty_paths) - limit))
+    return '\n'.join(lines)
 
 
 def run_rewind_check(context, branch: str, dirty_paths: list[str]) -> None:
@@ -58,6 +74,7 @@ def run_rewind_check(context, branch: str, dirty_paths: list[str]) -> None:
         return
 
     summary = _commit_summary(context, target_oid)
+    dirty_listing = _format_dirty_listing(context, dirty_paths)
     title = N_('Rewind check')
     question = N_('Rewind "%(branch)s" to %(summary)s?') % {
         'branch': branch,
@@ -67,11 +84,16 @@ def run_rewind_check(context, branch: str, dirty_paths: list[str]) -> None:
         'A backup branch "%(backup)s" will be created at the current HEAD,\n'
         'then "%(branch)s" will be reset --hard to %(oid)s.\n'
         'The dirty files in your worktree match the target commit, so their\n'
-        'content is preserved.'
+        'content is preserved.\n'
+        '\n'
+        'Dirty files (%(count)d):\n'
+        '%(listing)s'
     ) % {
         'backup': new_branch,
         'branch': branch,
         'oid': target_oid[:12],
+        'count': len(dirty_paths),
+        'listing': dirty_listing,
     }
     if not Interaction.confirm(title, question, info, N_('Rewind')):
         return
