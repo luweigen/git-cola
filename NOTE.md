@@ -553,6 +553,121 @@ view.graphview.legacy_label_colors = _config_truthy(
 - 多条标签同 commit 时，所有非 current 标签都用同一个 lane 色。这是按"这个 commit 在哪条 lane"决定的，不是按各自分支的 lane（实际上多个分支头都指着同一个 commit，它们物理上就是同一条 lane）。
 - 法外狂徒：`Edge.recompute_path()` 用直线（§10 默认）时，pen color 仍按 `EdgeColor.cycle/current` 选取，与本节读取方式无关。
 
+## 13. Rewind check 菜单（在历史里找"工作区当前状态"对应的旧 commit）
+
+### 动机
+
+agent 自动化经常生成大量提交，回过头来人会"觉得现在工作区的内容更接近某个早期 commit"——想直接把 branch head 拨回那个 commit 继续干，而不是手工 stash + reset + apply。Rewind check 把这个过程自动化：扫一遍当前分支历史，找一个"该 commit 在这些 dirty 文件上的内容与工作区**完全一致**"的提交，作为回退目标。
+
+### 触发位置
+
+右侧 GraphView，点击 commit 旁边的 branch label。**仅当**满足以下三条时菜单出现 `Rewind check`：
+
+1. 该 label 是 `heads/<X>` 形式（本地分支，不是 tag/remote/HEAD）。
+2. 该 label 名 == 当前分支（`model.currentbranch`）。
+3. `model.modified` 非空（工作区有未暂存修改 / 删除）。
+
+不满足任一条都不显示，避免误触发。
+
+### 行为流程
+
+1. **采集 dirty 集**：取 `model.modified`（git status 视角的"未暂存修改 + 未暂存删除"，对应 git status 里的 ` M` / ` D`），不包括 staged / untracked / unmerged。每个文件分类为：
+   - **存在**（present）：`git hash-object -- <path>` 算 worktree blob oid。默认 filter（不要 `--no-filters`、不要 `-w`），与 commit-side 的 `ls-tree` oid 在 CRLF / text=auto 下口径一致。
+   - **删除**（deleted）：`os.path.lexists(<worktree>/<path>)` 为假 → 用哨兵 `DELETED` 标记，要求候选 commit 中**也**没有这个路径。
+2. **候选集**：
+   - 全部 present → `git log <branch> --first-parent --no-renames -n 200 --pretty=%H -- <paths>`（路径过滤，最多 200 个 commit）。
+   - 含任一 deleted → `git log <branch> --first-parent -n 200 --pretty=%H`（不带路径过滤；因为路径在被引入之前的 commit 不会出现在 `git log -- <path>` 里，必须扫全 first-parent 历史才能找到"那时候这文件还不存在"的 commit）。
+3. **逐 commit 比对**：对每个候选 oid C，跑 `git ls-tree --full-tree C -- <paths>` 一次拿全部 (mode, type, oid)。判定：
+   - present 路径：mode 必须是 `100644 / 100755 / 120000`（regular file 或 symlink），blob oid 必须等于 worktree hash。`160000` (gitlink/submodule)、缺失项都算 miss。
+   - deleted 路径：ls-tree 输出里**不能**有该路径。
+   - 全部满足 → 命中，立刻返回。任何一项不满足 → 跳过该 commit。
+4. **进度提示**：每检查满 10 个候选 commit 仍未命中 → 弹 `Interaction.confirm` "Checked N commits without finding a match. Continue searching?"，用户拒绝则提前结束返回 None。命中后立即停止。
+5. **未命中**：弹 `Interaction.information` "No matching commit was found." 退出。
+6. **命中后确认**：弹 `Interaction.confirm`，标题 `Rewind check`，正文：
+   ```
+   Rewind <branch> to <short-hash> <commit subject>
+   <message line 2>
+   <message line 3>
+   <message line 4>
+   ```
+   `<short-hash>` 与 commit message subject 同行（中间一个空格）；commit message 经"去掉空白行"过滤后取前 4 行。informative 部分追加：
+   ```
+   A backup branch "<backup>" will be created at the current HEAD,
+   then "<branch>" will be reset --hard to <oid12>.
+   The dirty files in your worktree match the target commit, so their
+   content is preserved.
+   
+   Dirty files (<count>):
+       M  cola/widgets/dag.py
+       D  obsolete/foo.py
+       ...
+       ... and <N> more   (超过 20 条折叠)
+   ```
+   `M` = 工作区修改、`D` = 工作区删除（按 `os.path.lexists` 即时判定）。
+7. **执行**（用户同意 Rewind 后）：
+   1. `git branch <new_name> HEAD` 在当前 HEAD 建一个备份分支（不切换）。
+   2. `git reset --hard <target_oid> --` 把当前分支拨到目标 commit。**直接调 `context.git.reset(...)` 而不是 `cmds.ResetHard`**，避免 `ResetHard` 自带的二次 confirm 造成双重确认。
+   3. `context.model.update_status()` + `graph_view.merge_finished.emit()` 触发 status / DAG 重绘。
+   4. 弹 `Interaction.information` 报告 reset + backup 名。
+8. 任一 git 步骤非零 → `Interaction.critical` 报错，包含 stderr。
+
+整个搜索过程**只读**：`git log` / `ls-tree` / `hash-object` 都不写工作区也不写 object DB（hash-object 不带 `-w`）。`reset --hard` 才是写动作，且仅在用户确认后执行。
+
+### 备份分支命名规则（`unique_rewind_branch_name`）
+
+固定形式 `rewind_<branch>/<N>`，从 `N=0` 开始，冲突就递增到 99。例：
+
+| 当前分支 | 第 1 次 | 第 2 次 | 第 3 次 |
+|---|---|---|---|
+| `feature` | `rewind_feature/0` | `rewind_feature/1` | `rewind_feature/2` |
+| `agent/abc/dag.py` | `rewind_agent/abc/dag.py/0` | `rewind_agent/abc/dag.py/1` | `rewind_agent/abc/dag.py/2` |
+
+**为什么始终带 `/N` 后缀（而不是裸 `rewind_feature`）**：git 不允许 `refs/heads/X` 同时是叶子分支和目录前缀（D/F 冲突）。如果第一次创建为 `rewind_feature`（叶子），第二次想用 `rewind_feature/1` 就会被 git 拒绝。统一从 `/0` 起，保证 `rewind_<branch>` 永远是 ref 目录而非叶子，回退序列可以无限延展。
+
+冲突检测规则（`_conflicts`）：候选名等于已有分支名 ✗；候选名是某已有分支名的前缀目录（`existing.startswith(name + '/')`）✗；候选名以某已有分支名 + `/` 起首（`name.startswith(existing + '/')`）✗。前两条覆盖 D/F 双方向。
+
+99 都被占满 → 返回 `None`，UI 弹 `Interaction.critical` 让用户先手动清理 `rewind_*` 分支。
+
+### 实现分布
+
+| 文件 | 职责 |
+|---|---|
+| `cola/rewind.py` | 纯算法（无 Qt 依赖）：`find_rewind_target`、`unique_rewind_branch_name`、底层 git 包装 `commits_touching_paths` / `first_parent_commits` / `tree_blob_entries` / `worktree_blob_oid` / `existing_local_branches`。`DELETED` 哨兵在此模块导出。 |
+| `cola/widgets/rewind.py` | Qt 端编排：`run_rewind_check(context, branch, dirty_paths)`。`_commit_summary`（短 hash + 过滤空行后的前 4 行 message）、`_format_dirty_listing`（`M`/`D` 标识 + 截断 20）。WaitCursor 包住搜索过程，搜索期间禁用普通交互。 |
+| `cola/widgets/dag.py` | 在 `_show_branch_menu` 加菜单项，新增 `_modified_paths()` helper 取 `model.modified`。点击后 `from . import rewind as rewind_widget; rewind_widget.run_rewind_check(...)`，最后 `graph_view.merge_finished.emit()` 触发图重绘。 |
+| `test/rewind_test.py` | 12 条 pytest（用 `app_context` fixture 在临时仓里造 commit）：命中 / 未命中 / 多文件全匹配 / 部分不匹配跳过 / 旧 commit 缺路径 / 二进制 / 工作区删除命中"该路径不存在的 commit" / 删除+修改混合 / 进度回调 cancel / 命名 N=0 默认 / 命名 N 递增 / 含 `/` 的分支名 / gitlink (mode 160000) 跳过。 |
+| `test/rewind_check_manual.sh` | `bash` 脚本在 `/tmp/git-cola-rewind-check-demo` 下幂等地搭一个 4-commit + feature 分支的 demo 仓，把工作区还原到 c3 状态，供 `python -m cola dag` 手工点击验证。 |
+
+### 算法细节备忘
+
+- **为什么用 `git ls-tree` 而不是 `git rev-parse C:path`**：ls-tree 一次拿一组 (mode, type, oid)，路径不存在时输出里直接缺失（不抛错），且原生区分 `100644` 和 `160000`。`rev-parse C:path` 路径不存在会非零退出，每个路径一次调用，调度成本高且需要额外 try/except。
+- **为什么 `git hash-object` 不带 `--no-filters`**：commit-side blob 是经过 clean filter 后的形态（CRLF 规范化、`text=auto` 之类），与 worktree 默认 filter 后的 hash 一致。带 `--no-filters` 反而会在启用 `core.autocrlf` 的仓库里制造永远不命中的假 miss。
+- **为什么 `--first-parent`**：避免在 merge commit 的另一侧反复扫无关历史；语义上 "branch 的"历史也就是 first-parent 链。
+- **为什么 `--no-renames`**：让命中条件＝路径名相同。如果跨过 rename 边界匹配，会出现"工作区里 a.txt 命中了某个 commit 的 b.txt（rename 前）"这种困惑结果。
+- **`max_commits=200` 上限**：兜底防大仓库 `git log` 爆炸；命中前先弹 10/20/.../200 的 confirm 给用户机会停止。
+- **不复用 `cmds.ResetHard`**：`ResetHard` 继承 `ConfirmAction`，`do()` 自带 `confirm()`；这里 UI 已经弹过详细确认（含 dirty listing），再走 `ResetHard.confirm()` 是双重确认。直接 `context.git.reset(oid, '--', hard=True)` + 手动 `model.update_status()`。
+- **dirty 集中含已删文件时扫全 first-parent**：`git log <branch> -- <deleted_path>` 只返回**触动过该路径的 commit**——文件被引入前的 commit 不在其中，但那恰恰是我们想找的"该路径还不存在"的目标。这种场景必须放弃 path 过滤。
+
+### 实测
+
+`bash test/rewind_check_manual.sh` 后 demo 仓：
+
+```
+b52a56e (HEAD -> feature, main) c4
+8677cf7 c3
+f4dccdf c2
+6c483b6 c1
+```
+
+工作区 `a.txt=a3, b.txt=b2`（c3 状态）。`python -m cola dag` 点 `feature` label → `Rewind check`：
+
+- 候选 ≤ 10 → 不弹"继续？" 直接命中 c3。
+- 确认对话框第一行：`Rewind feature to 8677cf7 c3`，下方列出 `M a.txt` `M b.txt`。
+- 同意 → `git branch -a` 多出 `rewind_feature/0`，`git log --oneline` HEAD 落到 c3，`git status` 干净。
+- 再次执行（让 `rewind_feature/0` 已存在）→ 备份名变成 `rewind_feature/1`。
+
+12 个新单元测试 + 项目原 220 个测试全过。
+
 ## 其它
 
 - 顶部新增 `from ..interaction import Interaction` 导入（merge 流程用到 `Interaction.confirm`）。
