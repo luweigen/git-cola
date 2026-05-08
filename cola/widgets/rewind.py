@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from qtpy import QtCore
+from qtpy import QtGui
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt
 
@@ -31,7 +31,7 @@ def run_rewind_check(context, branch: str, dirty_paths: list[str]) -> None:
         info = N_('Continue searching?')
         return Interaction.confirm(title, text, info, N_('Continue'))
 
-    QtWidgets.QApplication.setOverrideCursor(QtCore.QCursor(Qt.WaitCursor))
+    QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(Qt.WaitCursor))
     try:
         target_oid = rewind_logic.find_rewind_target(
             context, branch, dirty_paths, progress
