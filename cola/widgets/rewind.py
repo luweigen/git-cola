@@ -27,13 +27,14 @@ def _commit_summary(context, oid: str, max_lines: int = 4) -> str:
     body = context.git.log(
         '-1', '--pretty=%B', oid, _readonly=True
     )[STDOUT]
-    lines = body.splitlines()[:max_lines]
+    # Drop blank / whitespace-only lines, then cap at max_lines.
+    lines = [line for line in body.splitlines() if line.strip()][:max_lines]
     if not lines:
         return short
     first, rest = lines[0], lines[1:]
     head = f'{short} {first}'.rstrip()
     if rest:
-        head = head + '\n' + '\n'.join(rest).rstrip()
+        head = head + '\n' + '\n'.join(rest)
     return head
 
 
