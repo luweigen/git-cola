@@ -143,18 +143,46 @@ def test_find_rewind_target_handles_binary_paths(app_context):
     assert target == c1
 
 
-def test_find_rewind_target_returns_none_when_dirty_path_missing_in_worktree(
+def test_find_rewind_target_matches_deletion_to_commit_without_file(
     app_context,
 ):
+    """A deleted dirty file matches a candidate commit where the file is absent."""
     _write('a.txt', b'a1\n')
-    _commit('c1')
+    c1 = _commit('c1')
+    assert c1
+    _write('b.txt', b'b1\n')
+    c2 = _commit('c2')  # introduces b.txt
+    assert c2
+    _write('b.txt', b'b2\n')
+    _commit('c3')
 
-    # Remove a.txt entirely; hash-object will fail.
-    os.remove('a.txt')
+    # Worktree: delete b.txt -> should rewind to c1 (b.txt absent there).
+    os.remove('b.txt')
     target = rewind.find_rewind_target(
-        app_context, 'main', ['a.txt'], _accept
+        app_context, 'main', ['b.txt'], _accept
     )
-    assert target is None
+    assert target == c1
+
+
+def test_find_rewind_target_deletion_combined_with_modification(app_context):
+    _write('a.txt', b'a1\n')
+    c1 = _commit('c1')
+    assert c1
+    _write('a.txt', b'a2\n')
+    _write('b.txt', b'b1\n')
+    c2 = _commit('c2')
+    assert c2
+    _write('a.txt', b'a3\n')
+    _write('b.txt', b'b2\n')
+    _commit('c3')
+
+    # Worktree: a.txt back to a1, b.txt deleted -> only c1 satisfies both.
+    _write('a.txt', b'a1\n')
+    os.remove('b.txt')
+    target = rewind.find_rewind_target(
+        app_context, 'main', ['a.txt', 'b.txt'], _accept
+    )
+    assert target == c1
 
 
 def test_unique_rewind_branch_name_no_conflict(app_context):

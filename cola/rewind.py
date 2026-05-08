@@ -7,6 +7,8 @@ be safely rewound to it. UI orchestration lives in ``cola.widgets.rewind``.
 
 from __future__ import annotations
 
+import os
+
 from typing import Callable
 from typing import Optional
 
@@ -15,6 +17,11 @@ from .git import STDOUT
 
 _REWIND_PREFIX = 'rewind-'
 _MAX_BRANCH_SUFFIX = 99
+
+# Sentinel for dirty paths that have been removed from the worktree. A
+# candidate commit matches a deleted path iff that path is absent from the
+# commit's tree.
+DELETED = '__deleted__'
 
 
 def commits_touching_paths(
@@ -36,6 +43,19 @@ def commits_touching_paths(
         str(max_n),
         '--pretty=%H',
         *args,
+        _readonly=True,
+    )[STDOUT]
+    return [line.strip() for line in out.splitlines() if line.strip()]
+
+
+def first_parent_commits(context, branch: str, max_n: int = 200) -> list[str]:
+    """Return commit oids on ``branch``'s first-parent line (HEAD-first)."""
+    out = context.git.log(
+        '--first-parent',
+        '-n',
+        str(max_n),
+        '--pretty=%H',
+        branch,
         _readonly=True,
     )[STDOUT]
     return [line.strip() for line in out.splitlines() if line.strip()]
@@ -78,9 +98,13 @@ def worktree_blob_oid(context, path: str) -> Optional[str]:
     """Return the blob oid git would store for ``path`` in the worktree.
 
     Uses default filters so CRLF / text=auto normalization matches what is
-    already in the index/tree. Returns ``None`` when the file is missing or
-    git refuses to hash it.
+    already in the index/tree. Returns ``DELETED`` when the file is absent
+    from the worktree, or ``None`` when git refuses to hash it for any
+    other reason.
     """
+    worktree = context.git.worktree() or context.git.getcwd()
+    if worktree and not os.path.lexists(os.path.join(worktree, path)):
+        return DELETED
     status, out, _ = context.git.hash_object('--', path, _readonly=True)
     if status != 0:
         return None
@@ -93,10 +117,17 @@ def _all_match(
     worktree_oids: dict[str, str],
     dirty_paths: list[str],
 ) -> bool:
-    """Return True iff every dirty path has a regular-blob entry whose oid
-    equals the worktree hash."""
+    """Return True iff every dirty path either matches its candidate commit
+    blob (for present files) or is absent from the tree (for deleted files).
+    """
     for path in dirty_paths:
+        expected = worktree_oids.get(path)
         entry = tree_entries.get(path)
+        if expected == DELETED:
+            # Deleted in worktree -> commit must also lack the path.
+            if entry is not None:
+                return False
+            continue
         if entry is None:
             return False
         mode, blob_oid = entry
@@ -104,7 +135,7 @@ def _all_match(
         # (160000) and tree entries (040000).
         if mode not in ('100644', '100755', '120000'):
             return False
-        if blob_oid != worktree_oids.get(path):
+        if blob_oid != expected:
             return False
     return True
 
@@ -130,15 +161,24 @@ def find_rewind_target(
         return None
 
     worktree_oids: dict[str, str] = {}
+    has_deleted = False
     for path in dirty_paths:
         oid = worktree_blob_oid(context, path)
         if oid is None:
             return None
+        if oid == DELETED:
+            has_deleted = True
         worktree_oids[path] = oid
 
-    candidates = commits_touching_paths(
-        context, branch, dirty_paths, max_n=max_commits
-    )
+    # When any dirty path is a deletion, the matching commit may pre-date the
+    # path's introduction and therefore not appear in `git log -- <path>`.
+    # Fall back to the full first-parent history in that case.
+    if has_deleted:
+        candidates = first_parent_commits(context, branch, max_n=max_commits)
+    else:
+        candidates = commits_touching_paths(
+            context, branch, dirty_paths, max_n=max_commits
+        )
 
     checked = 0
     for commit_oid in candidates:
