@@ -60,11 +60,22 @@ def run_rewind_check(context, branch: str, dirty_paths: list[str]) -> None:
     if not branch or not dirty_paths:
         return
 
+    cancelled = {'flag': False}
+
     def progress(checked: int) -> bool:
         title = N_('Rewind check')
         text = N_('Checked %d commits without finding a match.') % checked
-        info = N_('Continue searching?')
-        return Interaction.confirm(title, text, info, N_('Continue'))
+        info = N_('Continue searching, or stop now?')
+        keep_going = Interaction.confirm(
+            title,
+            text,
+            info,
+            N_('Continue'),
+            cancel_text=N_('Stop'),
+        )
+        if not keep_going:
+            cancelled['flag'] = True
+        return keep_going
 
     QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(Qt.WaitCursor))
     try:
@@ -75,10 +86,16 @@ def run_rewind_check(context, branch: str, dirty_paths: list[str]) -> None:
         QtWidgets.QApplication.restoreOverrideCursor()
 
     if not target_oid:
-        Interaction.information(
-            N_('Rewind check'),
-            message=N_('No matching commit was found.'),
-        )
+        if cancelled['flag']:
+            Interaction.information(
+                N_('Rewind check'),
+                message=N_('Search stopped.'),
+            )
+        else:
+            Interaction.information(
+                N_('Rewind check'),
+                message=N_('No matching commit was found.'),
+            )
         return
 
     new_branch = rewind_logic.unique_rewind_branch_name(context, branch)
