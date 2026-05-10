@@ -1541,6 +1541,11 @@ class GitDAG(standard.MainWindow):
 
         # File Menu
         self.file_menu = qtutils.add_menu(N_('&File'), self.menubar)
+        self.open_main_action = self.file_menu.addAction(
+            N_('Open Commit Panel'), self._open_main_app
+        )
+        self.open_main_action.setIcon(icons.commit())
+        self.file_menu.addSeparator()
         self.open_recent_menu = self.file_menu.addMenu(N_('Open Recent'))
         self.open_recent_menu.setIcon(icons.folder())
         self.open_recent_menu.aboutToShow.connect(self._build_open_recent_menu)
@@ -1704,6 +1709,25 @@ class GitDAG(standard.MainWindow):
         rest[insert_at:insert_at] = ['--repo', repo_path]
 
         core.fork(launcher + rest)
+
+    def _open_main_app(self):
+        """Launch the main git-cola commit panel for the current worktree."""
+        worktree = self.context.git.worktree()
+        if not worktree:
+            return
+
+        import __main__
+
+        spec = getattr(__main__, '__spec__', None)
+        if spec is not None and getattr(spec, 'name', None):
+            module_name = spec.name
+            if module_name.endswith('.__main__'):
+                module_name = module_name[: -len('.__main__')]
+            launcher = [sys.executable, '-m', module_name]
+        else:
+            launcher = [sys.executable, sys.argv[0]]
+
+        core.fork(launcher + ['cola', '--repo', worktree])
 
     def _display_worktree_status(self, enabled):
         """Enable and disable the display of the WORKTREE and STAGE pseudo-commits"""
@@ -2680,6 +2704,32 @@ class Label(QtWidgets.QGraphicsItem):
                 if rewind_paths:
                     rewind_check = menu.addAction(N_('Rewind check'))
         merge_to = menu.addAction(N_('Merge to...'))
+        push_actions = []
+        push_force_actions = []
+        push_all_action = None
+        push_force_all_action = None
+        if is_local_branch:
+            remotes = self._configured_remotes()
+            if remotes:
+                menu.addSeparator()
+                push_menu = menu.addMenu(N_('Push "%s" to') % full_name)
+                push_menu.setIcon(icons.push())
+                for remote in remotes:
+                    action = push_menu.addAction(remote)
+                    push_actions.append((action, remote))
+                if len(remotes) > 1:
+                    push_menu.addSeparator()
+                    push_all_action = push_menu.addAction(N_('All remotes'))
+                push_menu.addSeparator()
+                for remote in remotes:
+                    action = push_menu.addAction(
+                        N_('%s (force-with-lease)') % remote
+                    )
+                    push_force_actions.append((action, remote))
+                if len(remotes) > 1:
+                    push_force_all_action = push_menu.addAction(
+                        N_('All remotes (force-with-lease)')
+                    )
         chosen = menu.exec_(event.screenPos())
         if chosen is None:
             return
@@ -2711,6 +2761,70 @@ class Label(QtWidgets.QGraphicsItem):
             graph_view = self._graph_view()
             if graph_view is not None:
                 graph_view.enter_merge_mode(full_name)
+        elif push_all_action is not None and chosen is push_all_action:
+            self._push_branch(full_name, [r for _, r in push_actions], force=False)
+        elif push_force_all_action is not None and chosen is push_force_all_action:
+            self._push_branch(
+                full_name, [r for _, r in push_force_actions], force=True
+            )
+        else:
+            for action, remote in push_actions:
+                if chosen is action:
+                    self._push_branch(full_name, [remote], force=False)
+                    return
+            for action, remote in push_force_actions:
+                if chosen is action:
+                    self._push_branch(full_name, [remote], force=True)
+                    return
+
+    def _configured_remotes(self):
+        graph_view = self._graph_view()
+        if graph_view is None or graph_view.context is None:
+            return []
+        model = graph_view.context.model
+        if model is None:
+            return []
+        return list(getattr(model, 'remotes', None) or [])
+
+    def _push_branch(self, branch_name, remotes, force=False):
+        graph_view = self._graph_view()
+        if graph_view is None or graph_view.context is None:
+            return
+        context = graph_view.context
+        model = context.model
+        if model is None or not remotes:
+            return
+
+        def push_to_remotes():
+            results = []
+            for remote in remotes:
+                try:
+                    status, out, err = model.push(
+                        remote,
+                        local_branch=branch_name,
+                        remote_branch=branch_name,
+                        force=force,
+                    )
+                except Exception as exc:  # pragma: no cover - defensive
+                    status, out, err = -1, '', str(exc)
+                results.append((remote, status, out, err))
+            return results
+
+        def on_result(results):
+            if not results:
+                return
+            any_failure = False
+            for remote, status, out, err in results:
+                cmd = 'git push %s %s' % (remote, branch_name)
+                Interaction.log_status(status, out, err)
+                if status != 0:
+                    any_failure = True
+                    Interaction.command_error(N_('Push failed'), cmd, status, out, err)
+            if not any_failure:
+                graph_view.merge_finished.emit()
+
+        task = qtutils.SimpleTask(push_to_remotes)
+        context.runtask.start(task, result=on_result)
 
     def _rename_branch(self, full_name, suggestion):
         graph_view = self._graph_view()
