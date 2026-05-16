@@ -309,9 +309,26 @@ def run_command(cmd: list[UStr | str], *args, **kwargs) -> tuple[int, UStr, UStr
 
 @interruptable
 def _fork_posix(args: list[str], cwd: str | None = None, shell: bool = False) -> int:
-    """Launch a process in the background."""
+    """Launch a process in the background.
+
+    Detach stdio and the controlling TTY so the spawned GUI process
+    survives the originating terminal being closed. Without this the
+    child inherits FDs that may go bad later (e.g. when started under
+    ``nohup ... &`` and the terminal is then closed), and a freshly
+    started Python interpreter aborts with "OSError: [Errno 9] Bad file
+    descriptor" while initializing ``sys.stdin/stdout/stderr``.
+    """
     encoded_args = [encode(arg) for arg in args]
-    return subprocess.Popen(encoded_args, cwd=cwd, shell=shell).pid
+    return subprocess.Popen(
+        encoded_args,
+        cwd=cwd,
+        shell=shell,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+        close_fds=True,
+    ).pid
 
 
 def _fork_win32(
