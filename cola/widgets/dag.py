@@ -2,6 +2,7 @@ import collections
 import html
 import itertools
 import math
+import os
 import sys
 from functools import partial
 from typing import Optional
@@ -4042,8 +4043,25 @@ class AmendFilesDialog(standard.Dialog):
         paths, ignored_set = gitcmds.files_modified_between(
             context, float(t_prev), float(t_head)
         )
-        in_commit = set(gitcmds.changed_files(context, head_oid))
-        staged = set(gitcmds.staged_against_head(context))
+        # Drop entries that no longer exist in the worktree (e.g. the
+        # old name of a renamed file, or any path deleted by the commit)
+        # so we don't try to `git add` a pathspec that matches nothing.
+        worktree = context.git.worktree() or ''
+
+        def _exists_in_worktree(path: str) -> bool:
+            if not path:
+                return False
+            full = os.path.join(worktree, path) if worktree else path
+            return core.exists(full)
+
+        in_commit = {
+            p for p in gitcmds.changed_files(context, head_oid)
+            if _exists_in_worktree(p)
+        }
+        staged = {
+            p for p in gitcmds.staged_against_head(context)
+            if _exists_in_worktree(p)
+        }
 
         # Always surface files already in the commit and files currently
         # staged for amending, even if their mtime is outside the window.
