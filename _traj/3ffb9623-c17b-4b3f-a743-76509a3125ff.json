@@ -14409,19 +14409,118 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 177,
+      "timestamp": "2026-05-19T10:41:24.394Z",
+      "source": "user",
+      "message": "Amend Files into Commit菜单，反选已经在commit中的文件，会移除吗？",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 178,
+      "timestamp": "2026-05-19T10:41:36.417Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 17263,
+        "completion_tokens": 1207,
+        "cached_tokens": 17257,
+        "extra": {
+          "cache_creation_input_tokens": 86741,
+          "cache_read_input_tokens": 17257,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 86741,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 1207,
+              "cache_read_input_tokens": 17257,
+              "cache_creation_input_tokens": 86741,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 86741
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 179,
+      "timestamp": "2026-05-19T10:41:47.465Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "**不会移除**。\n\n看 `cmds.py:308 AmendFilesIntoHead`：\n\n```python\ndef do(self) -> None:\n    if not self.paths:\n        return\n    status, out, err = self.git.add('-f', '--', *self.paths)\n    ...\n    status, out, err = self.git.commit('--amend', '--no-edit')\n```\n\n只对**勾选的**路径做 `git add -f --`，然后 `git commit --amend --no-edit`。`--amend` 会基于当前 index 重建 HEAD；index 里既有 HEAD tree 的旧内容也有我们刚 add 进来的新内容，**反选只是不去碰那个文件**，它在 HEAD tree 里就一直在，amend 出来还在。\n\n也就是说：\n\n- ✅ 勾选 = 把工作区版本塞进 HEAD（新增或更新）\n- ❌ 反选 = 不动它（既不更新也不移除）\n- ❌ 反选不等于 `git rm`\n\n所以\"勾选状态\"在语义上是单向的\"要把哪些文件并进 commit\"，不是\"commit 应该包含哪些文件\"。对话框默认把已在 commit 的文件勾上，只是方便你重新合一遍工作区里的最新版本，不是表达\"这是 commit 的最终文件清单\"。\n\n如果你想要\"反选 → 从 commit 中真正剔除\"的语义，要扩 `AmendFilesIntoHead`：\n- 入参再加一组 `paths_to_remove`\n- `do()` 里对它们做 `git rm --cached -- <paths>`（保留工作区）或 `git rm -- <paths>`（连工作区也删）\n- 然后再 amend\n\n要的话告诉我倾向哪种（`--cached` 更保守、不动磁盘），我加上。",
+      "metrics": {
+        "prompt_tokens": 17263,
+        "completion_tokens": 1207,
+        "cached_tokens": 17257,
+        "extra": {
+          "cache_creation_input_tokens": 86741,
+          "cache_read_input_tokens": 17257,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 86741,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 1207,
+              "cache_read_input_tokens": 17257,
+              "cache_creation_input_tokens": 86741,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 86741
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 10857428,
-    "total_completion_tokens": 107895,
-    "total_cached_tokens": 10857165,
-    "total_steps": 176,
+    "total_prompt_tokens": 10891954,
+    "total_completion_tokens": 110309,
+    "total_cached_tokens": 10891679,
+    "total_steps": 179,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 556058,
-      "total_cache_read_input_tokens": 10857165
+      "total_cache_creation_input_tokens": 729540,
+      "total_cache_read_input_tokens": 10891679
     }
   }
 }
