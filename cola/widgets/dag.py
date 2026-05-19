@@ -2986,6 +2986,8 @@ def _edit_file_and_commit(context, label, rel_path, parent=None):
     dialog = QtWidgets.QDialog(parent or qtutils.active_window())
     dialog.setWindowTitle('%s — %s' % (label, rel_path))
     dialog.setWindowModality(Qt.WindowModal)
+    path_label = QtWidgets.QLabel(rel_path, dialog)
+    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
     editor = QtWidgets.QPlainTextEdit(dialog)
     editor.setPlainText(content)
     buttons = QtWidgets.QDialogButtonBox(
@@ -2994,6 +2996,7 @@ def _edit_file_and_commit(context, label, rel_path, parent=None):
     buttons.accepted.connect(dialog.accept)
     buttons.rejected.connect(dialog.reject)
     layout = QtWidgets.QVBoxLayout(dialog)
+    layout.addWidget(path_label)
     layout.addWidget(editor)
     layout.addWidget(buttons)
     dialog.resize(720, 540)

@@ -12562,19 +12562,385 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 150,
+      "timestamp": "2026-05-19T06:27:02.624Z",
+      "source": "user",
+      "message": "文本编辑框上方显示文件名",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 151,
+      "timestamp": "2026-05-19T06:27:06.379Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 93255,
+        "completion_tokens": 848,
+        "cached_tokens": 93249,
+        "extra": {
+          "cache_creation_input_tokens": 891,
+          "cache_read_input_tokens": 93249,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 891,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 848,
+              "cache_read_input_tokens": 93249,
+              "cache_creation_input_tokens": 891,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 891
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 152,
+      "timestamp": "2026-05-19T06:27:12.513Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01GPXzMzYhEjA7fUt4euvHJx",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01GPXzMzYhEjA7fUt4euvHJx",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\n    dialog.setWindowModality(Qt.WindowModal)\n    editor = QtWidgets.QPlainTextEdit(dialog)\n    editor.setPlainText(content)\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(editor)\n    layout.addWidget(buttons)",
+            "new_string": "    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\n    dialog.setWindowModality(Qt.WindowModal)\n    path_label = QtWidgets.QLabel(rel_path, dialog)\n    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)\n    editor = QtWidgets.QPlainTextEdit(dialog)\n    editor.setPlainText(content)\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(path_label)\n    layout.addWidget(editor)\n    layout.addWidget(buttons)"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01GPXzMzYhEjA7fUt4euvHJx",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\\n    dialog.setWindowModality(Qt.WindowModal)\\n    editor = QtWidgets.QPlainTextEdit(dialog)\\n    editor.setPlainText(content)\\n    buttons = QtWidgets.QDialogButtonBox(\\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\\n    )\\n    buttons.accepted.connect(dialog.accept)\\n    buttons.rejected.connect(dialog.reject)\\n    layout = QtWidgets.QVBoxLayout(dialog)\\n    layout.addWidget(editor)\\n    layout.addWidget(buttons)\", \"newString\": \"    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\\n    dialog.setWindowModality(Qt.WindowModal)\\n    path_label = QtWidgets.QLabel(rel_path, dialog)\\n    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)\\n    editor = QtWidgets.QPlainTextEdit(dialog)\\n    editor.setPlainText(content)\\n    buttons = QtWidgets.QDialogButtonBox(\\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\\n    )\\n    buttons.accepted.connect(dialog.accept)\\n    buttons.rejected.connect(dialog.reject)\\n    layout = QtWidgets.QVBoxLayout(dialog)\\n    layout.addWidget(path_label)\\n    layout.addWidget(editor)\\n    layout.addWidget(buttons)\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2986, \"oldLines\": 6, \"newStart\": 2986, \"newLines\": 8, \"lines\": [\"     dialog = QtWidgets.QDialog(parent or qtutils.active_window())\", \"     dialog.setWindowTitle('%s — %s' % (label, rel_path))\", \"     dialog.setWindowModality(Qt.WindowModal)\", \"+    path_label = QtWidgets.QLabel(rel_path, dialog)\", \"+    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)\", \"     editor = QtWidgets.QPlainTextEdit(dialog)\", \"     editor.setPlainText(content)\", \"     buttons = QtWidgets.QDialogButtonBox(\"]}, {\"oldStart\": 2994, \"oldLines\": 6, \"newStart\": 2996, \"newLines\": 7, \"lines\": [\"     buttons.accepted.connect(dialog.accept)\", \"     buttons.rejected.connect(dialog.reject)\", \"     layout = QtWidgets.QVBoxLayout(dialog)\", \"+    layout.addWidget(path_label)\", \"     layout.addWidget(editor)\", \"     layout.addWidget(buttons)\", \"     dialog.resize(720, 540)\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 93255,
+        "completion_tokens": 848,
+        "cached_tokens": 93249,
+        "extra": {
+          "cache_creation_input_tokens": 891,
+          "cache_read_input_tokens": 93249,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 891,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 848,
+              "cache_read_input_tokens": 93249,
+              "cache_creation_input_tokens": 891,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 891
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\n    dialog.setWindowModality(Qt.WindowModal)\n    editor = QtWidgets.QPlainTextEdit(dialog)\n    editor.setPlainText(content)\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(editor)\n    layout.addWidget(buttons)",
+            "newString": "    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\n    dialog.setWindowModality(Qt.WindowModal)\n    path_label = QtWidgets.QLabel(rel_path, dialog)\n    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)\n    editor = QtWidgets.QPlainTextEdit(dialog)\n    editor.setPlainText(content)\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(path_label)\n    layout.addWidget(editor)\n    layout.addWidget(buttons)",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2986,
+                "oldLines": 6,
+                "newStart": 2986,
+                "newLines": 8,
+                "lines": [
+                  "     dialog = QtWidgets.QDialog(parent or qtutils.active_window())",
+                  "     dialog.setWindowTitle('%s — %s' % (label, rel_path))",
+                  "     dialog.setWindowModality(Qt.WindowModal)",
+                  "+    path_label = QtWidgets.QLabel(rel_path, dialog)",
+                  "+    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)",
+                  "     editor = QtWidgets.QPlainTextEdit(dialog)",
+                  "     editor.setPlainText(content)",
+                  "     buttons = QtWidgets.QDialogButtonBox("
+                ]
+              },
+              {
+                "oldStart": 2994,
+                "oldLines": 6,
+                "newStart": 2996,
+                "newLines": 7,
+                "lines": [
+                  "     buttons.accepted.connect(dialog.accept)",
+                  "     buttons.rejected.connect(dialog.reject)",
+                  "     layout = QtWidgets.QVBoxLayout(dialog)",
+                  "+    layout.addWidget(path_label)",
+                  "     layout.addWidget(editor)",
+                  "     layout.addWidget(buttons)",
+                  "     dialog.resize(720, 540)"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01GPXzMzYhEjA7fUt4euvHJx",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\n    dialog.setWindowModality(Qt.WindowModal)\n    editor = QtWidgets.QPlainTextEdit(dialog)\n    editor.setPlainText(content)\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(editor)\n    layout.addWidget(buttons)",
+            "newString": "    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\n    dialog.setWindowModality(Qt.WindowModal)\n    path_label = QtWidgets.QLabel(rel_path, dialog)\n    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)\n    editor = QtWidgets.QPlainTextEdit(dialog)\n    editor.setPlainText(content)\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(path_label)\n    layout.addWidget(editor)\n    layout.addWidget(buttons)",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2986,
+                "oldLines": 6,
+                "newStart": 2986,
+                "newLines": 8,
+                "lines": [
+                  "     dialog = QtWidgets.QDialog(parent or qtutils.active_window())",
+                  "     dialog.setWindowTitle('%s — %s' % (label, rel_path))",
+                  "     dialog.setWindowModality(Qt.WindowModal)",
+                  "+    path_label = QtWidgets.QLabel(rel_path, dialog)",
+                  "+    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)",
+                  "     editor = QtWidgets.QPlainTextEdit(dialog)",
+                  "     editor.setPlainText(content)",
+                  "     buttons = QtWidgets.QDialogButtonBox("
+                ]
+              },
+              {
+                "oldStart": 2994,
+                "oldLines": 6,
+                "newStart": 2996,
+                "newLines": 7,
+                "lines": [
+                  "     buttons.accepted.connect(dialog.accept)",
+                  "     buttons.rejected.connect(dialog.reject)",
+                  "     layout = QtWidgets.QVBoxLayout(dialog)",
+                  "+    layout.addWidget(path_label)",
+                  "     layout.addWidget(editor)",
+                  "     layout.addWidget(buttons)",
+                  "     dialog.resize(720, 540)"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01GPXzMzYhEjA7fUt4euvHJx",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)"
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\n    dialog.setWindowModality(Qt.WindowModal)\n    editor = QtWidgets.QPlainTextEdit(dialog)\n    editor.setPlainText(content)\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(editor)\n    layout.addWidget(buttons)",
+          "new_string": "    dialog = QtWidgets.QDialog(parent or qtutils.active_window())\n    dialog.setWindowTitle('%s — %s' % (label, rel_path))\n    dialog.setWindowModality(Qt.WindowModal)\n    path_label = QtWidgets.QLabel(rel_path, dialog)\n    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)\n    editor = QtWidgets.QPlainTextEdit(dialog)\n    editor.setPlainText(content)\n    buttons = QtWidgets.QDialogButtonBox(\n        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel\n    )\n    buttons.accepted.connect(dialog.accept)\n    buttons.rejected.connect(dialog.reject)\n    layout = QtWidgets.QVBoxLayout(dialog)\n    layout.addWidget(path_label)\n    layout.addWidget(editor)\n    layout.addWidget(buttons)"
+        }
+      }
+    },
+    {
+      "step_id": 153,
+      "timestamp": "2026-05-19T06:27:15.629Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01TFUiktNpw58SnKa4f2LQZ4",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01TFUiktNpw58SnKa4f2LQZ4",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "python3 -c \"import sys; sys.path.insert(0,'.'); import cola.widgets.dag; print('ok')\"",
+            "description": "Smoke import"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01TFUiktNpw58SnKa4f2LQZ4",
+            "content": "ok\n\n[stdout]\nok\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 94141,
+        "completion_tokens": 128,
+        "cached_tokens": 94140,
+        "extra": {
+          "cache_creation_input_tokens": 942,
+          "cache_read_input_tokens": 94140,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 942,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 128,
+              "cache_read_input_tokens": 94140,
+              "cache_creation_input_tokens": 942,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 942
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "ok",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01TFUiktNpw58SnKa4f2LQZ4",
+            "type": "tool_result",
+            "content": "ok",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "ok",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01TFUiktNpw58SnKa4f2LQZ4",
+            "type": "tool_result",
+            "content": "ok",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "python3 -c \"import sys; sys.path.insert(0,'.'); import cola.widgets.dag; print('ok')\"",
+          "description": "Smoke import"
+        }
+      }
+    },
+    {
+      "step_id": 154,
+      "timestamp": "2026-05-19T06:27:37.136Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "在文本编辑框上方加了一个 `QLabel`，显示 `rel_path`（例如 `_traj/stop.md`），可用鼠标选中复制。",
+      "metrics": {
+        "prompt_tokens": 95083,
+        "completion_tokens": 60,
+        "cached_tokens": 95082,
+        "extra": {
+          "cache_creation_input_tokens": 142,
+          "cache_read_input_tokens": 95082,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 142,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 60,
+              "cache_read_input_tokens": 95082,
+              "cache_creation_input_tokens": 142,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 142
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 8875237,
-    "total_completion_tokens": 94641,
-    "total_cached_tokens": 8875046,
-    "total_steps": 149,
+    "total_prompt_tokens": 9250971,
+    "total_completion_tokens": 96525,
+    "total_cached_tokens": 9250766,
+    "total_steps": 154,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 376164,
-      "total_cache_read_input_tokens": 8875046
+      "total_cache_creation_input_tokens": 379030,
+      "total_cache_read_input_tokens": 9250766
     }
   }
 }
