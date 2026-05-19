@@ -4007,13 +4007,23 @@ class AmendFilesDialog(standard.Dialog):
     """Pick worktree files modified during a commit's time window and amend them in."""
 
     def __init__(
-        self, context, head_oid, paths, ignored_set, default_checked, parent=None
+        self,
+        context,
+        head_oid,
+        paths,
+        ignored_set,
+        default_checked,
+        removable_set=None,
+        parent=None,
     ):
         super().__init__(parent=parent)
         self.context = context
         self.head_oid = head_oid
         self.ignored_set = set(ignored_set)
         self.paths = list(paths)
+        # Files that are currently part of the commit. Unchecking one means
+        # ``git rm --cached`` on amend.
+        self.removable_set = set(removable_set or ())
         default_checked = set(default_checked)
 
         abbrev = prefs.abbrev(context)
@@ -4024,8 +4034,10 @@ class AmendFilesDialog(standard.Dialog):
         self.info_label = QtWidgets.QLabel(
             N_(
                 'Select files modified between the previous commit and %s.\n'
-                'Selected files will be added (with --force for ignored files)\n'
-                'and the commit will be amended without changing the message.'
+                'Checked files are added (with --force for ignored files);\n'
+                'files already in the commit that you uncheck are removed\n'
+                'from it via "git rm --cached" (worktree copy is kept).\n'
+                'The commit is then amended without changing the message.'
             )
             % short
         )
@@ -4122,16 +4134,26 @@ class AmendFilesDialog(standard.Dialog):
         return result
 
     def _on_amend(self):
-        paths = self._checked_paths()
-        if not paths:
+        checked = set(self._checked_paths())
+        paths = sorted(checked)
+        paths_to_remove = sorted(self.removable_set - checked)
+        if not paths and not paths_to_remove:
             Interaction.information(
-                N_('No Files Selected'),
-                N_('Select at least one file to amend into the commit.'),
+                N_('Nothing To Do'),
+                N_(
+                    'Check at least one file to add, or uncheck a file'
+                    ' already in the commit to remove it.'
+                ),
             )
             return
-        ignored_selected = [p for p in paths if p in self.ignored_set]
-        force_set = set(ignored_selected)
-        cmds.do(cmds.AmendFilesIntoHead, self.context, paths, force_set)
+        force_set = {p for p in paths if p in self.ignored_set}
+        cmds.do(
+            cmds.AmendFilesIntoHead,
+            self.context,
+            paths,
+            force_set,
+            paths_to_remove,
+        )
         self.accept()
 
     @classmethod
@@ -4198,7 +4220,13 @@ class AmendFilesDialog(standard.Dialog):
         default_checked = in_commit | staged
 
         dialog = cls(
-            context, head_oid, paths, ignored_set, default_checked, parent=parent
+            context,
+            head_oid,
+            paths,
+            ignored_set,
+            default_checked,
+            removable_set=in_commit,
+            parent=parent,
         )
         dialog.show()
         dialog.raise_()

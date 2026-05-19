@@ -306,25 +306,42 @@ class AmendMode(EditModel):
 
 
 class AmendFilesIntoHead(ContextCommand):
-    """Force-add the given paths and amend HEAD without editing the message."""
+    """Adjust HEAD's file set: force-add ``paths`` and ``git rm --cached`` the
+    files in ``remove_paths``, then ``git commit --amend --no-edit``.
+
+    ``remove_paths`` keeps the worktree copy intact and only drops the entry
+    from the index, so the amended commit no longer references it.
+    """
 
     def __init__(
         self,
         context: ApplicationContext,
         paths: list[str],
         force_paths: set[str] | None = None,
+        remove_paths: list[str] | None = None,
     ) -> None:
         super().__init__(context)
         self.paths = list(paths)
         self.force_paths = set(force_paths or ())
+        self.remove_paths = list(remove_paths or ())
 
     def do(self) -> None:
-        if not self.paths:
+        if not self.paths and not self.remove_paths:
             return
-        status, out, err = self.git.add('-f', '--', *self.paths)
-        Interaction.command(N_('Error'), 'git add -f', status, out, err)
-        if status != 0:
-            return
+        if self.remove_paths:
+            status, out, err = self.git.rm(
+                '--cached', '--', *self.remove_paths
+            )
+            Interaction.command(
+                N_('Error'), 'git rm --cached', status, out, err
+            )
+            if status != 0:
+                return
+        if self.paths:
+            status, out, err = self.git.add('-f', '--', *self.paths)
+            Interaction.command(N_('Error'), 'git add -f', status, out, err)
+            if status != 0:
+                return
         status, out, err = self.git.commit('--amend', '--no-edit')
         Interaction.command(N_('Error'), 'git commit --amend', status, out, err)
         if status == 0:
