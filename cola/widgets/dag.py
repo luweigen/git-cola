@@ -2733,13 +2733,16 @@ class Label(QtWidgets.QGraphicsItem):
                     )
 
         # Optional env-driven entries (``BRANCH_MENU=Stop>_traj/stop.md:...``).
-        custom_entries = _parse_branch_menu_env()
+        # Local branches only: committing to remote-tracking refs would
+        # require a detached HEAD, which is not what these actions mean.
         custom_actions = []
-        if custom_entries:
-            menu.addSeparator()
-            for label, rel_path in custom_entries:
-                action = menu.addAction(label)
-                custom_actions.append((action, label, rel_path))
+        if is_local_branch:
+            custom_entries = _parse_branch_menu_env()
+            if custom_entries:
+                menu.addSeparator()
+                for label, rel_path in custom_entries:
+                    action = menu.addAction(label)
+                    custom_actions.append((action, label, rel_path))
 
         chosen = menu.exec_(event.screenPos())
         if chosen is None:
@@ -2752,13 +2755,6 @@ class Label(QtWidgets.QGraphicsItem):
                 context = graph_view.context
                 # The action is contextual to ``full_name``, so the commit
                 # must land on that branch. Switch to it first when needed.
-                if not is_local_branch:
-                    Interaction.information(
-                        N_('Cannot Commit'),
-                        N_('BRANCH_MENU actions only apply to local'
-                           ' branches.'),
-                    )
-                    return
                 if self._current_branch_name() != full_name:
                     result = cmds.do(cmds.CheckoutBranch, context, full_name)
                     if not result or result[0] != 0:
