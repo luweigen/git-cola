@@ -2731,9 +2731,40 @@ class Label(QtWidgets.QGraphicsItem):
                     push_force_all_action = push_menu.addAction(
                         N_('All remotes (force-with-lease)')
                     )
+
+        # Optional env-driven entries (``BRANCH_MENU=Stop>_traj/stop.md:...``).
+        # Local branches only: committing to remote-tracking refs would
+        # require a detached HEAD, which is not what these actions mean.
+        custom_actions = []
+        if is_local_branch:
+            custom_entries = _parse_branch_menu_env()
+            if custom_entries:
+                menu.addSeparator()
+                for label, rel_path in custom_entries:
+                    action = menu.addAction(label)
+                    custom_actions.append((action, label, rel_path))
+
         chosen = menu.exec_(event.screenPos())
         if chosen is None:
             return
+        for action, label, rel_path in custom_actions:
+            if chosen is action:
+                graph_view = self._graph_view()
+                if graph_view is None or graph_view.context is None:
+                    return
+                context = graph_view.context
+                # The action is contextual to ``full_name``, so the commit
+                # must land on that branch. Switch to it first when needed.
+                if self._current_branch_name() != full_name:
+                    result = cmds.do(cmds.CheckoutBranch, context, full_name)
+                    if not result or result[0] != 0:
+                        # CheckoutBranch already surfaced the failure (e.g.
+                        # dirty worktree); just abort so we don't commit on
+                        # the wrong branch.
+                        return
+                if _edit_file_and_commit(context, label, rel_path):
+                    graph_view.merge_finished.emit()
+                return
         if chosen is copy_full:
             qtutils.set_clipboard(full_name)
         elif copy_part is not None and chosen is copy_part:
@@ -2918,6 +2949,100 @@ def _agent_branch_part(name):
             slash = tail.find('/')
             return tail if slash < 0 else tail[:slash]
     return None
+
+
+def _parse_branch_menu_env():
+    """Parse ``$BRANCH_MENU`` into a list of ``(label, rel_path)`` tuples.
+
+    Format: colon-separated entries, each ``Label>relative/path``. Example::
+
+        BRANCH_MENU="Stop>_traj/stop.md:Memo>_traj/memo.md"
+    """
+    raw = core.getenv('BRANCH_MENU', '') or ''
+    entries = []
+    for chunk in raw.split(':'):
+        chunk = chunk.strip()
+        if not chunk or '>' not in chunk:
+            continue
+        label, _sep, path = chunk.partition('>')
+        label = label.strip()
+        path = path.strip()
+        if label and path:
+            entries.append((label, path))
+    return entries
+
+
+def _edit_file_and_commit(context, label, rel_path, parent=None):
+    """Open an editor for ``rel_path``; on accept, write, ``git add``, and
+    ``git commit -m <label>`` so only ``rel_path`` is committed.
+
+    Returns ``True`` if a commit was created, ``False`` otherwise (cancelled,
+    write failure, or git command failure).
+    """
+    worktree = context.git.worktree()
+    if not worktree:
+        Interaction.information(
+            N_('Cannot Commit'), N_('No active worktree.')
+        )
+        return False
+
+    abs_path = os.path.join(worktree, rel_path)
+    content = ''
+    if core.exists(abs_path):
+        try:
+            content = core.read(abs_path)
+        except (OSError, UnicodeDecodeError):
+            content = ''
+
+    dialog = QtWidgets.QDialog(parent or qtutils.active_window())
+    dialog.setWindowTitle('%s — %s' % (label, rel_path))
+    dialog.setWindowModality(Qt.WindowModal)
+    path_label = QtWidgets.QLabel(rel_path, dialog)
+    path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+    editor = QtWidgets.QPlainTextEdit(dialog)
+    editor.setPlainText(content)
+    buttons = QtWidgets.QDialogButtonBox(
+        QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+    )
+    buttons.accepted.connect(dialog.accept)
+    buttons.rejected.connect(dialog.reject)
+    layout = QtWidgets.QVBoxLayout(dialog)
+    layout.addWidget(path_label)
+    layout.addWidget(editor)
+    layout.addWidget(buttons)
+    dialog.resize(720, 540)
+    editor.setFocus()
+    if dialog.exec_() != QtWidgets.QDialog.Accepted:
+        return False
+
+    new_content = editor.toPlainText()
+    parent_dir = os.path.dirname(abs_path)
+    if parent_dir and not core.exists(parent_dir):
+        try:
+            os.makedirs(parent_dir, exist_ok=True)
+        except OSError as exc:
+            Interaction.information(
+                N_('Cannot Commit'),
+                N_('Failed to create directory: %s') % str(exc),
+            )
+            return False
+    try:
+        core.write(abs_path, new_content)
+    except OSError as exc:
+        Interaction.information(
+            N_('Cannot Commit'),
+            N_('Failed to write file: %s') % str(exc),
+        )
+        return False
+
+    git = context.git
+    status, out, err = git.add('--', rel_path)
+    Interaction.command(N_('Error'), 'git add', status, out, err)
+    if status != 0:
+        return False
+    status, out, err = git.commit('-m', label, '--', rel_path)
+    Interaction.command(N_('Error'), 'git commit', status, out, err)
+    return status == 0
 
 
 class GraphView(QtWidgets.QGraphicsView, ViewerMixin):

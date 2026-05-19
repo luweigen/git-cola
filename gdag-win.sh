@@ -4,4 +4,4 @@
 #conda activate git-cola
 #git clone git@github.com:luweigen/git-cola.git
 #pip install --editable '.[extras,pyqt6]'
-GIT_EDITOR="'C:/Program Files/Notepad++/notepad++.exe' -multiInst -notabbar -nosession -noPlugin" /c/conda_envs/git-cola/python -m cola dag --all --orphan-isolate
+GIT_EDITOR="'C:/Program Files/Notepad++/notepad++.exe' -multiInst -notabbar -nosession -noPlugin" BRANCH_MENU="Stop>_traj/stop.md:Memo>_traj/memo.md" /c/conda_envs/git-cola/python -m cola dag --all --orphan-isolate
