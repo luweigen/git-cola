@@ -2749,9 +2749,24 @@ class Label(QtWidgets.QGraphicsItem):
                 graph_view = self._graph_view()
                 if graph_view is None or graph_view.context is None:
                     return
-                if _edit_file_and_commit(
-                    graph_view.context, label, rel_path
-                ):
+                context = graph_view.context
+                # The action is contextual to ``full_name``, so the commit
+                # must land on that branch. Switch to it first when needed.
+                if not is_local_branch:
+                    Interaction.information(
+                        N_('Cannot Commit'),
+                        N_('BRANCH_MENU actions only apply to local'
+                           ' branches.'),
+                    )
+                    return
+                if self._current_branch_name() != full_name:
+                    result = cmds.do(cmds.CheckoutBranch, context, full_name)
+                    if not result or result[0] != 0:
+                        # CheckoutBranch already surfaced the failure (e.g.
+                        # dirty worktree); just abort so we don't commit on
+                        # the wrong branch.
+                        return
+                if _edit_file_and_commit(context, label, rel_path):
                     graph_view.merge_finished.emit()
                 return
         if chosen is copy_full:

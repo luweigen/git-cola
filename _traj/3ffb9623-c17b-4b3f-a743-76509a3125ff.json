@@ -13027,19 +13027,393 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 158,
+      "timestamp": "2026-05-19T06:29:44.522Z",
+      "source": "user",
+      "message": "加上",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 159,
+      "timestamp": "2026-05-19T06:30:02.997Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 95459,
+        "completion_tokens": 1981,
+        "cached_tokens": 95453,
+        "extra": {
+          "cache_creation_input_tokens": 655,
+          "cache_read_input_tokens": 95453,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 655,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 1981,
+              "cache_read_input_tokens": 95453,
+              "cache_creation_input_tokens": 655,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 655
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 160,
+      "timestamp": "2026-05-19T06:30:08.587Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Edit toolu_01UqcB1VthBrC57WYso2exjE",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01UqcB1VthBrC57WYso2exjE",
+          "function_name": "Edit",
+          "arguments": {
+            "replace_all": false,
+            "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "old_string": "        for action, label, rel_path in custom_actions:\n            if chosen is action:\n                graph_view = self._graph_view()\n                if graph_view is None or graph_view.context is None:\n                    return\n                if _edit_file_and_commit(\n                    graph_view.context, label, rel_path\n                ):\n                    graph_view.merge_finished.emit()\n                return",
+            "new_string": "        for action, label, rel_path in custom_actions:\n            if chosen is action:\n                graph_view = self._graph_view()\n                if graph_view is None or graph_view.context is None:\n                    return\n                context = graph_view.context\n                # The action is contextual to ``full_name``, so the commit\n                # must land on that branch. Switch to it first when needed.\n                if not is_local_branch:\n                    Interaction.information(\n                        N_('Cannot Commit'),\n                        N_('BRANCH_MENU actions only apply to local'\n                           ' branches.'),\n                    )\n                    return\n                if self._current_branch_name() != full_name:\n                    result = cmds.do(cmds.CheckoutBranch, context, full_name)\n                    if not result or result[0] != 0:\n                        # CheckoutBranch already surfaced the failure (e.g.\n                        # dirty worktree); just abort so we don't commit on\n                        # the wrong branch.\n                        return\n                if _edit_file_and_commit(context, label, rel_path):\n                    graph_view.merge_finished.emit()\n                return"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01UqcB1VthBrC57WYso2exjE",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)\n\n[metadata] {\"filePath\": \"/Users/luwei/work/git-cola/cola/widgets/dag.py\", \"oldString\": \"        for action, label, rel_path in custom_actions:\\n            if chosen is action:\\n                graph_view = self._graph_view()\\n                if graph_view is None or graph_view.context is None:\\n                    return\\n                if _edit_file_and_commit(\\n                    graph_view.context, label, rel_path\\n                ):\\n                    graph_view.merge_finished.emit()\\n                return\", \"newString\": \"        for action, label, rel_path in custom_actions:\\n            if chosen is action:\\n                graph_view = self._graph_view()\\n                if graph_view is None or graph_view.context is None:\\n                    return\\n                context = graph_view.context\\n                # The action is contextual to ``full_name``, so the commit\\n                # must land on that branch. Switch to it first when needed.\\n                if not is_local_branch:\\n                    Interaction.information(\\n                        N_('Cannot Commit'),\\n                        N_('BRANCH_MENU actions only apply to local'\\n                           ' branches.'),\\n                    )\\n                    return\\n                if self._current_branch_name() != full_name:\\n                    result = cmds.do(cmds.CheckoutBranch, context, full_name)\\n                    if not result or result[0] != 0:\\n                        # CheckoutBranch already surfaced the failure (e.g.\\n                        # dirty worktree); just abort so we don't commit on\\n                        # the wrong branch.\\n                        return\\n                if _edit_file_and_commit(context, label, rel_path):\\n                    graph_view.merge_finished.emit()\\n                return\", \"originalFile\": null, \"structuredPatch\": [{\"oldStart\": 2749, \"oldLines\": 9, \"newStart\": 2749, \"newLines\": 24, \"lines\": [\"                 graph_view = self._graph_view()\", \"                 if graph_view is None or graph_view.context is None:\", \"                     return\", \"-                if _edit_file_and_commit(\", \"-                    graph_view.context, label, rel_path\", \"-                ):\", \"+                context = graph_view.context\", \"+                # The action is contextual to ``full_name``, so the commit\", \"+                # must land on that branch. Switch to it first when needed.\", \"+                if not is_local_branch:\", \"+                    Interaction.information(\", \"+                        N_('Cannot Commit'),\", \"+                        N_('BRANCH_MENU actions only apply to local'\", \"+                           ' branches.'),\", \"+                    )\", \"+                    return\", \"+                if self._current_branch_name() != full_name:\", \"+                    result = cmds.do(cmds.CheckoutBranch, context, full_name)\", \"+                    if not result or result[0] != 0:\", \"+                        # CheckoutBranch already surfaced the failure (e.g.\", \"+                        # dirty worktree); just abort so we don't commit on\", \"+                        # the wrong branch.\", \"+                        return\", \"+                if _edit_file_and_commit(context, label, rel_path):\", \"                     graph_view.merge_finished.emit()\", \"                 return\", \"         if chosen is copy_full:\"]}], \"userModified\": false, \"replaceAll\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 95459,
+        "completion_tokens": 1981,
+        "cached_tokens": 95453,
+        "extra": {
+          "cache_creation_input_tokens": 655,
+          "cache_read_input_tokens": 95453,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 655,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 6,
+              "output_tokens": 1981,
+              "cache_read_input_tokens": 95453,
+              "cache_creation_input_tokens": 655,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 655
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Edit",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "        for action, label, rel_path in custom_actions:\n            if chosen is action:\n                graph_view = self._graph_view()\n                if graph_view is None or graph_view.context is None:\n                    return\n                if _edit_file_and_commit(\n                    graph_view.context, label, rel_path\n                ):\n                    graph_view.merge_finished.emit()\n                return",
+            "newString": "        for action, label, rel_path in custom_actions:\n            if chosen is action:\n                graph_view = self._graph_view()\n                if graph_view is None or graph_view.context is None:\n                    return\n                context = graph_view.context\n                # The action is contextual to ``full_name``, so the commit\n                # must land on that branch. Switch to it first when needed.\n                if not is_local_branch:\n                    Interaction.information(\n                        N_('Cannot Commit'),\n                        N_('BRANCH_MENU actions only apply to local'\n                           ' branches.'),\n                    )\n                    return\n                if self._current_branch_name() != full_name:\n                    result = cmds.do(cmds.CheckoutBranch, context, full_name)\n                    if not result or result[0] != 0:\n                        # CheckoutBranch already surfaced the failure (e.g.\n                        # dirty worktree); just abort so we don't commit on\n                        # the wrong branch.\n                        return\n                if _edit_file_and_commit(context, label, rel_path):\n                    graph_view.merge_finished.emit()\n                return",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2749,
+                "oldLines": 9,
+                "newStart": 2749,
+                "newLines": 24,
+                "lines": [
+                  "                 graph_view = self._graph_view()",
+                  "                 if graph_view is None or graph_view.context is None:",
+                  "                     return",
+                  "-                if _edit_file_and_commit(",
+                  "-                    graph_view.context, label, rel_path",
+                  "-                ):",
+                  "+                context = graph_view.context",
+                  "+                # The action is contextual to ``full_name``, so the commit",
+                  "+                # must land on that branch. Switch to it first when needed.",
+                  "+                if not is_local_branch:",
+                  "+                    Interaction.information(",
+                  "+                        N_('Cannot Commit'),",
+                  "+                        N_('BRANCH_MENU actions only apply to local'",
+                  "+                           ' branches.'),",
+                  "+                    )",
+                  "+                    return",
+                  "+                if self._current_branch_name() != full_name:",
+                  "+                    result = cmds.do(cmds.CheckoutBranch, context, full_name)",
+                  "+                    if not result or result[0] != 0:",
+                  "+                        # CheckoutBranch already surfaced the failure (e.g.",
+                  "+                        # dirty worktree); just abort so we don't commit on",
+                  "+                        # the wrong branch.",
+                  "+                        return",
+                  "+                if _edit_file_and_commit(context, label, rel_path):",
+                  "                     graph_view.merge_finished.emit()",
+                  "                 return",
+                  "         if chosen is copy_full:"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01UqcB1VthBrC57WYso2exjE",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)"
+          }
+        },
+        "metadata": {
+          "tool_use_result": {
+            "filePath": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+            "oldString": "        for action, label, rel_path in custom_actions:\n            if chosen is action:\n                graph_view = self._graph_view()\n                if graph_view is None or graph_view.context is None:\n                    return\n                if _edit_file_and_commit(\n                    graph_view.context, label, rel_path\n                ):\n                    graph_view.merge_finished.emit()\n                return",
+            "newString": "        for action, label, rel_path in custom_actions:\n            if chosen is action:\n                graph_view = self._graph_view()\n                if graph_view is None or graph_view.context is None:\n                    return\n                context = graph_view.context\n                # The action is contextual to ``full_name``, so the commit\n                # must land on that branch. Switch to it first when needed.\n                if not is_local_branch:\n                    Interaction.information(\n                        N_('Cannot Commit'),\n                        N_('BRANCH_MENU actions only apply to local'\n                           ' branches.'),\n                    )\n                    return\n                if self._current_branch_name() != full_name:\n                    result = cmds.do(cmds.CheckoutBranch, context, full_name)\n                    if not result or result[0] != 0:\n                        # CheckoutBranch already surfaced the failure (e.g.\n                        # dirty worktree); just abort so we don't commit on\n                        # the wrong branch.\n                        return\n                if _edit_file_and_commit(context, label, rel_path):\n                    graph_view.merge_finished.emit()\n                return",
+            "originalFile": null,
+            "structuredPatch": [
+              {
+                "oldStart": 2749,
+                "oldLines": 9,
+                "newStart": 2749,
+                "newLines": 24,
+                "lines": [
+                  "                 graph_view = self._graph_view()",
+                  "                 if graph_view is None or graph_view.context is None:",
+                  "                     return",
+                  "-                if _edit_file_and_commit(",
+                  "-                    graph_view.context, label, rel_path",
+                  "-                ):",
+                  "+                context = graph_view.context",
+                  "+                # The action is contextual to ``full_name``, so the commit",
+                  "+                # must land on that branch. Switch to it first when needed.",
+                  "+                if not is_local_branch:",
+                  "+                    Interaction.information(",
+                  "+                        N_('Cannot Commit'),",
+                  "+                        N_('BRANCH_MENU actions only apply to local'",
+                  "+                           ' branches.'),",
+                  "+                    )",
+                  "+                    return",
+                  "+                if self._current_branch_name() != full_name:",
+                  "+                    result = cmds.do(cmds.CheckoutBranch, context, full_name)",
+                  "+                    if not result or result[0] != 0:",
+                  "+                        # CheckoutBranch already surfaced the failure (e.g.",
+                  "+                        # dirty worktree); just abort so we don't commit on",
+                  "+                        # the wrong branch.",
+                  "+                        return",
+                  "+                if _edit_file_and_commit(context, label, rel_path):",
+                  "                     graph_view.merge_finished.emit()",
+                  "                 return",
+                  "         if chosen is copy_full:"
+                ]
+              }
+            ],
+            "userModified": false,
+            "replaceAll": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01UqcB1VthBrC57WYso2exjE",
+            "type": "tool_result",
+            "content": "The file /Users/luwei/work/git-cola/cola/widgets/dag.py has been updated successfully. (file state is current in your context — no need to Read it back)"
+          }
+        },
+        "raw_arguments": {
+          "replace_all": false,
+          "file_path": "/Users/luwei/work/git-cola/cola/widgets/dag.py",
+          "old_string": "        for action, label, rel_path in custom_actions:\n            if chosen is action:\n                graph_view = self._graph_view()\n                if graph_view is None or graph_view.context is None:\n                    return\n                if _edit_file_and_commit(\n                    graph_view.context, label, rel_path\n                ):\n                    graph_view.merge_finished.emit()\n                return",
+          "new_string": "        for action, label, rel_path in custom_actions:\n            if chosen is action:\n                graph_view = self._graph_view()\n                if graph_view is None or graph_view.context is None:\n                    return\n                context = graph_view.context\n                # The action is contextual to ``full_name``, so the commit\n                # must land on that branch. Switch to it first when needed.\n                if not is_local_branch:\n                    Interaction.information(\n                        N_('Cannot Commit'),\n                        N_('BRANCH_MENU actions only apply to local'\n                           ' branches.'),\n                    )\n                    return\n                if self._current_branch_name() != full_name:\n                    result = cmds.do(cmds.CheckoutBranch, context, full_name)\n                    if not result or result[0] != 0:\n                        # CheckoutBranch already surfaced the failure (e.g.\n                        # dirty worktree); just abort so we don't commit on\n                        # the wrong branch.\n                        return\n                if _edit_file_and_commit(context, label, rel_path):\n                    graph_view.merge_finished.emit()\n                return"
+        }
+      }
+    },
+    {
+      "step_id": 161,
+      "timestamp": "2026-05-19T06:30:11.793Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "Executed Bash toolu_01KCa53cZCzTyWpiV4FU6Z9n",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01KCa53cZCzTyWpiV4FU6Z9n",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "python3 -c \"import sys; sys.path.insert(0,'.'); import cola.widgets.dag; print('ok')\"",
+            "description": "Smoke import"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01KCa53cZCzTyWpiV4FU6Z9n",
+            "content": "ok\n\n[stdout]\nok\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 96109,
+        "completion_tokens": 128,
+        "cached_tokens": 96108,
+        "extra": {
+          "cache_creation_input_tokens": 2051,
+          "cache_read_input_tokens": 96108,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 2051,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 128,
+              "cache_read_input_tokens": 96108,
+              "cache_creation_input_tokens": 2051,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 2051
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "ok",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01KCa53cZCzTyWpiV4FU6Z9n",
+            "type": "tool_result",
+            "content": "ok",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "ok",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01KCa53cZCzTyWpiV4FU6Z9n",
+            "type": "tool_result",
+            "content": "ok",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "python3 -c \"import sys; sys.path.insert(0,'.'); import cola.widgets.dag; print('ok')\"",
+          "description": "Smoke import"
+        }
+      }
+    },
+    {
+      "step_id": 162,
+      "timestamp": "2026-05-19T06:31:40.336Z",
+      "source": "agent",
+      "model_name": "claude-opus-4-7",
+      "message": "加好了。新行为：\n\n1. **远端 branch / tag**：直接拒绝（弹 info 框，不进编辑器）——因为 checkout 它们会进 detached HEAD 或没意义。\n2. **本地 branch 且就是当前 HEAD**：跳过 checkout，直接进编辑+提交流程（行为不变）。\n3. **本地 branch 且非当前 HEAD**：先 `cmds.do(cmds.CheckoutBranch, ...)`。\n   - checkout 失败（典型场景：工作区脏）→ `CheckoutBranch` 命令自己已经把 git 错误报到 Interaction，这里直接 return，不弹编辑器、不写文件、不再尝试提交。用户的工作区保持原样。\n   - checkout 成功 → 进编辑器，OK 后写文件 + add + commit，新 commit 落在刚切过去的那个 branch 上。\n\n整体保持\"用户改动不会被静默丢弃\"的安全约束：不会偷偷 stash 也不会强切。",
+      "metrics": {
+        "prompt_tokens": 98160,
+        "completion_tokens": 356,
+        "cached_tokens": 98159,
+        "extra": {
+          "cache_creation_input_tokens": 142,
+          "cache_read_input_tokens": 98159,
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 142,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [
+            {
+              "input_tokens": 1,
+              "output_tokens": 356,
+              "cache_read_input_tokens": 98159,
+              "cache_creation_input_tokens": 142,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 142
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 9441431,
-    "total_completion_tokens": 97817,
-    "total_cached_tokens": 9441214,
-    "total_steps": 157,
+    "total_prompt_tokens": 9826618,
+    "total_completion_tokens": 102263,
+    "total_cached_tokens": 9826387,
+    "total_steps": 162,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 379488,
-      "total_cache_read_input_tokens": 9441214
+      "total_cache_creation_input_tokens": 382991,
+      "total_cache_read_input_tokens": 9826387
     }
   }
 }
