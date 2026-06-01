@@ -2785,10 +2785,26 @@ class Label(QtWidgets.QGraphicsItem):
             if graph_view is not None:
                 from . import rewind as rewind_widget
 
-                rewind_widget.run_rewind_check(
-                    graph_view.context, full_name, rewind_paths
-                )
-                graph_view.merge_finished.emit()
+                # ``run_rewind_check`` performs ``git reset --hard`` and shows
+                # modal dialogs that spin a nested event loop. Both end up
+                # rebuilding the DAG scene (``scene().clear()``), which would
+                # delete *this* ``Label`` item while its ``mousePressEvent`` is
+                # still on the C++ event-dispatch stack -> use-after-free crash.
+                # Defer the work until after the mouse event has fully returned.
+                # The closure must not touch ``self``/this item (it may already
+                # be gone); only ``graph_view`` and plain values are captured.
+                context = graph_view.context
+
+                def _run_rewind(
+                    graph_view=graph_view,
+                    context=context,
+                    branch=full_name,
+                    paths=rewind_paths,
+                ):
+                    rewind_widget.run_rewind_check(context, branch, paths)
+                    graph_view.merge_finished.emit()
+
+                QtCore.QTimer.singleShot(0, _run_rewind)
         elif chosen is merge_to:
             graph_view = self._graph_view()
             if graph_view is not None:
