@@ -2696,7 +2696,7 @@ class Label(QtWidgets.QGraphicsItem):
                     graph_view.context, getattr(self.commit, 'oid', None)
                 )
                 if basenames:
-                    rename_to_target = '%s/%s' % (full_name, ','.join(basenames))
+                    rename_to_target = '%s.%s' % (full_name, ','.join(basenames))
                     rename_to = menu.addAction(
                         N_('Rename to "%s"...') % rename_to_target
                     )
