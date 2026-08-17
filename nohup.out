@@ -1,7 +1,0 @@
-Fatal Python error: init_sys_streams: can't initialize sys standard streams
-Python runtime state: core initialized
-OSError: [Errno 9] Bad file descriptor
-
-Current thread 0x00000002011910c0 (most recent call first):
-  <no Python frame>
-2026-08-17 14:47:43.282 Python[3947:67149647] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
