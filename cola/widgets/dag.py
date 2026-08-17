@@ -2675,6 +2675,7 @@ class Label(QtWidgets.QGraphicsItem):
 
     def _show_branch_menu(self, event, full_name, original_tag):
         is_local_branch = original_tag.startswith('heads/')
+        is_remote_branch = original_tag.startswith('remotes/')
         agent_part = _agent_branch_part(full_name)
         menu = QtWidgets.QMenu()
         copy_full = menu.addAction(N_('Copy "%s"') % full_name)
@@ -2731,6 +2732,22 @@ class Label(QtWidgets.QGraphicsItem):
                     push_force_all_action = push_menu.addAction(
                         N_('All remotes (force-with-lease)')
                     )
+
+        # Remote-tracking labels get a "delete the branch on the remote" entry.
+        # Renaming a local branch leaves the ref it was pushed under behind on
+        # the remote, and a stale ``agent/{session id}`` ref also blocks pushing
+        # ``agent/{session id}.{files}`` ("refname conflict"), so deleting it
+        # has to be reachable from the label itself.
+        delete_remote = None
+        delete_remote_target = (None, None)
+        if is_remote_branch:
+            delete_remote_target = _split_remote_ref(
+                full_name, self._configured_remotes()
+            )
+            if delete_remote_target[0] is not None:
+                menu.addSeparator()
+                delete_remote = menu.addAction(N_('Delete "%s"') % full_name)
+                delete_remote.setIcon(icons.discard())
 
         # Optional env-driven entries (``BRANCH_MENU=Stop>_traj/stop.md:...``).
         # Local branches only: committing to remote-tracking refs would
@@ -2809,6 +2826,29 @@ class Label(QtWidgets.QGraphicsItem):
             graph_view = self._graph_view()
             if graph_view is not None:
                 graph_view.enter_merge_mode(full_name)
+        elif delete_remote is not None and chosen is delete_remote:
+            graph_view = self._graph_view()
+            if graph_view is None:
+                return
+            remote, branch = delete_remote_target
+            # ``DeleteRemoteBranch`` spins nested event loops for its confirm
+            # and result dialogs, and its success path refreshes the model,
+            # which rebuilds the DAG scene (``scene().clear()``) and deletes
+            # *this* ``Label`` while ``mousePressEvent`` is still on the C++
+            # event-dispatch stack -> use-after-free. Defer the work until the
+            # mouse event has fully returned and keep ``self`` out of the
+            # closure; only ``graph_view`` and plain values are captured.
+            def _delete_remote_branch(
+                graph_view=graph_view,
+                context=graph_view.context,
+                remote=remote,
+                branch=branch,
+            ):
+                result = cmds.do(cmds.DeleteRemoteBranch, context, remote, branch)
+                if result and result[0] and result[1] == 0:
+                    graph_view.merge_finished.emit()
+
+            QtCore.QTimer.singleShot(0, _delete_remote_branch)
         elif push_all_action is not None and chosen is push_all_action:
             self._push_branch(full_name, [r for _, r in push_actions], force=False)
         elif push_force_all_action is not None and chosen is push_force_all_action:
@@ -2977,6 +3017,33 @@ def _agent_branch_part(name):
                 tail = tail.split(separator, 1)[0]
             return tail
     return None
+
+
+def _split_remote_ref(name, remotes):
+    """Split a remote-tracking label such as "origin/agent/x" into (remote, branch).
+
+    ``remotes`` holds the configured remote names; the longest match wins so that
+    remotes sharing a prefix resolve to the right one. Returns ``(None, None)``
+    when no configured remote matches or when the label is a symbolic ``HEAD``,
+    which is not a branch that can be deleted.
+
+    >>> _split_remote_ref('origin/agent/23ecce3c', ['origin'])
+    ('origin', 'agent/23ecce3c')
+    >>> _split_remote_ref('origin/mirror/topic', ['origin', 'origin/mirror'])
+    ('origin/mirror', 'topic')
+    >>> _split_remote_ref('origin/HEAD', ['origin'])
+    (None, None)
+    >>> _split_remote_ref('upstream/main', ['origin'])
+    (None, None)
+    """
+    for remote in sorted(remotes, key=len, reverse=True):
+        prefix = remote + '/'
+        if name.startswith(prefix):
+            branch = name[len(prefix):]
+            if not branch or branch == 'HEAD':
+                return (None, None)
+            return (remote, branch)
+    return (None, None)
 
 
 def _parse_branch_menu_env():
