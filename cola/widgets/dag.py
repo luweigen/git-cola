@@ -2956,14 +2956,26 @@ def _agent_branch_part(name):
     """Return the agent name segment for branches starting with "agent_" or "agent/".
 
     The returned segment is the text after the prefix up to (but not including) the
-    next "/", or the rest of the string if there is no "/". Returns None if name
-    does not start with one of the recognized agent prefixes.
+    next "/" or ".", or the rest of the string when neither is present. Branches
+    renamed from the DAG are named ``agent/{session id}.{file names}``, so "." must
+    stop the segment as well in order to yield the bare session id. Returns None if
+    name does not start with one of the recognized agent prefixes.
+
+    >>> _agent_branch_part('agent/23ecce3c-dc37.SQALE_Quality_Model,notes.md')
+    '23ecce3c-dc37'
+    >>> _agent_branch_part('agent/23ecce3c-dc37/SQALE_Quality_Model')
+    '23ecce3c-dc37'
+    >>> _agent_branch_part('agent_23ecce3c-dc37')
+    '23ecce3c-dc37'
+    >>> _agent_branch_part('feature/agent/23ecce3c-dc37') is None
+    True
     """
     for prefix in ('agent_', 'agent/'):
         if name.startswith(prefix):
             tail = name[len(prefix):]
-            slash = tail.find('/')
-            return tail if slash < 0 else tail[:slash]
+            for separator in ('/', '.'):
+                tail = tail.split(separator, 1)[0]
+            return tail
     return None
 
 
