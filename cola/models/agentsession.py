@@ -14,6 +14,7 @@ supports git 2.2.  We therefore read these refs ourselves with
 ``git for-each-ref`` and attach labels to commits by object ID.
 """
 from __future__ import annotations
+import datetime
 import hashlib
 from dataclasses import dataclass
 from dataclasses import field
@@ -504,6 +505,66 @@ def build_thread(session, commits_by_oid, trailers, cache=None) -> SessionThread
         )
 
 
+DEFAULT_DAYS = 30
+"""How far back the Sessions panel looks by default"""
+
+
+def parse_updated(session):
+    """The session's tip date as a datetime, or None when unparsable.
+
+    ``creatordate:iso-strict`` produces an offset like ``+03:00``, which
+    ``datetime.fromisoformat`` accepts on Python 3.9.
+
+    >>> stamp = parse_updated(
+    ...     AgentSession('s', updated='2026-09-05T12:00:00+03:00')
+    ... )
+    >>> stamp.year, stamp.month, stamp.day, stamp.hour
+    (2026, 9, 5, 12)
+    >>> stamp.utcoffset().total_seconds()
+    10800.0
+    >>> parse_updated(AgentSession('s')) is None
+    True
+    >>> parse_updated(AgentSession('s', updated='not a date')) is None
+    True
+    """
+    if not session.updated:
+        return None
+    try:
+        return datetime.datetime.fromisoformat(session.updated)
+    except ValueError:
+        return None
+
+
+def is_recent(session, days: int = DEFAULT_DAYS, now=None) -> bool:
+    """Did this session's tip land within the last ``days`` days?
+
+    A session whose date cannot be read counts as recent: hiding a session
+    because its timestamp was unreadable would be worse than showing it.
+    ``days <= 0`` means no time limit.
+
+    >>> import datetime as dt
+    >>> now = dt.datetime(2026, 9, 5, tzinfo=dt.timezone.utc)
+    >>> recent = AgentSession('s', updated='2026-09-01T00:00:00+00:00')
+    >>> old = AgentSession('s', updated='2026-01-01T00:00:00+00:00')
+    >>> is_recent(recent, days=30, now=now)
+    True
+    >>> is_recent(old, days=30, now=now)
+    False
+    >>> is_recent(old, days=0, now=now)
+    True
+    >>> is_recent(AgentSession('s'), days=30, now=now)
+    True
+    """
+    if days <= 0:
+        return True
+    updated = parse_updated(session)
+    if updated is None:
+        return True
+    if now is None:
+        now = datetime.datetime.now().astimezone()
+    return (now - updated) <= datetime.timedelta(days=days)
+
+
 def thread_segments(thread, commits_by_oid):
     """Parent edges that make up one session's band.
 
@@ -551,6 +612,27 @@ def thread_segments(thread, commits_by_oid):
             if parent.oid in covered and parent.oid in commits_by_oid:
                 segments.append((oid, parent.oid, mark))
     return segments
+
+
+def branch_name(session_id: str, basenames=()) -> str:
+    """Name for the branch that stands in for renaming a session.
+
+    A session ref cannot be renamed: the id is the identity that the
+    ``Agent-Session-Id`` trailers, the reflog and agent-sessions.py all key
+    off.  What the old branch-per-session layout called "rename to
+    ``agent/{id}.{files}``" becomes "create that branch at the tip" here,
+    which leaves the ref alone and hands the result to the ordinary branch
+    menu.
+
+    >>> branch_name('23ecce3c-dc37', ['notes.md', 'dag.py'])
+    'agent/23ecce3c-dc37.notes.md,dag.py'
+    >>> branch_name('23ecce3c-dc37')
+    'agent/23ecce3c-dc37'
+    """
+    name = 'agent/%s' % session_id
+    if basenames:
+        name += '.%s' % ','.join(basenames)
+    return name
 
 
 def session_hue(session_id: str) -> int:

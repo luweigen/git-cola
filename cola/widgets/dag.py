@@ -45,6 +45,7 @@ from . import diff_intraline
 from . import filelist
 from . import finder
 from . import standard
+from . import text
 
 
 def git_dag(context, args=None, existing_view=None, show=True):
@@ -84,6 +85,9 @@ def git_dag(context, args=None, existing_view=None, show=True):
     )
     view.graphview.legacy_label_colors = _config_truthy(
         context.cfg.get('cola.dag.legacylabelcolors', default=False)
+    )
+    view.graphview.show_session_ribbons = _config_truthy(
+        context.cfg.get('cola.dag.agentsessionribbon', default=True)
     )
     if show:
         view.show()
@@ -1375,6 +1379,173 @@ class CommitTreeWidget(standard.TreeWidget, ViewerMixin):
             QtWidgets.QTreeWidget.dataChanged(self, top_left, bottom_right, roles)
 
 
+class SessionsWidget(QtWidgets.QFrame):
+    """Lists the agent sessions found in refs/agent/session/.
+
+    The base/tip labels answer "where is this one session"; this answers
+    "what sessions are there at all", which the graph cannot show for a
+    session whose commits are not currently on screen.
+    """
+
+    session_selected = Signal(object)
+    """Emits the tip object ID of the clicked session"""
+
+    session_range = Signal(object)
+    """Emits a base..tip revision range to show on its own"""
+
+    COLOR, SESSION, COMMITS, UPDATED, STATE = range(5)
+
+    def __init__(self, context, parent=None):
+        super().__init__(parent)
+        self.context = context
+        self.sessions = {}
+        self.threads = {}
+        self.head_oid = None
+
+        self.filter_text = text.LineEdit(parent=self)
+        self.filter_text.setPlaceholderText(N_('Filter sessions'))
+        self.recent_only = qtutils.checkbox(
+            text=N_('Recent only'),
+            tooltip=N_('Hide sessions older than cola.dag.agentsessiondays'),
+            checked=True,
+        )
+
+        self.tree = standard.TreeWidget(parent=self)
+        self.tree.setHeaderLabels(
+            [' ', N_('Session'), N_('Commits'), N_('Updated'), N_('State')]
+        )
+        self.tree.setRootIsDecorated(False)
+        self.tree.setAlternatingRowColors(True)
+        self.tree.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
+
+        self.controls_layout = qtutils.hbox(
+            defs.no_margin, defs.spacing, self.filter_text, self.recent_only
+        )
+        self.main_layout = qtutils.vbox(
+            defs.no_margin, defs.spacing, self.controls_layout, self.tree
+        )
+        self.setLayout(self.main_layout)
+
+        self.filter_text.textChanged.connect(lambda _text: self.refill())
+        self.recent_only.toggled.connect(lambda _checked: self.refill())
+        self.tree.itemSelectionChanged.connect(self._selection_changed)
+        self.tree.itemDoubleClicked.connect(self._double_clicked)
+        self.tree.customContextMenuRequested.connect(self._context_menu)
+
+    def set_sessions(self, sessions, threads, head_oid=None):
+        """Take the state from the last completed read and redraw"""
+        self.sessions = sessions or {}
+        self.threads = threads or {}
+        self.head_oid = head_oid
+        self.refill()
+
+    def refill(self):
+        """Rebuild the rows for the current filter settings"""
+        needle = get(self.filter_text).strip().lower()
+        days = self.context.cfg.get(
+            'cola.dag.agentsessiondays', default=agentsession.DEFAULT_DAYS
+        )
+        try:
+            days = int(days)
+        except (TypeError, ValueError):
+            days = agentsession.DEFAULT_DAYS
+        recent_only = get(self.recent_only)
+
+        self.tree.clear()
+        for session_id, session in self.sessions.items():
+            if needle and needle not in session_id.lower():
+                continue
+            if recent_only and not agentsession.is_recent(session, days=days):
+                continue
+            self.tree.addTopLevelItem(self._build_item(session_id, session))
+        for column in (self.COLOR, self.SESSION, self.COMMITS, self.UPDATED):
+            self.tree.resizeColumnToContents(column)
+
+    def _build_item(self, session_id, session):
+        item = QtWidgets.QTreeWidgetItem()
+        item.setData(self.COLOR, Qt.UserRole, session_id)
+        item.setBackground(
+            self.COLOR, QtGui.QBrush(session_ribbon_color(session_id))
+        )
+        item.setText(self.SESSION, session.short)
+        item.setToolTip(self.SESSION, session_id)
+        item.setText(self.COMMITS, self._commits_text(session_id))
+        item.setText(self.UPDATED, session.updated[:10])
+        item.setToolTip(self.UPDATED, session.updated)
+        item.setText(self.STATE, self._state_text(session_id, session))
+        return item
+
+    def _commits_text(self, session_id):
+        """Own count, plus the two anomalies when they are non-zero"""
+        thread = self.threads.get(session_id)
+        if thread is None:
+            return N_('not classified')
+        counts = thread.counts()
+        parts = ['%d' % counts[agentsession.Mark.OWN]]
+        foreign = counts[agentsession.Mark.FOREIGN]
+        if foreign:
+            parts.append(N_('+%d foreign') % foreign)
+        stray = counts[agentsession.Mark.STRAY]
+        if stray:
+            parts.append(N_('%d stray') % stray)
+        return ', '.join(parts)
+
+    def _state_text(self, session_id, session):
+        if session.is_empty():
+            return N_('no commits')
+        if self.head_oid and session.tip_oid == self.head_oid:
+            return N_('at HEAD')
+        if session_id not in self.threads:
+            return ''
+        if not session.base_oid:
+            return N_('no base ref')
+        return ''
+
+    def _selected_session(self):
+        items = self.tree.selectedItems()
+        if not items:
+            return None
+        return items[0].data(self.COLOR, Qt.UserRole)
+
+    def _selection_changed(self):
+        session_id = self._selected_session()
+        if session_id is None:
+            return
+        session = self.sessions.get(session_id)
+        if session is not None and session.tip_oid:
+            self.session_selected.emit(session.tip_oid)
+
+    def _double_clicked(self, _item, _column):
+        session_id = self._selected_session()
+        session = self.sessions.get(session_id) if session_id else None
+        if session is None or not session.base_oid or not session.tip_oid:
+            return
+        self.session_range.emit(
+            '%s..%s'
+            % (
+                agentsession.session_ref(session_id, agentsession.BASE),
+                agentsession.session_ref(session_id, agentsession.TIP),
+            )
+        )
+
+    def _context_menu(self, pos):
+        item = self.tree.itemAt(pos)
+        if item is None:
+            return
+        session_id = item.data(self.COLOR, Qt.UserRole)
+        if not session_id:
+            return
+        window = self.window()
+        graph_view = getattr(window, 'graphview', None)
+        show_session_menu(
+            graph_view,
+            agentsession.TIP,
+            session_id,
+            self.tree.viewport().mapToGlobal(pos),
+        )
+
+
 class GitDAG(standard.MainWindow):
     """The git-dag widget."""
 
@@ -1386,7 +1557,9 @@ class GitDAG(standard.MainWindow):
         self.setMinimumSize(420, 420)
 
         # change when widgets are added/removed
-        self.widget_version = 2
+        # Bumped when docks are added/removed so a saved layout from an
+        # older version is not restored on top of the new one.
+        self.widget_version = 3
         self.context = context
         self.params = params
         self.model = context.model
@@ -1401,6 +1574,8 @@ class GitDAG(standard.MainWindow):
         self.old_display_status = None
         self.old_head_oid = None
         self.force_refresh = False
+        self.agent_sessions = {}
+        """{session_id: AgentSession} from the last completed read"""
         self.session_threads = {}
         """{session_id: SessionThread} from the last completed read"""
         self._widgets_initialized = False
@@ -1429,6 +1604,7 @@ class GitDAG(standard.MainWindow):
         self.diffwidget = diff.CommitDiffWidget(context, self, is_commit=True)
         self.filewidget = filelist.FileWidget(context, self)
         self.graphview = GraphView(context, self)
+        self.sessionswidget = SessionsWidget(context, self)
 
         self.treewidget.commits_selected.connect(
             self.commits_selected, type=Qt.QueuedConnection
@@ -1498,6 +1674,11 @@ class GitDAG(standard.MainWindow):
             'Files', N_('Files'), self, hide_title=True
         )
         self.file_dock.setWidget(self.filewidget)
+
+        self.sessions_dock = qtutils.create_dock(
+            'Sessions', N_('Agent Sessions'), self, hide_title=True
+        )
+        self.sessions_dock.setWidget(self.sessionswidget)
 
         self.diff_panel = diff.DiffPanel(self.diffwidget, self.diffwidget.diff, self)
         self.diff_options = diff.Options(self.diffwidget)
@@ -1570,6 +1751,7 @@ class GitDAG(standard.MainWindow):
         self.view_menu.addAction(self.display_status_action)
         self.view_menu.addSeparator()
         self.view_menu.addAction(self.log_dock.toggleViewAction())
+        self.view_menu.addAction(self.sessions_dock.toggleViewAction())
         self.view_menu.addAction(self.graphview_dock.toggleViewAction())
         self.view_menu.addAction(self.diff_dock.toggleViewAction())
         self.view_menu.addAction(self.file_dock.toggleViewAction())
@@ -1579,6 +1761,9 @@ class GitDAG(standard.MainWindow):
         left = Qt.LeftDockWidgetArea
         right = Qt.RightDockWidgetArea
         self.addDockWidget(left, self.log_dock)
+        self.addDockWidget(left, self.sessions_dock)
+        self.tabifyDockWidget(self.log_dock, self.sessions_dock)
+        self.log_dock.raise_()
         self.addDockWidget(left, self.diff_dock)
         self.addDockWidget(right, self.graphview_dock)
         self.addDockWidget(right, self.file_dock)
@@ -1609,6 +1794,12 @@ class GitDAG(standard.MainWindow):
         )
         self.filewidget.select_line_range_for_file.connect(
             self.search_line_range_for_file, type=Qt.QueuedConnection
+        )
+        self.sessionswidget.session_selected.connect(
+            self.select_session_tip, type=Qt.QueuedConnection
+        )
+        self.sessionswidget.session_range.connect(
+            self.show_session_range, type=Qt.QueuedConnection
         )
         self.maxresults.editingFinished.connect(self.display, type=Qt.QueuedConnection)
         self.revtext.textChanged.connect(self.text_changed, type=Qt.QueuedConnection)
@@ -1649,8 +1840,8 @@ class GitDAG(standard.MainWindow):
         self.thread.begin.connect(self.thread_begin, type=Qt.QueuedConnection)
         self.thread.status.connect(self.thread_status, type=Qt.QueuedConnection)
         self.thread.add.connect(self.add_commits, type=Qt.QueuedConnection)
-        self.thread.sessions.connect(
-            self.set_session_threads, type=Qt.QueuedConnection
+        self.thread.agent_sessions.connect(
+            self.set_session_data, type=Qt.QueuedConnection
         )
         self.thread.end.connect(self.thread_end, type=Qt.QueuedConnection)
 
@@ -1970,10 +2161,28 @@ class GitDAG(standard.MainWindow):
         # been gathered.
         self.treewidget.add_commits(commits)
 
-    def set_session_threads(self, threads):
-        """The reader classified each session's base..tip"""
+    def set_session_data(self, sessions, threads):
+        """The reader finished reading and classifying the agent sessions"""
+        self.agent_sessions = sessions or {}
         self.session_threads = threads or {}
+        self.graphview.agent_sessions = self.agent_sessions
         self.graphview.session_threads = self.session_threads
+        self.sessionswidget.set_sessions(
+            self.agent_sessions, self.session_threads, head_oid=self.old_head_oid
+        )
+
+    def select_session_tip(self, oid):
+        """Select a session's tip commit in both views"""
+        if not oid or oid not in self.commits:
+            return
+        self.treewidget.select([oid])
+        self.graphview.select([oid])
+
+    def show_session_range(self, revision_range):
+        """Narrow the view to one session's base..tip"""
+        self.revtext.set_value(revision_range)
+        self.force_refresh = True
+        self.display()
 
     def thread_begin(self):
         """The reader thread has begun"""
@@ -2115,8 +2324,12 @@ class ReaderThread(QtCore.QThread):
     add = Signal(object)
     end = Signal()
     status = Signal(object)
-    sessions = Signal(object)
-    """Emits {session_id: SessionThread} once the whole walk is classified"""
+    agent_sessions = Signal(object, object)
+    """Emits (sessions, threads) once the whole walk is classified.
+
+    Both are needed: ``threads`` only covers the newest N sessions, but every
+    session still has base/tip labels whose menu needs its endpoints.
+    """
 
     def __init__(self, context, params):
         super().__init__()
@@ -2151,7 +2364,7 @@ class ReaderThread(QtCore.QThread):
         # Threads are only complete once every commit has been read, so this
         # goes out after the last add() and before end(), which is where the
         # views rebuild themselves.
-        self.sessions.emit(repo.threads)
+        self.agent_sessions.emit(repo.sessions, repo.threads)
         self.status.emit(repo.returncode == 0)
         self.end.emit()
 
@@ -2863,23 +3076,10 @@ class Label(QtWidgets.QGraphicsItem):
         return list(getattr(model, 'modified', None) or [])
 
     def _show_session_menu(self, event, kind, session_id):
-        """Menu for an agent session base/tip label.
-
-        A session anchor is not a branch -- there is nothing to check out,
-        merge or push -- so this offers the two things worth copying: the
-        session id that ``Agent-Session-Id`` trailers and ``agent-sessions.py``
-        take, and the ref name for use with ``git log`` / ``git reflog``.
-        """
-        refname = agentsession.session_ref(session_id, kind)
-        menu = QtWidgets.QMenu()
-        copy_id = menu.addAction(N_('Copy "%s"') % session_id)
-        copy_ref = menu.addAction(N_('Copy "%s"') % refname)
-
-        chosen = menu.exec_(event.screenPos())
-        if chosen is copy_id:
-            qtutils.set_clipboard(session_id)
-        elif chosen is copy_ref:
-            qtutils.set_clipboard(refname)
+        """Forward to the shared session menu (the panel uses it too)"""
+        show_session_menu(
+            self._graph_view(), kind, session_id, event.screenPos()
+        )
 
     def _show_branch_menu(self, event, full_name, original_tag):
         is_local_branch = original_tag.startswith('heads/')
@@ -3144,6 +3344,153 @@ class Label(QtWidgets.QGraphicsItem):
             graph_view.merge_finished.emit()
 
 
+def show_session_menu(graph_view, kind, session_id, screen_pos):
+    """Menu for an agent session base/tip label.
+
+    A session anchor is not a branch -- there is nothing to check out,
+    merge or push -- so this is a different menu from _show_branch_menu().
+    The session id cannot be renamed either: it is the identity that the
+    ``Agent-Session-Id`` trailers, the reflog and agent-sessions.py all
+    key off. The equivalent of "rename" is "create a branch at the tip",
+    after which the ordinary branch menu applies to that branch.
+    """
+    refname = agentsession.session_ref(session_id, kind)
+    session = None
+    if graph_view is not None:
+        session = graph_view.agent_sessions.get(session_id)
+    base_oid = session.base_oid if session else None
+    tip_oid = session.tip_oid if session else None
+
+    menu = QtWidgets.QMenu()
+    copy_id = menu.addAction(N_('Copy "%s"') % session_id)
+    copy_ref = menu.addAction(N_('Copy "%s"') % refname)
+
+    menu.addSeparator()
+    diff_range = None
+    if base_oid and tip_oid and base_oid != tip_oid:
+        diff_range = menu.addAction(N_('Diff base..tip'))
+    reflog = menu.addAction(N_('Show Reflog'))
+
+    create_branch = None
+    branch_name = None
+    if tip_oid and graph_view is not None:
+        basenames = _branch_tip_basenames(graph_view.context, tip_oid)
+        branch_name = agentsession.branch_name(session_id, basenames)
+        menu.addSeparator()
+        create_branch = menu.addAction(
+            N_('Create Branch "%s" at tip...') % branch_name
+        )
+
+    menu.addSeparator()
+    prune = menu.addAction(N_('Prune Session Refs'))
+    prune.setIcon(icons.discard())
+
+    chosen = menu.exec_(screen_pos)
+    if chosen is None:
+        return
+    if chosen is copy_id:
+        qtutils.set_clipboard(session_id)
+    elif chosen is copy_ref:
+        qtutils.set_clipboard(refname)
+    elif diff_range is not None and chosen is diff_range:
+        if graph_view is not None:
+            graph_view.diff_commits.emit(base_oid, tip_oid)
+    elif chosen is reflog:
+        show_session_reflog(graph_view, session_id, kind)
+    elif create_branch is not None and chosen is create_branch:
+        create_session_branch(graph_view, branch_name, tip_oid)
+    elif chosen is prune:
+        prune_session(graph_view, session_id)
+
+
+def show_session_reflog(graph_view, session_id, kind):
+    """Show the tip ref's reflog: the session's own progress log.
+
+    The hooks write these refs with ``--create-reflog``, so the ref
+    already carries a timestamped, ordered record of the session. It is
+    just not reachable from anywhere in the UI.
+    """
+    if graph_view is None:
+        return
+    refname = agentsession.session_ref(session_id, kind)
+    context = graph_view.context
+    status, out, err = context.git.reflog(
+        'show', refname, _readonly=True
+    )
+    if status != 0 or not out.strip():
+        Interaction.information(
+            N_('No Reflog'),
+            message=N_('"%s" has no reflog entries.') % refname,
+            details=err or None,
+        )
+        return
+    # A dialog spins a nested event loop, which can rebuild the DAG scene
+    # and delete this Label while mousePressEvent is still on the C++
+    # stack. Defer it and keep ``self`` out of the closure.
+    def _show(context=context, refname=refname, text=out, view=graph_view):
+        SessionReflogDialog(
+            context, refname, text, parent=qtutils.active_window()
+        ).show()
+
+    QtCore.QTimer.singleShot(0, _show)
+
+
+def create_session_branch(graph_view, branch_name, tip_oid):
+    """Open the branch dialog prefilled with agent/{id}.{files} at tip.
+
+    This is what "rename" means once sessions live in refs rather than
+    branches: the ref keeps its identity, and the readable name becomes
+    an ordinary branch that the existing branch menu can rename, push and
+    delete.
+    """
+    if graph_view is None:
+        return
+    context = graph_view.context
+
+    def _create(context=context, revision=tip_oid, name=branch_name):
+        dialog = createbranch.create_new_branch(context, revision=revision)
+        dialog.branch_name.set_value(name)
+
+    QtCore.QTimer.singleShot(0, _create)
+
+
+def prune_session(graph_view, session_id):
+    """Delete both of a session's refs after confirming.
+
+    Safe by construction: the refs are derived data. The commits stay
+    reachable from whatever branch holds them, and the trailers still
+    say which session made them, so agent-sessions.py can rebuild the
+    refs later.
+    """
+    if graph_view is None:
+        return
+    context = graph_view.context
+    refs = [
+        agentsession.session_ref(session_id, agentsession.BASE),
+        agentsession.session_ref(session_id, agentsession.TIP),
+    ]
+
+    def _prune(context=context, refs=refs, view=graph_view, sid=session_id):
+        if not Interaction.confirm(
+            N_('Prune Session Refs'),
+            N_('Delete the refs recording session %s?') % sid,
+            N_(
+                'The commits are not touched. Their Agent-Session-Id '
+                'trailers still identify the session, so the refs can be '
+                'rebuilt later.'
+            ),
+            N_('Prune'),
+            icon=icons.discard(),
+            default=False,
+        ):
+            return
+        for refname in refs:
+            context.git.update_ref('-d', refname)
+        view.merge_finished.emit()
+
+    QtCore.QTimer.singleShot(0, _prune)
+
+
 def _prompt_wide(msg, title, text='', width_factor=1):
     """Like qtutils.prompt, but with the dialog forced wider.
 
@@ -3401,9 +3748,14 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         # HEAD and the current local branch always stay yellow.
         # Toggled via ``cola.dag.legacylabelcolors``.
         self.legacy_label_colors = False
-        # {session_id: SessionThread} for the commits currently on screen,
-        # set by GitDAG once the reader finishes.
+        # Agent session state for the commits currently on screen, set by
+        # GitDAG once the reader finishes.
+        self.agent_sessions = {}
         self.session_threads = {}
+        # ``cola.dag.agentsessionribbon`` -- when false only the base/tip
+        # labels are drawn, which is what the view looked like before the
+        # ribbon existed.
+        self.show_session_ribbons = True
         # Live SessionRibbon items, rebuilt whenever the layout moves.
         self.session_ribbons = []
         # Populated transiently inside recompute_grid().
@@ -3827,7 +4179,7 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
             if ribbon.scene() is scene:
                 scene.removeItem(ribbon)
         self.session_ribbons = []
-        if not self.session_threads:
+        if not self.session_threads or not self.show_session_ribbons:
             return
 
         for session_id, thread in self.session_threads.items():
@@ -4376,6 +4728,53 @@ def sort_by_generation(commits):
         return commits
     commits.sort(key=lambda x: x.generation)
     return commits
+
+
+class SessionReflogDialog(standard.Dialog):
+    """Show one agent session ref's reflog.
+
+    The hooks create these refs with ``--create-reflog``, which makes git
+    keep a timestamped, ordered record of how the session progressed --
+    ``refs/agent/`` is not one of the namespaces that gets a reflog by
+    default, so that flag is deliberate. This puts the record on screen
+    instead of leaving it to ``git reflog show`` on the command line.
+    """
+
+    def __init__(self, context, refname, text, parent=None):
+        super().__init__(parent=parent)
+        self.context = context
+        self.setWindowTitle(N_('Reflog for "%s"') % refname)
+        self.setWindowModality(Qt.NonModal)
+
+        self.text = QtWidgets.QPlainTextEdit(self)
+        self.text.setReadOnly(True)
+        self.text.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
+        self.text.setFont(qtutils.diff_font(context))
+        self.text.setPlainText(text.rstrip('\n'))
+
+        self.copy_button = qtutils.create_button(text=N_('Copy'))
+        self.close_button = qtutils.close_button()
+
+        self.button_layout = qtutils.hbox(
+            defs.no_margin,
+            defs.button_spacing,
+            qtutils.STRETCH,
+            self.copy_button,
+            self.close_button,
+        )
+        self.main_layout = qtutils.vbox(
+            defs.margin, defs.spacing, self.text, self.button_layout
+        )
+        self.setLayout(self.main_layout)
+
+        qtutils.connect_button(self.copy_button, self._copy)
+        qtutils.connect_button(self.close_button, self.close)
+        qtutils.add_close_action(self)
+
+        self.init_size(parent=parent)
+
+    def _copy(self):
+        qtutils.set_clipboard(self.text.toPlainText())
 
 
 class AmendFilesDialog(standard.Dialog):

@@ -439,3 +439,62 @@ def test_ribbon_follows_a_merge(app_context):
     assert (tip, trunk) in edges
     assert (tip, side) in edges
     assert (trunk, base) in edges
+
+
+def test_branch_name_matches_the_old_branch_layout(app_context):
+    """The 'rename' stand-in reproduces agent/{id}.{files} from the tip"""
+    from cola.widgets import dag as dagwidget
+
+    commit('base')
+    run_git('commit', '--allow-empty', '-m', 'seed')
+    with open('notes.md', 'w') as f:
+        f.write('note\n')
+    with open('_private.txt', 'w') as f:
+        f.write('skipped\n')
+    run_git('add', 'notes.md', '_private.txt')
+    tip = commit_for(SESSION_A, 'agent work')
+
+    basenames = dagwidget._branch_tip_basenames(app_context, tip)
+
+    # Paths starting with "_" are left out by _branch_tip_basenames().
+    assert basenames == ['notes.md']
+    assert agentsession.branch_name(SESSION_A, basenames) == (
+        'agent/' + SESSION_A + '.notes.md'
+    )
+
+
+def test_prune_removes_both_refs(app_context):
+    """Pruning drops the refs; the commits and their trailers survive"""
+    base = commit('base')
+    tip = commit_for(SESSION_A, 'agent work')
+    record_session(SESSION_A, base, tip)
+    assert SESSION_A in agentsession.load_agent_sessions(app_context)
+
+    for kind in (agentsession.BASE, agentsession.TIP):
+        run_git('update-ref', '-d', agentsession.session_ref(SESSION_A, kind))
+
+    assert agentsession.load_agent_sessions(app_context) == {}
+    # The commit is untouched, so the session is still identifiable and the
+    # refs can be rebuilt from the trailer.
+    trailer = run_git(
+        'log', '-1', '--format=%(trailers:key=Agent-Session-Id,valueonly)', tip
+    )
+    assert SESSION_A in trailer
+
+
+def test_is_recent_filters_by_tip_date(app_context):
+    """The panel's 'Recent only' box uses the tip commit date"""
+    import datetime
+
+    base = commit('base')
+    tip = commit('tip')
+    record_session(SESSION_A, base, tip)
+    session = agentsession.load_agent_sessions(app_context)[SESSION_A]
+
+    updated = agentsession.parse_updated(session)
+    assert updated is not None
+    long_after = updated + datetime.timedelta(days=90)
+
+    assert agentsession.is_recent(session, days=30, now=updated)
+    assert not agentsession.is_recent(session, days=30, now=long_after)
+    assert agentsession.is_recent(session, days=0, now=long_after)
