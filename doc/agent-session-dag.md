@@ -312,32 +312,60 @@ Create branch "agent/{session_id}.{files}" at tip
 
 排到 **M4**（连同 `Diff base..tip`、`Show Reflog`、`Prune` 一起，见第 3 节）。
 
-### 2.4 整条线索：Session 缎带（ribbon）
+### 2.4 整条线索：Session 缎带（ribbon）✅ M3
 
-新增 `SessionRibbon(QtWidgets.QGraphicsItem)`：
+`SessionRibbon(QtWidgets.QGraphicsItem)`：
 
 - **Z 序**：`setZValue(-3)`。现有是 `Edge` = -2、`Label` / summary text = -1、
   `Commit` = 0，所以 -3 稳稳压在所有东西下面
-- **路径**：把该 session 的节点按 `row` 排序，中心连成一条 `QPainterPath` spline
-  （和 `Edge.recompute_path()` 的 `cubicTo` 同风格，保持观感一致）
-- **笔**：宽 = `Commit.commit_radius * 1.6`，`RoundCap` + `RoundJoin`，alpha ≈ 60。
-  这样它是一条从 base 流到 tip 的半透明宽带，节点浮在上面
-- **分段**：`OWN` 实线、`FOREIGN` `Qt.DashLine`、`STRAY` 另起一条 item 用 `Qt.DotLine`
-- **两端**：base 节点套一个双圈「锚」环，tip 节点套一个「箭头」环
-- **配色**：`session_id` 哈希到一个稳定色相（HSV，S/V 固定），
-  保证同一个 session 每次打开颜色一致，且和 `EdgeColor` 的调色板分开取值
+- **路径**：**沿真实的 parent 边走**，不是把节点按 row 排序连直线。
+  `agentsession.thread_segments()` 挑出「两端都属于这个 session」的 parent 边，
+  merge 的两个父边都会被画上，跨 merge 时缎带仍然如实。
+  base 虽然不是 `base..tip` 的成员，但要作为端点算进去——它是缎带要够到的那一头
+- **配色**：`session_id` → `session_hue()`（sha256 前两字节映到 0-359），
+  HSV 的 S/V 固定成 165/225。哈希而不是按出现顺序分配，
+  是为了让同一个 session 每次打开、以及别的 session 来来去去时颜色都不变
 
-重建时机：跟 `_update_summary_labels()` 一样，挂在 `layout_commits()` 末尾——
-节点位置变了 path 必须重算。
+### 2.4.1 三态怎么画：两个独立的轴
+
+一开始按原设计用 `Qt.SolidLine` / `DashLine` / `DotLine`，**在这个尺度上完全不work**，
+踩了三个坑：
+
+1. **alpha 70 等于隐形**。实测采样：淡到 `#f2f7fd`，跟白底差 3%。抬到 110。
+2. **Qt 的 dash 长度按笔宽缩放**。`Qt.DashLine` 在 14px 笔下每段 dash 是 56px，
+   比 12px 的行距还长——每一段都渲染成实线，三态看起来一模一样。
+   必须用 `setDashPattern()` 自己给（单位仍是笔宽，但可以给小数）。
+3. **`RoundCap` 会把 dash 焊回实线**。圆头给每个 dash 两端各加半个笔宽（7px），
+   比空隙还大。改用 `FlatCap`——共线段在节点中心相接，照样无缝。
+
+改完虚线能看见了，但 `FOREIGN` 和 `STRAY` 还是分不出来。最终换成**两个独立的轴**：
+
+| 轴 | 回答的问题 | 编码 |
+|---|---|---|
+| **粗细** | 这个 commit 是不是这个 session 提的 | 14px = 是；7px = 不是（带子在这里「掐细」） |
+| **实/虚** | 有没有被 tip ref 锚住 | 实线 = 是；虚线 = 不是 |
+
+于是：
+
+| 状态 | 画法 | 读作 |
+|---|---|---|
+| `OWN` | 粗实 | 我提的，锚住了 |
+| `FOREIGN` | 细实 | 别人在中间插的 |
+| `STRAY` | 粗虚 | 我提的，但 tip ref 够不到了 |
+
+`FOREIGN` 的 7px 也是量出来的：4px 时整条被上面那根 2px 的红色 `Edge` 线盖住，
+读起来是「没有带子」而不是「细带子」，跟「不属于这个 session」混了。
+
+**重建时机**：挂在 `layout_commits()` 末尾，跟 `_update_summary_labels()` 一起——
+节点位置变了 path 必须重算。`GraphView.clear()` 里要把
+`self.session_ribbons` 一起清掉：`scene().clear()` 已经把 item 删了，
+留着引用就是悬空指针。
 
 ### 2.5 为什么是缎带不是别的
 
 场景图里表达「一组节点属于同一件事」，加背景色块会跟 lane 打架，
 加连线会和 parent 边混淆。半透明宽带压在最底层，既圈定了范围，
 又天然沿着真实的父子路径走，不需要额外的几何。
-
-`FOREIGN` 用虚线，直接回答「我的 session 是不是被打断了」；
-`STRAY` 用点线单独画一条，是「commit 被 rewind/reset 甩出区间」的图形版。
 
 ---
 
@@ -410,7 +438,7 @@ Create branch "agent/{session_id}.{files}" at tip
 | `cola.dag.agentsessionlimit` | `10` | 算三态/点亮的最新 session 数 | ✅ M2 |
 | `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |
 | `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |
-| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |
+| `cola.dag.agentsessionribbon` | `true` | 右图缎带开关 | M5 |
 
 命令行（`cola/dag.py` 的 `parse_args`）：
 `git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。
@@ -425,7 +453,7 @@ Create branch "agent/{session_id}.{files}" at tip
 | trailer 归属 | 第二遍 `git log`，只取 `%H` + trailer。9352 commit 实测 70ms |
 | `base..tip` 范围 | 内存集合减法（parents 图现成的），**0 个额外进程**；51 session 88ms → 限流后 25ms |
 | base/tip 标签 | 只多几个 `Label` 的绘制项，`alloc_cell()` 照旧预留空间 |
-| 缎带 path | 只在 `layout_commits()` 后重算一次 |
+| 缎带 path | 只在 `layout_commits()` 后重算一次，每个 session 一个 item |
 
 端到端实测（本仓库 9352 commit，51 个 session）：`RepoReader.get()`
 关掉功能 0.138s，打开 0.243s。多出来的 0.1s 里绝大部分是第二遍 git log。
@@ -441,13 +469,14 @@ Create branch "agent/{session_id}.{files}" at tip
 |---|---|---|
 | **M1** ✅ | 数据层 + 右图 base/tip 标签 + 标签上的两条 `Copy` 菜单 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |
 | **M2** ✅ | `base..tip` 集合减法 + 三态归属 + session 限流 + 结果送到视图层 | `agentsession.range_members/build_threads`、`RepoReader._read_trailers`、`version.py` 特性表、`ReaderThread.sessions` 信号 |
-| **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |
+| **M3** ✅ | 右图缎带（三态用粗细 + 实虚两个轴编码） | `SessionRibbon`(新)、`GraphView._update_session_ribbons`、`agentsession.thread_segments/session_hue` |
 | **M4** | session 菜单补齐（`Diff base..tip` / `Show Reflog` / `Create branch at tip` / `Prune`）+ Sessions 面板 + rebuild | `Label._show_session_menu()`、`widgets/dag.py` 新 dock |
 | **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |
 
-M1 回答「头在哪、尾在哪」；M2 把「整条线索」算出来（`GitDAG.session_threads` /
-`GraphView.session_threads` 里已经有了，只是还没画）；M3 把它画出来。
-左边 DAG 全程不动。
+M1 回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 把它画出来。
+到这里核心功能齐了，M4/M5 是菜单、面板和配置。左边 DAG 全程不动。
+
+截图：`test/log/dag-agent-session-m3.png`。
 
 ---
 
@@ -482,11 +511,23 @@ M1 回答「头在哪、尾在哪」；M2 把「整条线索」算出来（`GitD
 - 限流：`set_agent_session_limit(1)` 时只算最新的那个，但两个 session 的标签都还在
 - 没有 session ref 时第二遍 log 根本不跑
 
+**M3 加的（3 个）：**
+
+- 缎带够到 base（base 不是 `base..tip` 的成员，但必须是端点）
+- 段的样式取**子**（较新的那个）的 mark：插进来的那个 commit 的入边才是掐细的那条
+- 跨 merge：merge 的两个父边都在缎带里
+
+这三条测的是 `agentsession.thread_segments()`——把「哪些边组成缎带」这段纯逻辑
+从 `GraphView` 抽出来，就是为了让它能进测试套件（`GraphView` 那半只剩把 oid
+换成坐标）。
+
 **还没写的：**
 
 - M4 时间窗限流（`agentsessiondays`）
 - 一个 session 跨多个分支
 
-Qt 层（`Label` 的绘制、`alloc_cell` 预留、菜单本身）测试套件里没有覆盖——
+Qt 层（`Label` / `SessionRibbon` 的绘制、`alloc_cell` 预留、菜单本身）
+测试套件里没有覆盖——
 `test/` 目前完全不起 `QApplication`。这部分靠离屏渲染人工核对，
-截图存 `test/log/dag-agent-session-m1.png`。
+截图存 `test/log/dag-agent-session-m3.png`；另有一个反复 `display()`
+重建场景的脚本，确认 `scene().clear()` 之后没有悬空的 ribbon。

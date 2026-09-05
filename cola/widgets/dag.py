@@ -2337,6 +2337,118 @@ class EdgeColor:
         cls.current_color_index = 0
 
 
+class SessionRibbon(QtWidgets.QGraphicsItem):
+    """A translucent band tracing one agent session from its base to its tip.
+
+    Drawn below everything else (Edge is -2, Label is -1, Commit is 0) so the
+    dots and their labels float on top of it. The band follows the real
+    parent edges rather than a straight base-to-tip line, so it stays
+    truthful when the session spans a merge.
+
+    Line style carries the three-state classification:
+
+    - ``OWN`` solid -- the session's own commits
+    - ``FOREIGN`` dashed -- somebody committed in the middle of the session
+    - ``STRAY`` dotted -- trailer says this session, but the tip ref does not
+      reach it
+    """
+
+    item_type = qtutils.graphics_item_type_value(4)
+
+    WIDTH = 14.0
+    """Wide enough to enclose the 8px commit dots, narrower than the 18px
+    column pitch so two sessions side by side stay apart."""
+
+    ALPHA = 110
+    """Enough to read as a band over the window background. At 70 the wash
+    was within a few percent of white and effectively invisible."""
+
+    THIN = 7.0
+    """Width of a segment that does not belong to the session.
+
+    Half the full width, but still wider than the 2px edge line drawn on top
+    of it: at 4px the band vanished behind that line and read as "no band"
+    rather than "a thin one".
+    """
+
+    STROKES = {
+        # mark: (width, dash pattern in units of that width)
+        agentsession.Mark.OWN: (WIDTH, None),
+        agentsession.Mark.FOREIGN: (THIN, None),
+        agentsession.Mark.STRAY: (WIDTH, [0.45, 0.35]),
+    }
+    """Two independent visual axes, so both questions read at a glance:
+
+    - **width** answers "did this session make the commit" -- the band
+      pinches to a thin thread where somebody else committed in the middle
+    - **solid vs dashed** answers "is it anchored by the tip ref" -- a dashed
+      band is the session's own work that the tip ref no longer reaches
+
+    Dash lengths are given in units of pen width because that is what
+    QPen.setDashPattern() takes. Qt's stock Qt.DashLine is useless here: it
+    scales with the pen too, so at a 14px pen each dash is 56px -- longer
+    than the 12px row pitch, which renders every segment solid.
+    """
+
+    def __init__(self, color):
+        QtWidgets.QGraphicsItem.__init__(self)
+        self.setAcceptedMouseButtons(Qt.NoButton)
+        self.setZValue(-3)
+        self.color = color
+        self.paths = []
+        """(QPainterPath, QPen) per line style"""
+        self.bound = QtCore.QRectF()
+
+    def set_segments(self, segments):
+        """Build the painter paths from (start, end, mark) triples"""
+        by_mark = {}
+        for start, end, mark in segments:
+            path = by_mark.get(mark)
+            if path is None:
+                path = QtGui.QPainterPath()
+                by_mark[mark] = path
+            path.moveTo(start)
+            path.lineTo(end)
+
+        paths = []
+        for mark, path in by_mark.items():
+            color = QtGui.QColor(self.color)
+            color.setAlpha(self.ALPHA)
+            width, pattern = self.STROKES.get(mark, (self.WIDTH, None))
+            # FlatCap, not RoundCap: a round cap adds half the pen width to
+            # each end of every dash, which is more than the gaps below and
+            # would weld the dashes back into a solid line. Collinear
+            # segments meeting at a node center still join seamlessly.
+            pen = QtGui.QPen(color, width, Qt.SolidLine, Qt.FlatCap, Qt.RoundJoin)
+            if pattern:
+                pen.setDashPattern(pattern)
+            paths.append((path, pen))
+
+        self.prepareGeometryChange()
+        self.paths = paths
+        bound = QtCore.QRectF()
+        for path, _pen in paths:
+            bound = bound.united(path.boundingRect())
+        # Grow by the pen width so the round caps are inside the bounds.
+        self.bound = bound.adjusted(
+            -self.WIDTH, -self.WIDTH, self.WIDTH, self.WIDTH
+        )
+        self.update()
+
+    # Qt overrides
+    def type(self):
+        return self.item_type
+
+    def boundingRect(self):
+        return self.bound
+
+    def paint(self, painter, option, _widget):
+        painter.setClipRect(option.exposedRect)
+        for path, pen in self.paths:
+            painter.setPen(pen)
+            painter.drawPath(path)
+
+
 class Commit(QtWidgets.QGraphicsItem):
     item_type = qtutils.standard_item_type_value(2)
     commit_radius = 12.0
@@ -3289,9 +3401,11 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         # HEAD and the current local branch always stay yellow.
         # Toggled via ``cola.dag.legacylabelcolors``.
         self.legacy_label_colors = False
-        # {session_id: SessionThread} for the commits currently on screen.
-        # Set by GitDAG once the reader finishes; drawn from M3 onwards.
+        # {session_id: SessionThread} for the commits currently on screen,
+        # set by GitDAG once the reader finishes.
         self.session_threads = {}
+        # Live SessionRibbon items, rebuilt whenever the layout moves.
+        self.session_ribbons = []
         # Populated transiently inside recompute_grid().
         self._orphan_columns: set[int] = set()
         self._reserved_columns: set[int] = set()
@@ -3358,6 +3472,9 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         EdgeColor.reset()
         self.scene().clear()
         self.scene().invalidate()
+        # scene().clear() already deleted these; drop the dangling references
+        # before anything can touch them again.
+        self.session_ribbons = []
         self.items.clear()
         self.x_offsets.clear()
         self.x_min = 24
@@ -3696,6 +3813,55 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
             edge.commits_were_invalidated()
 
         self._update_summary_labels()
+        self._update_session_ribbons()
+
+    def _update_session_ribbons(self):
+        """Redraw the session bands for the current node positions.
+
+        Called from layout_commits(), like the summary labels: the band is
+        built from node coordinates, so it has to be rebuilt whenever those
+        change.
+        """
+        scene = self.scene()
+        for ribbon in self.session_ribbons:
+            if ribbon.scene() is scene:
+                scene.removeItem(ribbon)
+        self.session_ribbons = []
+        if not self.session_threads:
+            return
+
+        for session_id, thread in self.session_threads.items():
+            segments = self._ribbon_segments(thread)
+            if not segments:
+                continue
+            ribbon = SessionRibbon(session_ribbon_color(session_id))
+            ribbon.set_segments(segments)
+            scene.addItem(ribbon)
+            self.session_ribbons.append(ribbon)
+
+    def _ribbon_segments(self, thread):
+        """Map the session's parent edges onto scene coordinates.
+
+        Which edges belong to the band is decided by
+        ``agentsession.thread_segments()``; this only turns the object IDs
+        into node positions.
+        """
+        # self.items is keyed by object ID *and* by tag name; key off the
+        # commit itself so tag names cannot leak in as lookup keys.
+        commits_by_oid = {
+            item.commit.oid: item.commit for item in self.items.values()
+        }
+        center = Commit.item_bbox.center()
+        segments = []
+        for child_oid, parent_oid, mark in agentsession.thread_segments(
+            thread, commits_by_oid
+        ):
+            child = self.items.get(child_oid)
+            parent = self.items.get(parent_oid)
+            if child is None or parent is None:
+                continue
+            segments.append((child.pos() + center, parent.pos() + center, mark))
+        return segments
 
     def _update_summary_labels(self):
         """Place commit-summary text on outer dots; clear interior dots.
@@ -4191,6 +4357,17 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
             xratio = yratio = max(xratio, yratio)
         self.scale(xratio, yratio)
         self.centerOn(rect.center())
+
+
+def session_ribbon_color(session_id):
+    """A stable, muted color for one session's ribbon.
+
+    The hue comes from the session id (see ``agentsession.session_hue``) so it
+    survives restarts. Saturation and value are fixed and deliberately low so
+    the band reads as a wash behind the graph rather than competing with the
+    edge colors drawn on top of it.
+    """
+    return QtGui.QColor.fromHsv(agentsession.session_hue(session_id), 165, 225)
 
 
 def sort_by_generation(commits):

@@ -375,3 +375,67 @@ def test_session_limit_classifies_only_the_newest(app_context):
     # classified.
     assert sorted(reader.sessions) == sorted([SESSION_A, SESSION_B])
     assert list(reader.threads) == [SESSION_B]
+
+
+def segments_for(context, session_id, ref='HEAD'):
+    """Return the (child, parent, mark) edges making up a session's band"""
+    params = dag.DAG(ref, 1000)
+    reader = dag.RepoReader(context, params)
+    commits = {c.oid: c for c in reader.get()}
+    return agentsession.thread_segments(reader.threads[session_id], commits)
+
+
+def test_ribbon_reaches_down_to_base(app_context):
+    """base anchors the band even though it is not a member of base..tip"""
+    base = commit('base')
+    first = commit_for(SESSION_A, 'first')
+    tip = commit_for(SESSION_A, 'second')
+    record_session(SESSION_A, base, tip)
+    app_context.model.update_status()
+
+    segments = segments_for(app_context, SESSION_A)
+
+    assert sorted(segments) == sorted([
+        (first, base, agentsession.Mark.OWN),
+        (tip, first, agentsession.Mark.OWN),
+    ])
+
+
+def test_ribbon_segment_takes_the_mark_of_its_child(app_context):
+    """The edge into a foreign commit is the one that pinches"""
+    base = commit('base')
+    mine = commit_for(SESSION_A, 'mine')
+    theirs = commit('theirs')
+    tip = commit_for(SESSION_A, 'mine again')
+    record_session(SESSION_A, base, tip)
+    app_context.model.update_status()
+
+    marks = dict(
+        ((child, parent), mark)
+        for child, parent, mark in segments_for(app_context, SESSION_A)
+    )
+
+    assert marks[(mine, base)] == agentsession.Mark.OWN
+    assert marks[(theirs, mine)] == agentsession.Mark.FOREIGN
+    assert marks[(tip, theirs)] == agentsession.Mark.OWN
+
+
+def test_ribbon_follows_a_merge(app_context):
+    """The band follows real parent edges, both sides of a merge included"""
+    base = commit('base')
+    run_git('checkout', '-q', '-b', 'side')
+    side = commit_for(SESSION_A, 'side work')
+    run_git('checkout', '-q', 'main')
+    trunk = commit_for(SESSION_A, 'trunk work')
+    run_git('merge', '-q', '--no-ff', '-m', 'merge side', 'side')
+    tip = run_git('rev-parse', 'HEAD').strip()
+    record_session(SESSION_A, base, tip)
+    app_context.model.update_status()
+
+    edges = {(child, parent) for child, parent, _ in
+             segments_for(app_context, SESSION_A, ref='--all')}
+
+    # Both parents of the merge are inside the session, so both are drawn.
+    assert (tip, trunk) in edges
+    assert (tip, side) in edges
+    assert (trunk, base) in edges

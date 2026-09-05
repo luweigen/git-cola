@@ -14,6 +14,7 @@ supports git 2.2.  We therefore read these refs ourselves with
 ``git for-each-ref`` and attach labels to commits by object ID.
 """
 from __future__ import annotations
+import hashlib
 from dataclasses import dataclass
 from dataclasses import field
 from enum import Enum
@@ -406,10 +407,17 @@ def range_members(
 
 @dataclass(frozen=True)
 class SessionThread:
-    """One session's commits, each tagged with how it relates to the session."""
+    """One session's commits, each tagged with how it relates to the session.
+
+    ``base_oid`` is carried alongside the marks because the ribbon has to
+    reach down to it: base is the session's anchor but is *not* a member of
+    ``base..tip``, so it never appears in ``marks``.
+    """
 
     session_id: str
     marks: dict[str, Mark] = field(default_factory=dict)
+    base_oid: str | None = None
+    tip_oid: str | None = None
 
     def oids(self, mark: Mark) -> list[str]:
         """Object IDs carrying the given mark"""
@@ -458,14 +466,24 @@ def build_thread(session, commits_by_oid, trailers, cache=None) -> SessionThread
     if not session.tip_oid:
         for oid in tagged:
             marks[oid] = Mark.STRAY
-        return SessionThread(session_id=session_id, marks=marks)
+        return SessionThread(
+            session_id=session_id,
+            marks=marks,
+            base_oid=session.base_oid,
+            tip_oid=session.tip_oid,
+        )
 
     if not session.base_oid:
         for oid in tagged & ancestors(commits_by_oid, session.tip_oid):
             marks[oid] = Mark.OWN
         for oid in tagged - set(marks):
             marks[oid] = Mark.STRAY
-        return SessionThread(session_id=session_id, marks=marks)
+        return SessionThread(
+            session_id=session_id,
+            marks=marks,
+            base_oid=session.base_oid,
+            tip_oid=session.tip_oid,
+        )
 
     members = range_members(
         commits_by_oid, session.base_oid, session.tip_oid, cache=cache
@@ -478,7 +496,80 @@ def build_thread(session, commits_by_oid, trailers, cache=None) -> SessionThread
     for oid in tagged - members:
         marks[oid] = Mark.STRAY
 
-    return SessionThread(session_id=session_id, marks=marks)
+    return SessionThread(
+            session_id=session_id,
+            marks=marks,
+            base_oid=session.base_oid,
+            tip_oid=session.tip_oid,
+        )
+
+
+def thread_segments(thread, commits_by_oid):
+    """Parent edges that make up one session's band.
+
+    Returns ``(child_oid, parent_oid, mark)`` for every parent edge whose
+    two ends are both part of the session, so a band drawn from these
+    follows the real history instead of a straight base-to-tip line -- it
+    stays truthful across a merge.
+
+    The base commit counts as an end even though it is not a member of
+    ``base..tip``: it is what the band has to reach down to. A segment takes
+    the mark of its *child*, the newer of the two, so a stray commit hanging
+    off the tip draws its own edge dashed.
+
+    >>> from collections import namedtuple
+    >>> Node = namedtuple('Node', 'oid parents')
+    >>> a = Node('a', [])
+    >>> b = Node('b', [a])
+    >>> c = Node('c', [b])
+    >>> commits = {node.oid: node for node in (a, b, c)}
+    >>> thread = SessionThread(
+    ...     's', {'b': Mark.OWN, 'c': Mark.OWN}, base_oid='a', tip_oid='c'
+    ... )
+    >>> sorted(thread_segments(thread, commits))
+    [('b', 'a', <Mark.OWN: 0>), ('c', 'b', <Mark.OWN: 0>)]
+
+    Without a base ref the band simply stops at the oldest member:
+
+    >>> thread = SessionThread('s', {'c': Mark.OWN}, tip_oid='c')
+    >>> thread_segments(thread, commits)
+    []
+    """
+    marks = thread.marks
+    if not marks:
+        return []
+    covered = set(marks)
+    if thread.base_oid:
+        covered.add(thread.base_oid)
+
+    segments = []
+    for oid, mark in marks.items():
+        commit = commits_by_oid.get(oid)
+        if commit is None:
+            continue
+        for parent in commit.parents:
+            if parent.oid in covered and parent.oid in commits_by_oid:
+                segments.append((oid, parent.oid, mark))
+    return segments
+
+
+def session_hue(session_id: str) -> int:
+    """A stable 0-359 hue for a session id.
+
+    Derived from the id rather than assigned in encounter order, so a session
+    keeps the same ribbon color across restarts and regardless of which other
+    sessions happen to be visible.  Kept in the model, as a plain integer, so
+    this file stays free of Qt.
+
+    >>> session_hue('b47c8939-8ae6-4c1b-b9b2-f89c387b3e77')
+    212
+    >>> session_hue('a') == session_hue('a')
+    True
+    >>> 0 <= session_hue('') < 360
+    True
+    """
+    digest = hashlib.sha256(session_id.encode('utf-8')).digest()
+    return (digest[0] << 8 | digest[1]) * 360 // 65536
 
 
 DEFAULT_LIMIT = 10
