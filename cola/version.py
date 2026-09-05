@@ -49,6 +49,8 @@ _versions = {
     'rebase-merges': '2.18.0',
     # git rebase --update-refs was added in 2.38.0
     'rebase-update-refs': '2.38.0',
+    # git log --pretty '%(trailers:key=...)' was added in 2.22.0
+    'trailers-key': '2.22.0',
     # git rev-parse --show-superproject-working-tree was added in 2.13.0
     'show-superproject-working-tree': '2.13.0',
 }

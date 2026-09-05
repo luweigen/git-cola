@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from .. import core
 from .. import utils
 from ..i18n import N_
+from .. import version
 from ..models import agentsession
 from ..models import prefs
 
@@ -58,6 +59,9 @@ class DAG:
         # When true the ``refs/agent/session/`` refs are read and their base /
         # tip commits are labeled in the views.
         self.agent_sessions = True
+        # How many of the newest sessions get their base..tip classified.
+        # Labeling every session is free; classifying one is not.
+        self.agent_session_limit = agentsession.DEFAULT_LIMIT
         self.overrides = {}
 
     def set_ref(self, ref: str) -> bool:
@@ -100,6 +104,13 @@ class DAG:
     def set_agent_sessions(self, enabled: bool) -> None:
         """Should we label agent session base/tip commits?"""
         self.agent_sessions = bool(enabled)
+
+    def set_agent_session_limit(self, limit) -> None:
+        """How many of the newest sessions to classify; <= 0 means all"""
+        try:
+            self.agent_session_limit = int(limit)
+        except (TypeError, ValueError):
+            self.agent_session_limit = agentsession.DEFAULT_LIMIT
 
     def set_display_status(self, enabled: bool) -> None:
         """Should we display the worktree status?"""
@@ -283,6 +294,17 @@ class RepoReader:
             '--decorate=full',
             '--pretty=' + LOGFMT,
         ]
+        self._trailer_cmd = [
+            'git',
+            '-c',
+            'log.abbrevCommit=false',
+            '-c',
+            'log.showSignature=false',
+            'log',
+            '--topo-order',
+            '--pretty=' + agentsession.TRAILER_FORMAT,
+        ]
+        """Second pass over the same revisions, trailers only."""
         self._cached = False
         """Indicates that all data has been read"""
         self._topo_list = []
@@ -291,6 +313,8 @@ class RepoReader:
         """Agent sessions keyed by session id, read once per get()"""
         self._session_labels: dict[str, list[tuple[str, str]]] = {}
         """Object ID -> agent session base/tip labels anchored on it"""
+        self.threads: dict[str, agentsession.SessionThread] = {}
+        """Agent session id -> its commits, each marked OWN/FOREIGN/STRAY"""
 
     cached = property(lambda self: self._cached)
     """Return True when no commits remain to be read"""
@@ -304,6 +328,7 @@ class RepoReader:
         self._topo_list = []
         self.sessions = {}
         self._session_labels = {}
+        self.threads = {}
 
     def _read_agent_sessions(self) -> None:
         """Read refs/agent/session/ so base/tip commits can be labeled.
@@ -321,6 +346,51 @@ class RepoReader:
             self.sessions = {}
         self._session_labels = agentsession.labels_by_oid(self.sessions)
 
+    def _log_cmd(self, prefix, ref_args, with_date: bool = False) -> list[str]:
+        """Build a git-log command over the revisions the DAG is showing.
+
+        Both passes go through here so the trailer pass can never end up
+        walking a different set of commits than the main pass.
+        """
+        cmd = list(prefix) + ['-%d' % self.params.count]
+        if with_date:
+            cmd.append('--date=%s' % prefs.logdate(self.context))
+        return cmd + ['--no-patch'] + list(ref_args)
+
+    def _read_trailers(self, ref_args) -> dict[str, list[str]]:
+        """Read the Agent-Session-Id trailer of every visible commit.
+
+        A second, minimal ``git log`` over the same revisions rather than an
+        extra field in LOGFMT: the field count of LOGFMT would then depend on
+        the git version, and ``Commit.parse()`` is the hottest code path in
+        the DAG. The extra pass costs about as much as the main walk on the
+        git side (~70ms per 10k commits here) and nothing on the Python side,
+        because only commits carrying the trailer are kept.
+        """
+        if not self.sessions:
+            return {}
+        if not version.check_git(self.context, agentsession.TRAILER_VERSION_KEY):
+            # Without %(trailers:key=...) the range still works; only the
+            # OWN/FOREIGN distinction is unavailable.
+            return {}
+        cmd = self._log_cmd(self._trailer_cmd, ref_args)
+        status, out, _ = core.run_command(cmd)
+        if status != 0:
+            return {}
+        return agentsession.parse_trailers(out.splitlines())
+
+    def _build_threads(self, ref_args) -> None:
+        """Work out each session's base..tip and mark every commit in it."""
+        if not self.sessions:
+            return
+        trailers = self._read_trailers(ref_args)
+        self.threads = agentsession.build_threads(
+            self.sessions,
+            self._objects,
+            trailers,
+            limit=self.params.agent_session_limit,
+        )
+
     def get(self) -> Iterator[Commit]:
         """Generator function returns Commit objects found by the params"""
         if self._cached:
@@ -331,13 +401,7 @@ class RepoReader:
         self.reset()
         self._read_agent_sessions()
         ref_args = utils.shell_split(self.params.ref)
-        cmd = (
-            self._cmd
-            + ['-%d' % self.params.count]
-            + ['--date=%s' % prefs.logdate(self.context)]
-            + ['--no-patch']
-            + ref_args
-        )
+        cmd = self._log_cmd(self._cmd, ref_args, with_date=True)
         commit = None
 
         # When _allow_git_init is True then we detect the "git init" state
@@ -366,6 +430,8 @@ class RepoReader:
             # git init
             status = 0
         self._top_commit = commit
+        if status == 0:
+            self._build_threads(ref_args)
         self._cached = True
         self.returncode = status
 

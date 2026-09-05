@@ -184,3 +184,194 @@ def test_session_ref_round_trips(kind, expected):
     refname = agentsession.session_ref(SESSION_A, kind)
     assert refname == expected
     assert agentsession.parse_session_ref(refname) == (SESSION_A, kind)
+
+
+def commit_for(session_id, message):
+    """Commit with the Agent-Session-Id trailer an agent hook would add"""
+    run_git(
+        'commit',
+        '--allow-empty',
+        '-m',
+        message,
+        '--trailer',
+        'Agent-Session-Id: ' + session_id,
+    )
+    return run_git('rev-parse', 'HEAD').strip()
+
+
+def threads_for(context, ref='HEAD', count=1000):
+    """Read the repository and return the per-session classification"""
+    params = dag.DAG(ref, count)
+    reader = dag.RepoReader(context, params)
+    list(reader.get())
+    return reader.threads
+
+
+def test_range_is_computed_without_git_rev_list(app_context):
+    """base..tip comes from the in-memory parent graph, endpoints included"""
+    base = commit('one')
+    middle = commit('two')
+    tip = commit('three')
+    app_context.model.update_status()
+    commits = {c.oid: c for c in read_commits(app_context)}
+
+    members = agentsession.range_members(commits, base, tip)
+
+    assert members == {middle, tip}
+
+
+def test_range_excludes_merged_in_ancestors_of_base(app_context):
+    """A merge can pull in commits older than base; those are not in range"""
+    root = commit('root')
+    run_git('checkout', '-q', '-b', 'side')
+    side = commit('side work')
+    run_git('checkout', '-q', 'main')
+    base = commit('base')
+    run_git('merge', '-q', '--no-ff', '-m', 'merge side', 'side')
+    tip = run_git('rev-parse', 'HEAD').strip()
+    app_context.model.update_status()
+    commits = {c.oid: c for c in read_commits(app_context, ref='--all')}
+
+    members = agentsession.range_members(commits, base, tip)
+
+    # The side branch is reachable from tip but not from base, so it counts.
+    assert side in members
+    assert tip in members
+    # base and its ancestors do not.
+    assert base not in members
+    assert root not in members
+
+
+def test_own_and_foreign(app_context):
+    """A commit by somebody else inside base..tip is FOREIGN, not OWN"""
+    base = commit('base')
+    mine_a = commit_for(SESSION_A, 'agent work')
+    theirs = commit('someone else')
+    mine_b = commit_for(SESSION_A, 'more agent work')
+    record_session(SESSION_A, base, mine_b)
+    app_context.model.update_status()
+
+    marks = threads_for(app_context)[SESSION_A].marks
+
+    assert marks[mine_a] == agentsession.Mark.OWN
+    assert marks[mine_b] == agentsession.Mark.OWN
+    assert marks[theirs] == agentsession.Mark.FOREIGN
+    assert base not in marks  # base itself is not part of base..tip
+
+
+def test_stray_when_the_tip_ref_falls_behind(app_context):
+    """A trailer-tagged commit outside base..tip is STRAY
+
+    This is the ``HEAD != tip`` anomaly the UserPromptSubmit hook warns
+    about, made visible: the commit exists and says which session made it,
+    but the ref that should anchor it does not reach it.
+    """
+    base = commit('base')
+    anchored = commit_for(SESSION_A, 'anchored')
+    record_session(SESSION_A, base, anchored)
+    orphaned = commit_for(SESSION_A, 'tip ref never advanced to here')
+    app_context.model.update_status()
+
+    marks = threads_for(app_context)[SESSION_A].marks
+
+    assert marks[anchored] == agentsession.Mark.OWN
+    assert marks[orphaned] == agentsession.Mark.STRAY
+
+
+def test_without_trailers_everything_in_range_is_own(app_context):
+    """git < 2.22 reports no trailers: the range still works, FOREIGN cannot"""
+    base = commit('base')
+    mine = commit_for(SESSION_A, 'agent work')
+    theirs = commit('someone else')
+    record_session(SESSION_A, base, theirs)
+    app_context.model.update_status()
+    commits = {c.oid: c for c in read_commits(app_context)}
+    session = agentsession.load_agent_sessions(app_context)[SESSION_A]
+
+    thread = agentsession.build_thread(session, commits, {})
+
+    assert thread.marks == {
+        mine: agentsession.Mark.OWN,
+        theirs: agentsession.Mark.OWN,
+    }
+
+
+def test_counts(app_context):
+    """SessionThread.counts() summarises the three states"""
+    base = commit('base')
+    commit_for(SESSION_A, 'mine')
+    commit('theirs')
+    tip = commit_for(SESSION_A, 'mine again')
+    record_session(SESSION_A, base, tip)
+    app_context.model.update_status()
+
+    counts = threads_for(app_context)[SESSION_A].counts()
+
+    assert counts[agentsession.Mark.OWN] == 2
+    assert counts[agentsession.Mark.FOREIGN] == 1
+    assert counts[agentsession.Mark.STRAY] == 0
+
+
+def test_thread_without_tip_ref(app_context):
+    """No tip ref means the anchor is missing: tagged commits are STRAY"""
+    base = commit('base')
+    tagged = commit_for(SESSION_A, 'agent work')
+    record_session(SESSION_A, base)
+    app_context.model.update_status()
+
+    marks = threads_for(app_context)[SESSION_A].marks
+
+    assert marks == {tagged: agentsession.Mark.STRAY}
+
+
+def test_thread_without_base_ref(app_context):
+    """No base ref means no range to subtract: fall back to the trailer"""
+    commit('root')
+    tagged = commit_for(SESSION_A, 'agent work')
+    commit('someone else')
+    tip = commit_for(SESSION_A, 'more agent work')
+    run_git(
+        'update-ref', agentsession.SESSION_PREFIX + SESSION_A + '/tip', tip
+    )
+    app_context.model.update_status()
+
+    marks = threads_for(app_context)[SESSION_A].marks
+
+    # Only trailer-tagged commits; FOREIGN cannot be told without a base.
+    assert marks == {
+        tagged: agentsession.Mark.OWN,
+        tip: agentsession.Mark.OWN,
+    }
+
+
+def test_no_sessions_skips_the_trailer_pass(app_context):
+    """Without session refs the second git-log pass never runs"""
+    commit('one')
+    app_context.model.update_status()
+
+    params = dag.DAG('HEAD', 1000)
+    reader = dag.RepoReader(app_context, params)
+    list(reader.get())
+
+    assert reader.threads == {}
+    assert reader._read_trailers(['HEAD']) == {}
+
+
+def test_session_limit_classifies_only_the_newest(app_context):
+    """The classification cap keeps ancestor-set memory bounded"""
+    base = commit('base')
+    older_tip = commit_for(SESSION_A, 'older session')
+    newer_tip = commit_for(SESSION_B, 'newer session')
+    record_session(SESSION_A, base, older_tip)
+    record_session(SESSION_B, older_tip, newer_tip)
+    app_context.model.update_status()
+
+    params = dag.DAG('HEAD', 1000)
+    params.set_agent_session_limit(1)
+    reader = dag.RepoReader(app_context, params)
+    list(reader.get())
+
+    # Both sessions still get their base/tip labels; only the newest is
+    # classified.
+    assert sorted(reader.sessions) == sorted([SESSION_A, SESSION_B])
+    assert list(reader.threads) == [SESSION_B]

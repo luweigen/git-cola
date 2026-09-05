@@ -104,29 +104,41 @@ def parse_session_ref(refname, prefix='refs/agent/session/'):
     """
 ```
 
-### 1.2 commit 的 session 归属（trailer）
+### 1.2 commit 的 session 归属（trailer）✅ M2
 
-`cola/models/dag.py` 的 `LOGFMT` 加一个字段，**放在 summary 之前**
-（summary 必须最后，它可以含任意字符）：
+**最初的方案是给 `LOGFMT` 加一个字段**，把
+`%(trailers:key=Agent-Session-Id,valueonly,separator=%x02)` 塞在 summary 之前，
+理由是「0 个额外进程」。实现时换掉了，换成**第二遍只取 trailer 的 `git log`**：
 
 ```python
-LOGFMT_TRAILERS = (
-    r'format:%H%x01%P%x01%d%x01%an%x01%ad%x01%ae%x01'
-    r'%(trailers:key=Agent-Session-Id,valueonly,separator=%x02)%x01%s'
-)
+TRAILER_FORMAT = 'format:%H%x01%(trailers:key=Agent-Session-Id,valueonly,separator=%x02)'
 ```
 
-`%(trailers:key=…)` 需要 git 2.22+。探测一次 git 版本：够新用上面这个（`split(sep, 6)`），
-不够新退回现有 `LOGFMT`（`split(sep, 5)`），此时只有 ref 归属、没有 trailer 归属。
-版本探测结果缓存在 `RepoReader` 上，不是每行都判。
+换的原因：
 
-`Commit.__slots__` 增加 `session_ids: list[str]`。
+1. `%(trailers:key=…)` 要 git 2.22，git-cola 支持到 2.2。加进 `LOGFMT` 就意味着
+   **字段数随 git 版本变**，`Commit.parse()` 得按版本切 `split(sep, 5)` / `split(sep, 6)`。
+   而 `parse()` 是整个 DAG 最热的函数，让它依赖全局版本状态是自找的麻烦。
+2. `test/dag_test.py` 的 `LOG_TEXT` 是写死 6 字段的 fixture，字段数一变它就得跟着
+   本机 git 版本走——fixture 不该有这种依赖。
+3. 实测第二遍根本不贵：本仓库 9352 个 commit，主 walk 70ms，只取 trailer 的第二遍
+   也是 70ms，而 Python 侧几乎零成本（只有带 trailer 的 commit 会进 dict）。
+   端到端 `RepoReader.get()` 从 0.124s 变成 0.223s（含 11 个 session 的三态计算）。
+
+代价是多一个进程、git 侧时间翻倍；换来的是 `Commit.parse()` 一行没动、
+现有 fixture 一个没改、版本降级只是一句 `return {}`。
+
+`separator=` **不是可选的**：不写的话 trailers atom 会在值后面附一个换行，
+直接串进下一条记录。
+
+版本探测走项目已有的机制：`cola/version.py` 的特性表加一行
+`'trailers-key': '2.22.0'`，用 `version.check_git(context, ...)` 判断，结果 memoize。
 
 > **旧格式**：`Co-authored-by: claude code/{model}/{uuid} <…>`。
 > `base.git_session_of_commit()` 那套剥 UUID 的正则只在 Sessions 面板的
 > 「Rebuild refs」动作里用，不进 DAG 的热路径——热路径每行多跑一个正则不值。
 
-### 1.3 三态归属：这是整个设计的重点
+### 1.3 三态归属：这是整个设计的重点 ✅ M2
 
 PLAN 里最在意的不变量是「上一个 commit 是不是我预期的那个 SHA」。
 DAG 应该把**这个不变量被破坏的样子**直接画出来。所以每个 commit 相对某个 session
@@ -142,18 +154,50 @@ DAG 应该把**这个不变量被破坏的样子**直接画出来。所以每个
 「`HEAD != tip` 就用 systemMessage 提醒」的图形版——文字提醒只说「有问题」，
 DAG 能直接指出**是哪几个 commit**。
 
-### 1.4 范围计算：在内存里做，不额外起进程
+两个退化情况给了明确答案，不是含糊过去：
 
-`base..tip` 不要跑 `git rev-list`。commit 全集已经读进内存、`Commit.parents`
-就是现成的图：从 `tip` 沿 parents 做 BFS，遇到 `base` 或已访问过就停。
+| ref 状态 | 怎么判 | 为什么 |
+|---|---|---|
+| **没有 tip ref** | 带 trailer 的 commit 全部 `STRAY` | 该锚住它们的 ref 不存在，这本身就是异常 |
+| **没有 base ref** | 退回只按 trailer 认成员，全是 `OWN` | 没有 base 就没得减，硬算范围会变成整部历史；也就无从判断 `FOREIGN` |
+| **git < 2.22** | 范围内全是 `OWN` | 拿不到 trailer，没有证据说别人插过队，就不能瞎标 `FOREIGN` |
+
+### 1.4 范围计算：在内存里做，不额外起进程 ✅ M2
+
+`base..tip` 不跑 `git rev-list`。commit 全集已经读进内存、`Commit.parents`
+就是现成的图。
+
+**但不能写成「从 tip 沿 parents 走，遇到 base 就停」**——这是最初的写法，它是错的：
+merge 可以把比 base 还老、但不是 base 祖先的 commit 拉进范围，
+「遇到 base 就停」会把它们漏掉。要老老实实做集合减法：
 
 ```python
-def range_members(commits_by_oid, base_oid, tip_oid):
-    """tip 可达、base 不可达的 commit 集合（base..tip）。"""
+def range_members(commits_by_oid, base_oid, tip_oid, cache=None):
+    """tip 可达、base 不可达（base..tip）。"""
+    members = ancestors(tip_oid)
+    if base_oid:
+        members -= ancestors(base_oid)
+    return members
 ```
 
-只有 base 或 tip 不在已读集合里（session 在另一条没被 walk 到的历史上）才落回
-`git rev-list base..tip`，并且这时候通常也该把它 pin 进 rev walk（下一节）。
+`test_range_excludes_merged_in_ancestors_of_base` 就是钉这个的：
+造一个 merge 进来的 side 分支，断言 side 在范围里、base 的祖先不在。
+
+`cache` 是跨 session 共享的 `{oid: 祖先集合}`，背靠背的 session 共用端点，命中率高。
+
+**这个缓存就是为什么要限流。** 每个 session 要两个端点的祖先集合，
+实测 9352 个 commit / 51 个 session：`build_threads` 88ms、缓存约 8MB，
+两者都随 `session 数 × commit 数` 长。十万 commit 的仓库配上几百个 session
+就是几秒钟和几百 MB——而且算的还是用户根本看不见的 session。
+
+所以 `build_threads(..., limit=10)`：只算最新的 N 个（`load_agent_sessions()`
+用 `-creatordate` 排好序，一个 session 的 tip 必然不早于它的 base，
+所以按扁平 ref 列表排序等价于按 tip 排序）。加了上限之后同样 51 个 session
+降到 25ms。**没被算 thread 的 session 照样有 base/tip 标签**——贴标签是免费的，
+算 thread 不是。
+
+> 这个上限原计划在 M4，提前到 M2 是因为它修的是上面这个实测出来的问题，
+> 不是新功能。
 
 ### 1.5 让 session 的 commit 进入 rev walk
 
@@ -164,11 +208,11 @@ def range_members(commits_by_oid, base_oid, tip_oid):
 rev 参数末尾。wildcard `git log` 不展开，得自己从 for-each-ref 的结果里展开成
 具体 ref 名。
 
-限流（几百个 session 的老仓库会炸）：
-
-- 默认只自动 pin **最近 `cola.dag.agentsessionlimit`（默认 10）个**、
-  且 tip 的 creatordate 在 `cola.dag.agentsessiondays`（默认 30）天内的 session
-- Sessions 面板里手动勾选可以覆盖这个默认
+限流（几百个 session 的老仓库会炸）：复用 M2 已经落地的
+`cola.dag.agentsessionlimit`（默认 10，按 tip 的 creatordate 取最新的 N 个），
+再加 `cola.dag.agentsessiondays`（默认 30）限制时间窗；
+Sessions 面板里手动勾选可以覆盖。这样这个上限同时管住三件事：
+算 thread 的成本、pin 进 rev walk 的成本、以及画多少条缎带。
 
 ### 1.6 刷新触发
 
@@ -357,13 +401,13 @@ Create branch "agent/{session_id}.{files}" at tip
 
 沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：
 
-（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）
+（标 ✅ 的已实现，其余随对应 M 阶段落地。）
 
 | key | 默认 | 含义 | 状态 |
 |---|---|---|---|
 | `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |
 | `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |
-| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |
+| `cola.dag.agentsessionlimit` | `10` | 算三态/点亮的最新 session 数 | ✅ M2 |
 | `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |
 | `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |
 | `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |
@@ -378,13 +422,16 @@ Create branch "agent/{session_id}.{files}" at tip
 | 项 | 代价 |
 |---|---|
 | 读 session ref | 1 次 `for-each-ref`，前缀查询 |
-| trailer 归属 | 同一条 log 命令多一个格式串，**0 个额外进程** |
-| `base..tip` 范围 | 内存 BFS（parents 图现成的），**0 个额外进程** |
+| trailer 归属 | 第二遍 `git log`，只取 `%H` + trailer。9352 commit 实测 70ms |
+| `base..tip` 范围 | 内存集合减法（parents 图现成的），**0 个额外进程**；51 session 88ms → 限流后 25ms |
 | base/tip 标签 | 只多几个 `Label` 的绘制项，`alloc_cell()` 照旧预留空间 |
 | 缎带 path | 只在 `layout_commits()` 后重算一次 |
 
+端到端实测（本仓库 9352 commit，51 个 session）：`RepoReader.get()`
+关掉功能 0.138s，打开 0.243s。多出来的 0.1s 里绝大部分是第二遍 git log。
+
 唯一可能变贵的是 1.5 的 pin：多 pin 一个 session 就多一条 walk 起点。
-限流默认值（10 个 / 30 天）就是为这个设的。
+`agentsessionlimit`（默认 10）同时管住 thread 计算和 pin。
 
 ---
 
@@ -393,12 +440,13 @@ Create branch "agent/{session_id}.{files}" at tip
 | 阶段 | 内容 | 改动范围 |
 |---|---|---|
 | **M1** ✅ | 数据层 + 右图 base/tip 标签 + 标签上的两条 `Copy` 菜单 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |
-| **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |
+| **M2** ✅ | `base..tip` 集合减法 + 三态归属 + session 限流 + 结果送到视图层 | `agentsession.range_members/build_threads`、`RepoReader._read_trailers`、`version.py` 特性表、`ReaderThread.sessions` 信号 |
 | **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |
 | **M4** | session 菜单补齐（`Diff base..tip` / `Show Reflog` / `Create branch at tip` / `Prune`）+ Sessions 面板 + rebuild | `Label._show_session_menu()`、`widgets/dag.py` 新 dock |
 | **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |
 
-M1 就已经能回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 把它画出来。
+M1 回答「头在哪、尾在哪」；M2 把「整条线索」算出来（`GitDAG.session_threads` /
+`GraphView.session_threads` 里已经有了，只是还没画）；M3 把它画出来。
 左边 DAG 全程不动。
 
 ---
@@ -421,13 +469,22 @@ M1 就已经能回答「头在哪、尾在哪」；M2 把「整条线索」算�
 - 刷新：`refresh_key()` 在 tip 推进后改变
 - 菜单要复制的东西：`label_text()` 不含 tip/base 字样；`session_ref()` 造出来的
   ref 名能被 `parse_session_ref()` 原样解回同一个 `(session_id, kind)`
+- 纯函数的 doctest：`parse_trailers` / `ancestors` / `range_members` /
+  `counts` / `build_threads` 的限流
 
-**还没写的（跟着对应阶段补）：**
+**M2 加的（10 个）：**
 
-- M2 三态：造一个中间插了别人 commit 的历史断言 `FOREIGN`；
-  造一个 rewind 后的历史断言 `STRAY`
-- M2 git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作
-- M4 限流：几百个 session 时不 pin 全部
+- 范围：`base..tip` 不含 base 本身；**merge 进来的、比 base 老但不是 base 祖先的
+  commit 要算在范围里**（这条钉住 1.4 那个「遇到 base 就停」的错法）
+- 三态：中间插了别人 commit → `FOREIGN`；tip ref 没跟上 → `STRAY`；
+  `counts()` 三个数对得上
+- 退化：没有 tip ref、没有 base ref、拿不到 trailer（git < 2.22）各一个
+- 限流：`set_agent_session_limit(1)` 时只算最新的那个，但两个 session 的标签都还在
+- 没有 session ref 时第二遍 log 根本不跑
+
+**还没写的：**
+
+- M4 时间窗限流（`agentsessiondays`）
 - 一个 session 跨多个分支
 
 Qt 层（`Label` 的绘制、`alloc_cell` 预留、菜单本身）测试套件里没有覆盖——

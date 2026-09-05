@@ -63,6 +63,11 @@ def git_dag(context, args=None, existing_view=None, show=True):
     params.set_agent_sessions(
         _config_truthy(context.cfg.get('cola.dag.agentsessions', default=True))
     )
+    params.set_agent_session_limit(
+        context.cfg.get(
+            'cola.dag.agentsessionlimit', default=agentsession.DEFAULT_LIMIT
+        )
+    )
     params.set_arguments(args)
 
     if existing_view is None:
@@ -1396,6 +1401,8 @@ class GitDAG(standard.MainWindow):
         self.old_display_status = None
         self.old_head_oid = None
         self.force_refresh = False
+        self.session_threads = {}
+        """{session_id: SessionThread} from the last completed read"""
         self._widgets_initialized = False
 
         self.thread = None
@@ -1642,6 +1649,9 @@ class GitDAG(standard.MainWindow):
         self.thread.begin.connect(self.thread_begin, type=Qt.QueuedConnection)
         self.thread.status.connect(self.thread_status, type=Qt.QueuedConnection)
         self.thread.add.connect(self.add_commits, type=Qt.QueuedConnection)
+        self.thread.sessions.connect(
+            self.set_session_threads, type=Qt.QueuedConnection
+        )
         self.thread.end.connect(self.thread_end, type=Qt.QueuedConnection)
 
     def _stop_reader_thread(self):
@@ -1960,6 +1970,11 @@ class GitDAG(standard.MainWindow):
         # been gathered.
         self.treewidget.add_commits(commits)
 
+    def set_session_threads(self, threads):
+        """The reader classified each session's base..tip"""
+        self.session_threads = threads or {}
+        self.graphview.session_threads = self.session_threads
+
     def thread_begin(self):
         """The reader thread has begun"""
         if self.selection:
@@ -2100,6 +2115,8 @@ class ReaderThread(QtCore.QThread):
     add = Signal(object)
     end = Signal()
     status = Signal(object)
+    sessions = Signal(object)
+    """Emits {session_id: SessionThread} once the whole walk is classified"""
 
     def __init__(self, context, params):
         super().__init__()
@@ -2131,6 +2148,10 @@ class ReaderThread(QtCore.QThread):
         if commits:
             self.add.emit(commits)
 
+        # Threads are only complete once every commit has been read, so this
+        # goes out after the last add() and before end(), which is where the
+        # views rebuild themselves.
+        self.sessions.emit(repo.threads)
         self.status.emit(repo.returncode == 0)
         self.end.emit()
 
@@ -3268,6 +3289,9 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         # HEAD and the current local branch always stay yellow.
         # Toggled via ``cola.dag.legacylabelcolors``.
         self.legacy_label_colors = False
+        # {session_id: SessionThread} for the commits currently on screen.
+        # Set by GitDAG once the reader finishes; drawn from M3 onwards.
+        self.session_threads = {}
         # Populated transiently inside recompute_grid().
         self._orphan_columns: set[int] = set()
         self._reserved_columns: set[int] = set()

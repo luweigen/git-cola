@@ -15,6 +15,8 @@ supports git 2.2.  We therefore read these refs ourselves with
 """
 from __future__ import annotations
 from dataclasses import dataclass
+from dataclasses import field
+from enum import Enum
 
 SESSION_PREFIX = 'refs/agent/session/'
 """Default namespace holding the per-session base/tip refs"""
@@ -32,6 +34,52 @@ REF_FORMAT = FIELD_SEP.join(
     ('%(objectname)', '%(refname)', '%(creatordate:iso-strict)')
 )
 """for-each-ref format producing the fields parse_for_each_ref() expects"""
+
+TRAILER_KEY = 'Agent-Session-Id'
+"""Commit trailer the agent hooks write on every commit"""
+
+TRAILER_SEP = '\x02'
+"""Separates several trailer values on one commit; distinct from FIELD_SEP"""
+
+TRAILER_FORMAT = (
+    'format:%H'
+    + FIELD_SEP
+    + '%(trailers:key='
+    + TRAILER_KEY
+    + ',valueonly,separator=%x02)'
+)
+"""git-log format for the trailer-only second pass.
+
+``separator=`` is not optional: without it the trailers atom appends a newline
+after the value, which would run into the next record.
+"""
+
+TRAILER_VERSION_KEY = 'trailers-key'
+"""cola.version feature key: %(trailers:key=...) needs git 2.22"""
+
+
+class Mark(Enum):
+    """How a commit relates to one agent session.
+
+    The three states are the point of the whole feature: they turn the
+    "is HEAD still where I left it" invariant into something visible.
+    """
+
+    OWN = 0
+    """In base..tip and the trailer names this session"""
+
+    FOREIGN = 1
+    """In base..tip but the trailer names someone else, or is absent.
+
+    Somebody committed in the middle of the session.
+    """
+
+    STRAY = 2
+    """The trailer names this session but the commit is outside base..tip.
+
+    A rewind, a reset, or a cherry-pick moved the commit out from under the
+    tip ref.
+    """
 
 
 def parse_session_ref(refname: str, prefix: str = SESSION_PREFIX):
@@ -165,9 +213,14 @@ def load_agent_sessions(
     A single ``for-each-ref`` reads both the base and the tip refs.  The
     pattern must be the *prefix* -- ``refs/agent/session/*`` matches nothing
     because ``for-each-ref`` wildcards do not cross "/".
+
+    Sorted newest first: a session's tip always points at a commit at least
+    as new as its base, so ``-creatordate`` over the flat ref list orders the
+    sessions by tip.  Callers that cap how many sessions they classify take
+    the first N.
     """
     status, out, _ = context.git.for_each_ref(
-        prefix, format=REF_FORMAT, _readonly=True
+        prefix, format=REF_FORMAT, sort='-creatordate', _readonly=True
     )
     if status != 0:
         return {}
@@ -244,3 +297,221 @@ def refresh_key(sessions) -> frozenset:
         (session.session_id, session.base_oid, session.tip_oid)
         for session in sessions.values()
     )
+
+
+def parse_trailers(lines) -> dict[str, list[str]]:
+    """Build ``{oid: [session_id, ...]}`` from the trailer-only log pass.
+
+    Each line is ``<oid><FIELD_SEP><value>[<TRAILER_SEP><value>...]``.
+    Commits without the trailer are left out entirely.
+
+    >>> lines = [
+    ...     'aaa\x01b47c8939',
+    ...     'bbb\x01',
+    ...     'ccc\x0123ecce3c\x02b47c8939',
+    ... ]
+    >>> result = parse_trailers(lines)
+    >>> sorted(result)
+    ['aaa', 'ccc']
+    >>> result['ccc']
+    ['23ecce3c', 'b47c8939']
+    """
+    trailers: dict[str, list[str]] = {}
+    for line in lines:
+        oid, sep, value = line.partition(FIELD_SEP)
+        if not sep or not oid:
+            continue
+        session_ids = [part.strip() for part in value.split(TRAILER_SEP)]
+        session_ids = [part for part in session_ids if part]
+        if session_ids:
+            trailers[oid] = session_ids
+    return trailers
+
+
+def ancestors(commits_by_oid, oid: str | None) -> set[str]:
+    """Object IDs reachable from ``oid`` along parent edges, ``oid`` included.
+
+    Walks the in-memory graph the DAG already read, so no ``git rev-list``
+    process is needed.  Parents outside the visible history simply stop the
+    walk: a truncated history yields a truncated ancestor set, which is the
+    right answer for what is on screen.
+
+    >>> from collections import namedtuple
+    >>> Node = namedtuple('Node', 'oid parents')
+    >>> a = Node('a', [])
+    >>> b = Node('b', [a])
+    >>> c = Node('c', [b])
+    >>> commits = {node.oid: node for node in (a, b, c)}
+    >>> sorted(ancestors(commits, 'c'))
+    ['a', 'b', 'c']
+    >>> sorted(ancestors(commits, 'a'))
+    ['a']
+    >>> sorted(ancestors(commits, None))
+    []
+    """
+    seen: set[str] = set()
+    if not oid or oid not in commits_by_oid:
+        return seen
+    stack = [oid]
+    while stack:
+        current = stack.pop()
+        if current in seen:
+            continue
+        seen.add(current)
+        commit = commits_by_oid.get(current)
+        if commit is None:
+            continue
+        for parent in commit.parents:
+            if parent.oid not in seen:
+                stack.append(parent.oid)
+    return seen
+
+
+def range_members(
+    commits_by_oid, base_oid: str | None, tip_oid: str | None, cache=None
+) -> set[str]:
+    """``base..tip`` -- reachable from tip, not reachable from base.
+
+    The subtraction matters: a merge can pull in commits that are older than
+    base, and "stop the walk when base is reached" would get those wrong.
+    ``cache`` is an optional ``{oid: ancestor set}`` dict shared across
+    sessions, which pays off because back-to-back sessions share endpoints.
+
+    >>> from collections import namedtuple
+    >>> Node = namedtuple('Node', 'oid parents')
+    >>> a = Node('a', [])
+    >>> b = Node('b', [a])
+    >>> c = Node('c', [b])
+    >>> commits = {node.oid: node for node in (a, b, c)}
+    >>> sorted(range_members(commits, 'a', 'c'))
+    ['b', 'c']
+    >>> sorted(range_members(commits, 'c', 'c'))
+    []
+    >>> sorted(range_members(commits, None, 'b'))
+    ['a', 'b']
+    """
+
+    def reachable(oid):
+        if cache is None:
+            return ancestors(commits_by_oid, oid)
+        if oid not in cache:
+            cache[oid] = ancestors(commits_by_oid, oid)
+        return cache[oid]
+
+    members = set(reachable(tip_oid))
+    if base_oid:
+        members -= reachable(base_oid)
+    return members
+
+
+@dataclass(frozen=True)
+class SessionThread:
+    """One session's commits, each tagged with how it relates to the session."""
+
+    session_id: str
+    marks: dict[str, Mark] = field(default_factory=dict)
+
+    def oids(self, mark: Mark) -> list[str]:
+        """Object IDs carrying the given mark"""
+        return [oid for oid, value in self.marks.items() if value == mark]
+
+    def counts(self) -> dict[Mark, int]:
+        """How many commits carry each mark.
+
+        >>> thread = SessionThread('s', {'a': Mark.OWN, 'b': Mark.FOREIGN})
+        >>> counts = thread.counts()
+        >>> counts[Mark.OWN], counts[Mark.FOREIGN], counts[Mark.STRAY]
+        (1, 1, 0)
+        """
+        result = {mark: 0 for mark in Mark}
+        for mark in self.marks.values():
+            result[mark] += 1
+        return result
+
+
+def build_thread(session, commits_by_oid, trailers, cache=None) -> SessionThread:
+    """Classify every visible commit that belongs to ``session``.
+
+    ``trailers`` maps an object ID to the session ids its
+    ``Agent-Session-Id`` trailers name; it is empty when git is too old to
+    report trailers, in which case everything in range is reported as OWN
+    because there is no evidence to say otherwise.
+
+    Two degenerate ref states get deliberate answers:
+
+    - **no tip ref** -- the session recorded nothing, so any commit carrying
+      its trailer is STRAY: the ref that should anchor it is missing.
+    - **no base ref** -- there is nothing to subtract, so the range would be
+      the whole history.  Fall back to trailer-only membership; FOREIGN
+      cannot be detected without a base.
+    """
+    session_id = session.session_id
+    marks: dict[str, Mark] = {}
+
+    tagged = {
+        oid
+        for oid, session_ids in trailers.items()
+        if session_id in session_ids and oid in commits_by_oid
+    }
+    have_trailers = bool(trailers)
+
+    if not session.tip_oid:
+        for oid in tagged:
+            marks[oid] = Mark.STRAY
+        return SessionThread(session_id=session_id, marks=marks)
+
+    if not session.base_oid:
+        for oid in tagged & ancestors(commits_by_oid, session.tip_oid):
+            marks[oid] = Mark.OWN
+        for oid in tagged - set(marks):
+            marks[oid] = Mark.STRAY
+        return SessionThread(session_id=session_id, marks=marks)
+
+    members = range_members(
+        commits_by_oid, session.base_oid, session.tip_oid, cache=cache
+    )
+    for oid in members:
+        if not have_trailers or oid in tagged:
+            marks[oid] = Mark.OWN
+        else:
+            marks[oid] = Mark.FOREIGN
+    for oid in tagged - members:
+        marks[oid] = Mark.STRAY
+
+    return SessionThread(session_id=session_id, marks=marks)
+
+
+DEFAULT_LIMIT = 10
+"""How many sessions get classified by default; see build_threads()"""
+
+
+def build_threads(
+    sessions, commits_by_oid, trailers, limit: int = DEFAULT_LIMIT
+) -> dict[str, SessionThread]:
+    """Run build_thread() for the newest ``limit`` sessions.
+
+    The cap is not cosmetic.  Each session needs the ancestor sets of its two
+    endpoints, and the shared cache that keeps this fast holds one set of
+    object IDs per endpoint: measured at 9352 commits, 51 sessions cost 88ms
+    and roughly 8MB of cached sets, and both grow with
+    ``sessions x commits``.  A repository with hundreds of sessions and a
+    long history would pay seconds and hundreds of megabytes for threads the
+    user cannot see anyway.
+
+    ``sessions`` is expected newest-first, as load_agent_sessions() returns
+    it.  ``limit <= 0`` means no cap.
+
+    >>> sessions = {'a': AgentSession('a'), 'b': AgentSession('b')}
+    >>> sorted(build_threads(sessions, {}, {}, limit=1))
+    ['a']
+    >>> sorted(build_threads(sessions, {}, {}, limit=0))
+    ['a', 'b']
+    """
+    selected = list(sessions.items())
+    if limit > 0:
+        selected = selected[:limit]
+    cache: dict[str, set[str]] = {}
+    return {
+        session_id: build_thread(session, commits_by_oid, trailers, cache=cache)
+        for session_id, session in selected
+    }
