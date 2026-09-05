@@ -13637,19 +13637,1126 @@
         "cwd": "/Users/luwei/work/git-cola",
         "is_sidechain": false
       }
+    },
+    {
+      "step_id": 176,
+      "timestamp": "2026-09-05T14:03:08.338Z",
+      "source": "user",
+      "message": "文档和计划相应修改确保这里正确理解没？",
+      "extra": {
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 177,
+      "timestamp": "2026-09-05T14:03:13.083Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 191485,
+        "completion_tokens": 470,
+        "cached_tokens": 191483,
+        "extra": {
+          "cache_creation_input_tokens": 936,
+          "cache_read_input_tokens": 191483,
+          "output_tokens_details": {
+            "thinking_tokens": 241
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 936,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 470,
+              "cache_read_input_tokens": 191483,
+              "cache_creation_input_tokens": 936,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 936
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 178,
+      "timestamp": "2026-09-05T14:03:14.042Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "我来实际核一遍文档里有没有残留的「画在左边」的说法，而不是凭印象。",
+      "metrics": {
+        "prompt_tokens": 191485,
+        "completion_tokens": 470,
+        "cached_tokens": 191483,
+        "extra": {
+          "cache_creation_input_tokens": 936,
+          "cache_read_input_tokens": 191483,
+          "output_tokens_details": {
+            "thinking_tokens": 241
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 936,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 470,
+              "cache_read_input_tokens": 191483,
+              "cache_creation_input_tokens": 936,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 936
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 179,
+      "timestamp": "2026-09-05T14:03:15.563Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "Executed Bash toolu_011D6ww9PtSz9UEKasmJ96xr",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_011D6ww9PtSz9UEKasmJ96xr",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "grep -n \"左图\\|左边\\|gutter\\|边槽\\|SESSION_BAND\\|GraphDelegate\\|log_dock\\|CommitTreeWidget\\|apply_graph_result\\|内联\\|_draw_labels\\|sizeHint\" doc/agent-session-dag.md",
+            "description": "Audit doc for stale left-view references"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_011D6ww9PtSz9UEKasmJ96xr",
+            "content": "194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n197:- 左边是一个**列表**，SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），\n202:  列表里只能靠边槽模拟，表达力反而更弱\n204:所以左边保持原样（lane + 分支/tag 标签 + summary），session 的全部可视化都在右边。\n265:`QTreeWidget`，放 `Qt.LeftDockWidgetArea` 和 `log_dock` tab 在一起，默认隐藏，\n266:`View` 菜单给 toggle（和现有 `log_dock.toggleViewAction()` 那几条并列）。\n278:- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n327:| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n342:| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |\n\n[stdout]\n194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n197:- 左边是一个**列表**，SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），\n202:  列表里只能靠边槽模拟，表达力反而更弱\n204:所以左边保持原样（lane + 分支/tag 标签 + summary），session 的全部可视化都在右边。\n265:`QTreeWidget`，放 `Qt.LeftDockWidgetArea` 和 `log_dock` tab 在一起，默认隐藏，\n266:`View` 菜单给 toggle（和现有 `log_dock.toggleViewAction()` 那几条并列）。\n278:- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n327:| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n342:| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 191485,
+        "completion_tokens": 470,
+        "cached_tokens": 191483,
+        "extra": {
+          "cache_creation_input_tokens": 936,
+          "cache_read_input_tokens": 191483,
+          "output_tokens_details": {
+            "thinking_tokens": 241
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 936,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 470,
+              "cache_read_input_tokens": 191483,
+              "cache_creation_input_tokens": 936,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 936
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n197:- 左边是一个**列表**，SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），\n202:  列表里只能靠边槽模拟，表达力反而更弱\n204:所以左边保持原样（lane + 分支/tag 标签 + summary），session 的全部可视化都在右边。\n265:`QTreeWidget`，放 `Qt.LeftDockWidgetArea` 和 `log_dock` tab 在一起，默认隐藏，\n266:`View` 菜单给 toggle（和现有 `log_dock.toggleViewAction()` 那几条并列）。\n278:- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n327:| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n342:| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_011D6ww9PtSz9UEKasmJ96xr",
+            "type": "tool_result",
+            "content": "194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n197:- 左边是一个**列表**，SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），\n202:  列表里只能靠边槽模拟，表达力反而更弱\n204:所以左边保持原样（lane + 分支/tag 标签 + summary），session 的全部可视化都在右边。\n265:`QTreeWidget`，放 `Qt.LeftDockWidgetArea` 和 `log_dock` tab 在一起，默认隐藏，\n266:`View` 菜单给 toggle（和现有 `log_dock.toggleViewAction()` 那几条并列）。\n278:- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n327:| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n342:| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n197:- 左边是一个**列表**，SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），\n202:  列表里只能靠边槽模拟，表达力反而更弱\n204:所以左边保持原样（lane + 分支/tag 标签 + summary），session 的全部可视化都在右边。\n265:`QTreeWidget`，放 `Qt.LeftDockWidgetArea` 和 `log_dock` tab 在一起，默认隐藏，\n266:`View` 菜单给 toggle（和现有 `log_dock.toggleViewAction()` 那几条并列）。\n278:- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n327:| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n342:| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_011D6ww9PtSz9UEKasmJ96xr",
+            "type": "tool_result",
+            "content": "194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n197:- 左边是一个**列表**，SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），\n202:  列表里只能靠边槽模拟，表达力反而更弱\n204:所以左边保持原样（lane + 分支/tag 标签 + summary），session 的全部可视化都在右边。\n265:`QTreeWidget`，放 `Qt.LeftDockWidgetArea` 和 `log_dock` tab 在一起，默认隐藏，\n266:`View` 菜单给 toggle（和现有 `log_dock.toggleViewAction()` 那几条并列）。\n278:- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n327:| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n342:| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "grep -n \"左图\\|左边\\|gutter\\|边槽\\|SESSION_BAND\\|GraphDelegate\\|log_dock\\|CommitTreeWidget\\|apply_graph_result\\|内联\\|_draw_labels\\|sizeHint\" doc/agent-session-dag.md",
+          "description": "Audit doc for stale left-view references"
+        }
+      }
+    },
+    {
+      "step_id": 180,
+      "timestamp": "2026-09-05T14:03:20.486Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 192421,
+        "completion_tokens": 339,
+        "cached_tokens": 192419,
+        "extra": {
+          "cache_creation_input_tokens": 853,
+          "cache_read_input_tokens": 192419,
+          "output_tokens_details": {
+            "thinking_tokens": 221
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 853,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 339,
+              "cache_read_input_tokens": 192419,
+              "cache_creation_input_tokens": 853,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 853
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 181,
+      "timestamp": "2026-09-05T14:03:20.947Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "找到三处残留。修掉：",
+      "metrics": {
+        "prompt_tokens": 192421,
+        "completion_tokens": 339,
+        "cached_tokens": 192419,
+        "extra": {
+          "cache_creation_input_tokens": 853,
+          "cache_read_input_tokens": 192419,
+          "output_tokens_details": {
+            "thinking_tokens": 221
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 853,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 339,
+              "cache_read_input_tokens": 192419,
+              "cache_creation_input_tokens": 853,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 853
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 182,
+      "timestamp": "2026-09-05T14:03:21.789Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "Executed Bash toolu_01HuXpvqHRiMwuVyVCwaZyy7",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01HuXpvqHRiMwuVyVCwaZyy7",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "sed -n '275,282p;320,334p;336,349p' doc/agent-session-dag.md",
+            "description": "Read the three stale spots"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01HuXpvqHRiMwuVyVCwaZyy7",
+            "content": "交互：\n\n- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n- 双击 → `revtext` 设为\n  `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`，只看这一段\n- 右键：\n  - `Copy Session Id`\n\n| key | 默认 | 含义 |\n|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |\n| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---\n\n\n| 项 | 代价 |\n|---|---|\n| 读 session ref | 1 次 `for-each-ref`，前缀查询 |\n| trailer 归属 | 同一条 log 命令多一个格式串，**0 个额外进程** |\n| `base..tip` 范围 | 内存 BFS（parents 图现成的），**0 个额外进程** |\n| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |\n| 缎带 path | 只在 `layout_commits()` 后重算一次 |\n\n唯一可能变贵的是 1.5 的 pin：多 pin 一个 session 就多一条 walk 起点。\n限流默认值（10 个 / 30 天）就是为这个设的。\n\n---\n\n[stdout]\n交互：\n\n- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n- 双击 → `revtext` 设为\n  `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`，只看这一段\n- 右键：\n  - `Copy Session Id`\n\n| key | 默认 | 含义 |\n|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |\n| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---\n\n\n| 项 | 代价 |\n|---|---|\n| 读 session ref | 1 次 `for-each-ref`，前缀查询 |\n| trailer 归属 | 同一条 log 命令多一个格式串，**0 个额外进程** |\n| `base..tip` 范围 | 内存 BFS（parents 图现成的），**0 个额外进程** |\n| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |\n| 缎带 path | 只在 `layout_commits()` 后重算一次 |\n\n唯一可能变贵的是 1.5 的 pin：多 pin 一个 session 就多一条 walk 起点。\n限流默认值（10 个 / 30 天）就是为这个设的。\n\n---\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 192421,
+        "completion_tokens": 339,
+        "cached_tokens": 192419,
+        "extra": {
+          "cache_creation_input_tokens": 853,
+          "cache_read_input_tokens": 192419,
+          "output_tokens_details": {
+            "thinking_tokens": 221
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 853,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 339,
+              "cache_read_input_tokens": 192419,
+              "cache_creation_input_tokens": 853,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 853
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "交互：\n\n- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n- 双击 → `revtext` 设为\n  `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`，只看这一段\n- 右键：\n  - `Copy Session Id`\n\n| key | 默认 | 含义 |\n|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |\n| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---\n\n\n| 项 | 代价 |\n|---|---|\n| 读 session ref | 1 次 `for-each-ref`，前缀查询 |\n| trailer 归属 | 同一条 log 命令多一个格式串，**0 个额外进程** |\n| `base..tip` 范围 | 内存 BFS（parents 图现成的），**0 个额外进程** |\n| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |\n| 缎带 path | 只在 `layout_commits()` 后重算一次 |\n\n唯一可能变贵的是 1.5 的 pin：多 pin 一个 session 就多一条 walk 起点。\n限流默认值（10 个 / 30 天）就是为这个设的。\n\n---",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01HuXpvqHRiMwuVyVCwaZyy7",
+            "type": "tool_result",
+            "content": "交互：\n\n- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n- 双击 → `revtext` 设为\n  `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`，只看这一段\n- 右键：\n  - `Copy Session Id`\n\n| key | 默认 | 含义 |\n|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |\n| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---\n\n\n| 项 | 代价 |\n|---|---|\n| 读 session ref | 1 次 `for-each-ref`，前缀查询 |\n| trailer 归属 | 同一条 log 命令多一个格式串，**0 个额外进程** |\n| `base..tip` 范围 | 内存 BFS（parents 图现成的），**0 个额外进程** |\n| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |\n| 缎带 path | 只在 `layout_commits()` 后重算一次 |\n\n唯一可能变贵的是 1.5 的 pin：多 pin 一个 session 就多一条 walk 起点。\n限流默认值（10 个 / 30 天）就是为这个设的。\n\n---",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "交互：\n\n- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n- 双击 → `revtext` 设为\n  `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`，只看这一段\n- 右键：\n  - `Copy Session Id`\n\n| key | 默认 | 含义 |\n|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |\n| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---\n\n\n| 项 | 代价 |\n|---|---|\n| 读 session ref | 1 次 `for-each-ref`，前缀查询 |\n| trailer 归属 | 同一条 log 命令多一个格式串，**0 个额外进程** |\n| `base..tip` 范围 | 内存 BFS（parents 图现成的），**0 个额外进程** |\n| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |\n| 缎带 path | 只在 `layout_commits()` 后重算一次 |\n\n唯一可能变贵的是 1.5 的 pin：多 pin 一个 session 就多一条 walk 起点。\n限流默认值（10 个 / 30 天）就是为这个设的。\n\n---",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01HuXpvqHRiMwuVyVCwaZyy7",
+            "type": "tool_result",
+            "content": "交互：\n\n- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip\n- 双击 → `revtext` 设为\n  `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`，只看这一段\n- 右键：\n  - `Copy Session Id`\n\n| key | 默认 | 含义 |\n|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |\n| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---\n\n\n| 项 | 代价 |\n|---|---|\n| 读 session ref | 1 次 `for-each-ref`，前缀查询 |\n| trailer 归属 | 同一条 log 命令多一个格式串，**0 个额外进程** |\n| `base..tip` 范围 | 内存 BFS（parents 图现成的），**0 个额外进程** |\n| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |\n| 缎带 path | 只在 `layout_commits()` 后重算一次 |\n\n唯一可能变贵的是 1.5 的 pin：多 pin 一个 session 就多一条 walk 起点。\n限流默认值（10 个 / 30 天）就是为这个设的。\n\n---",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "sed -n '275,282p;320,334p;336,349p' doc/agent-session-dag.md",
+          "description": "Read the three stale spots"
+        }
+      }
+    },
+    {
+      "step_id": 183,
+      "timestamp": "2026-09-05T14:03:28.769Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "Executed Bash toolu_01GhsPNFFzrYoGKstQoKMLcG",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01GhsPNFFzrYoGKstQoKMLcG",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "./venv/bin/python - <<'PY'\np = 'doc/agent-session-dag.md'\ns = open(p).read()\n\nfixes = [\n    # Sessions panel interaction: there is no gutter any more\n    ('- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip',\n     '- 单击 → 高亮该 session 的缎带，滚到 tip'),\n\n    # config: drop the gutter switch, add the labels switch\n    ('| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\\n'\n     '| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |',\n     '| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 |\\n'\n     '| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |'),\n\n    # performance: the per-row gutter data no longer exists\n    ('| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |',\n     '| base/tip 标签 | 只多几个 `Label` 的绘制项，`alloc_cell()` 照旧预留空间 |'),\n]\nfor old, new in fixes:\n    assert old in s, old\n    s = s.replace(old, new, 1)\nopen(p, 'w').write(s)\nprint('ok')\nPY\ngrep -n \"边槽\\|gutter\" doc/agent-session-dag.md",
+            "description": "Fix the three stale references"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01GhsPNFFzrYoGKstQoKMLcG",
+            "content": "ok\n194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n202:  列表里只能靠边槽模拟，表达力反而更弱\n\n[stdout]\nok\n194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n202:  列表里只能靠边槽模拟，表达力反而更弱\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 193274,
+        "completion_tokens": 579,
+        "cached_tokens": 193272,
+        "extra": {
+          "cache_creation_input_tokens": 1026,
+          "cache_read_input_tokens": 193272,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1026,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 579,
+              "cache_read_input_tokens": 193272,
+              "cache_creation_input_tokens": 1026,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1026
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "ok\n194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n202:  列表里只能靠边槽模拟，表达力反而更弱",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01GhsPNFFzrYoGKstQoKMLcG",
+            "type": "tool_result",
+            "content": "ok\n194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n202:  列表里只能靠边槽模拟，表达力反而更弱",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "ok\n194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n202:  列表里只能靠边槽模拟，表达力反而更弱",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01GhsPNFFzrYoGKstQoKMLcG",
+            "type": "tool_result",
+            "content": "ok\n194:**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，\n202:  列表里只能靠边槽模拟，表达力反而更弱",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "./venv/bin/python - <<'PY'\np = 'doc/agent-session-dag.md'\ns = open(p).read()\n\nfixes = [\n    # Sessions panel interaction: there is no gutter any more\n    ('- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip',\n     '- 单击 → 高亮该 session 的缎带，滚到 tip'),\n\n    # config: drop the gutter switch, add the labels switch\n    ('| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |\\n'\n     '| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |',\n     '| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 |\\n'\n     '| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |'),\n\n    # performance: the per-row gutter data no longer exists\n    ('| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |',\n     '| base/tip 标签 | 只多几个 `Label` 的绘制项，`alloc_cell()` 照旧预留空间 |'),\n]\nfor old, new in fixes:\n    assert old in s, old\n    s = s.replace(old, new, 1)\nopen(p, 'w').write(s)\nprint('ok')\nPY\ngrep -n \"边槽\\|gutter\" doc/agent-session-dag.md",
+          "description": "Fix the three stale references"
+        }
+      }
+    },
+    {
+      "step_id": 184,
+      "timestamp": "2026-09-05T14:03:55.079Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 194300,
+        "completion_tokens": 377,
+        "cached_tokens": 194298,
+        "extra": {
+          "cache_creation_input_tokens": 685,
+          "cache_read_input_tokens": 194298,
+          "output_tokens_details": {
+            "thinking_tokens": 278
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 685,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 377,
+              "cache_read_input_tokens": 194298,
+              "cache_creation_input_tokens": 685,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 685
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 185,
+      "timestamp": "2026-09-05T14:03:55.080Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "Executed Bash toolu_01WHkemg6hGZMZ8Y12EuJHD6",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01WHkemg6hGZMZ8Y12EuJHD6",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "sed -n '350,382p' doc/agent-session-dag.md",
+            "description": "Read milestones and tests sections"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01WHkemg6hGZMZ8Y12EuJHD6",
+            "content": "## 7. 分阶段落地\n\n| 阶段 | 内容 | 改动范围 |\n|---|---|---|\n| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n| **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |\n| **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |\n| **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |\n| **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |\n\nM1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。\n\n---\n\n## 8. 测试\n\n`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：\n\n- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值\n- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；\n  造一个 `reset --hard` 后的历史，断言 `STRAY`\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）\n- 边界：\n  - `base == tip`（session 一个 commit 都没提）\n  - base ref 缺失（只装了 Stop hook）\n  - tip 不可达（`reset --hard` 之后）\n  - 几百个 session（限流生效、不 pin 全部）\n  - 一个 session 跨多个分支\n- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作\n\n[stdout]\n## 7. 分阶段落地\n\n| 阶段 | 内容 | 改动范围 |\n|---|---|---|\n| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n| **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |\n| **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |\n| **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |\n| **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |\n\nM1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。\n\n---\n\n## 8. 测试\n\n`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：\n\n- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值\n- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；\n  造一个 `reset --hard` 后的历史，断言 `STRAY`\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）\n- 边界：\n  - `base == tip`（session 一个 commit 都没提）\n  - base ref 缺失（只装了 Stop hook）\n  - tip 不可达（`reset --hard` 之后）\n  - 几百个 session（限流生效、不 pin 全部）\n  - 一个 session 跨多个分支\n- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 194300,
+        "completion_tokens": 377,
+        "cached_tokens": 194298,
+        "extra": {
+          "cache_creation_input_tokens": 685,
+          "cache_read_input_tokens": 194298,
+          "output_tokens_details": {
+            "thinking_tokens": 278
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 685,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 377,
+              "cache_read_input_tokens": 194298,
+              "cache_creation_input_tokens": 685,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 685
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "## 7. 分阶段落地\n\n| 阶段 | 内容 | 改动范围 |\n|---|---|---|\n| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n| **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |\n| **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |\n| **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |\n| **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |\n\nM1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。\n\n---\n\n## 8. 测试\n\n`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：\n\n- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值\n- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；\n  造一个 `reset --hard` 后的历史，断言 `STRAY`\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）\n- 边界：\n  - `base == tip`（session 一个 commit 都没提）\n  - base ref 缺失（只装了 Stop hook）\n  - tip 不可达（`reset --hard` 之后）\n  - 几百个 session（限流生效、不 pin 全部）\n  - 一个 session 跨多个分支\n- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01WHkemg6hGZMZ8Y12EuJHD6",
+            "type": "tool_result",
+            "content": "## 7. 分阶段落地\n\n| 阶段 | 内容 | 改动范围 |\n|---|---|---|\n| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n| **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |\n| **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |\n| **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |\n| **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |\n\nM1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。\n\n---\n\n## 8. 测试\n\n`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：\n\n- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值\n- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；\n  造一个 `reset --hard` 后的历史，断言 `STRAY`\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）\n- 边界：\n  - `base == tip`（session 一个 commit 都没提）\n  - base ref 缺失（只装了 Stop hook）\n  - tip 不可达（`reset --hard` 之后）\n  - 几百个 session（限流生效、不 pin 全部）\n  - 一个 session 跨多个分支\n- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "## 7. 分阶段落地\n\n| 阶段 | 内容 | 改动范围 |\n|---|---|---|\n| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n| **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |\n| **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |\n| **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |\n| **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |\n\nM1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。\n\n---\n\n## 8. 测试\n\n`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：\n\n- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值\n- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；\n  造一个 `reset --hard` 后的历史，断言 `STRAY`\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）\n- 边界：\n  - `base == tip`（session 一个 commit 都没提）\n  - base ref 缺失（只装了 Stop hook）\n  - tip 不可达（`reset --hard` 之后）\n  - 几百个 session（限流生效、不 pin 全部）\n  - 一个 session 跨多个分支\n- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01WHkemg6hGZMZ8Y12EuJHD6",
+            "type": "tool_result",
+            "content": "## 7. 分阶段落地\n\n| 阶段 | 内容 | 改动范围 |\n|---|---|---|\n| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n| **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |\n| **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |\n| **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |\n| **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |\n\nM1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。\n\n---\n\n## 8. 测试\n\n`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：\n\n- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值\n- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；\n  造一个 `reset --hard` 后的历史，断言 `STRAY`\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）\n- 边界：\n  - `base == tip`（session 一个 commit 都没提）\n  - base ref 缺失（只装了 Stop hook）\n  - tip 不可达（`reset --hard` 之后）\n  - 几百个 session（限流生效、不 pin 全部）\n  - 一个 session 跨多个分支\n- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "sed -n '350,382p' doc/agent-session-dag.md",
+          "description": "Read milestones and tests sections"
+        }
+      }
+    },
+    {
+      "step_id": 186,
+      "timestamp": "2026-09-05T14:04:00.798Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "",
+      "metrics": {
+        "prompt_tokens": 194985,
+        "completion_tokens": 435,
+        "cached_tokens": 194983,
+        "extra": {
+          "cache_creation_input_tokens": 1152,
+          "cache_read_input_tokens": 194983,
+          "output_tokens_details": {
+            "thinking_tokens": 293
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1152,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 435,
+              "cache_read_input_tokens": 194983,
+              "cache_creation_input_tokens": 1152,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1152
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 187,
+      "timestamp": "2026-09-05T14:04:01.833Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "Executed Bash toolu_01KB3LKNaQdbyVvtxmPjf4RL",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01KB3LKNaQdbyVvtxmPjf4RL",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "grep -n \"commit.tags or commit.session_labels\\|self.commit.tags or self.commit.session_labels\\|node.tags or node.session_labels\" cola/widgets/dag.py",
+            "description": "Verify the doc's three-change table against code"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01KB3LKNaQdbyVvtxmPjf4RL",
+            "content": "2369:        if commit.tags or commit.session_labels:\n2402:        if side is None or self.commit.tags or self.commit.session_labels:\n3959:                node.column, node.tags or node.session_labels\n\n[stdout]\n2369:        if commit.tags or commit.session_labels:\n2402:        if side is None or self.commit.tags or self.commit.session_labels:\n3959:                node.column, node.tags or node.session_labels\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 194985,
+        "completion_tokens": 435,
+        "cached_tokens": 194983,
+        "extra": {
+          "cache_creation_input_tokens": 1152,
+          "cache_read_input_tokens": 194983,
+          "output_tokens_details": {
+            "thinking_tokens": 293
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 1152,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 435,
+              "cache_read_input_tokens": 194983,
+              "cache_creation_input_tokens": 1152,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 1152
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "2369:        if commit.tags or commit.session_labels:\n2402:        if side is None or self.commit.tags or self.commit.session_labels:\n3959:                node.column, node.tags or node.session_labels",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01KB3LKNaQdbyVvtxmPjf4RL",
+            "type": "tool_result",
+            "content": "2369:        if commit.tags or commit.session_labels:\n2402:        if side is None or self.commit.tags or self.commit.session_labels:\n3959:                node.column, node.tags or node.session_labels",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "2369:        if commit.tags or commit.session_labels:\n2402:        if side is None or self.commit.tags or self.commit.session_labels:\n3959:                node.column, node.tags or node.session_labels",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01KB3LKNaQdbyVvtxmPjf4RL",
+            "type": "tool_result",
+            "content": "2369:        if commit.tags or commit.session_labels:\n2402:        if side is None or self.commit.tags or self.commit.session_labels:\n3959:                node.column, node.tags or node.session_labels",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "grep -n \"commit.tags or commit.session_labels\\|self.commit.tags or self.commit.session_labels\\|node.tags or node.session_labels\" cola/widgets/dag.py",
+          "description": "Verify the doc's three-change table against code"
+        }
+      }
+    },
+    {
+      "step_id": 188,
+      "timestamp": "2026-09-05T14:04:05.132Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "三处都对上了。但文档里还有两处**过度声称**——把还没做的说成已有的：",
+      "metrics": {
+        "prompt_tokens": 196137,
+        "completion_tokens": 2070,
+        "cached_tokens": 196135,
+        "extra": {
+          "cache_creation_input_tokens": 531,
+          "cache_read_input_tokens": 196135,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 531,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 2070,
+              "cache_read_input_tokens": 196135,
+              "cache_creation_input_tokens": 531,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 531
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
+    },
+    {
+      "step_id": 189,
+      "timestamp": "2026-09-05T14:04:25.911Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "Executed Bash toolu_014ddaSuNVnkUivJTedCZnBF",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_014ddaSuNVnkUivJTedCZnBF",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "./venv/bin/python - <<'PY'\np = 'doc/agent-session-dag.md'\ns = open(p).read()\n\nfixes = [\n    # \"两个视图对齐\" no longer applies: the left view is deliberately untouched\n    ('M1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。',\n     'M1 就已经能回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 把它画出来。\\n'\n     '左边 DAG 全程不动。'),\n\n    # config table: say which keys exist today\n    ('| key | 默认 | 含义 |\\n|---|---|---|\\n'\n     '| `cola.dag.agentsessions` | `true` | 总开关 |',\n     '（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\\n\\n'\n     '| key | 默认 | 含义 | 状态 |\\n|---|---|---|---|\\n'\n     '| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |'),\n    ('| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |',\n     '| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |'),\n    ('| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |',\n     '| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |'),\n    ('| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |',\n     '| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |'),\n    ('| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 |',\n     '| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |'),\n    ('| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |',\n     '| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |'),\n]\nfor old, new in fixes:\n    assert old in s, old\n    s = s.replace(old, new, 1)\n\n# --- tests section: separate what exists from what is planned ---\nold = \"\"\"`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：\n\n- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值\n- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；\n  造一个 `reset --hard` 后的历史，断言 `STRAY`\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）\n- 边界：\n  - `base == tip`（session 一个 commit 都没提）\n  - base ref 缺失（只装了 Stop hook）\n  - tip 不可达（`reset --hard` 之后）\n  - 几百个 session（限流生效、不 pin 全部）\n  - 一个 session 跨多个分支\n- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作\"\"\"\n\nnew = \"\"\"`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）。\n\n**M1 已有的（11 个测试 + 7 个 doctest）：**\n\n- 解析：`parse_session_ref` / `parse_for_each_ref` / `labels_by_oid` / `label_text`\n  的 doctest；`load_agent_sessions()` 前缀查询同时拿到 base 和 tip\n- 不误判：分支、tag、以及 `refs/agent/session/<id>`（少一层，不带 `/base` `/tip`）\n  都不算 session\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前），\n  背靠背 session 共享同一个 commit 时两个标签都在\n- 开关：`set_agent_sessions(False)` 后不读 ref、不贴标签\n- 边界：`base == tip`（session 一个 commit 都没提）、base ref 缺失\n  （只装了 Stop hook）、tip 被 `reset --hard` 甩掉后仍能标出 base\n- 刷新：`refresh_key()` 在 tip 推进后改变\n\n**还没写的（跟着对应阶段补）：**\n\n- M2 三态：造一个中间插了别人 commit 的历史断言 `FOREIGN`；\n  造一个 rewind 后的历史断言 `STRAY`\n- M2 git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作\n- M4 限流：几百个 session 时不 pin 全部\n- 一个 session 跨多个分支\n\nQt 层（`Label` 的绘制、`alloc_cell` 预留、点击复制 session id）测试套件里没有覆盖——\n`test/` 目前完全不起 `QApplication`。这部分靠离屏渲染人工核对，\n截图存 `test/log/dag-agent-session-m1.png`。\"\"\"\nassert old in s\ns = s.replace(old, new, 1)\n\nopen(p, 'w').write(s)\nprint('ok')\nPY\nsed -n '317,335p' doc/agent-session-dag.md",
+            "description": "Stop the doc overclaiming"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_014ddaSuNVnkUivJTedCZnBF",
+            "content": "ok\n## 5. 配置\n\n沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：\n\n（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n\n| key | 默认 | 含义 | 状态 |\n|---|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |\n| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---\n\n[stdout]\nok\n## 5. 配置\n\n沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：\n\n（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n\n| key | 默认 | 含义 | 状态 |\n|---|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |\n| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 196137,
+        "completion_tokens": 2070,
+        "cached_tokens": 196135,
+        "extra": {
+          "cache_creation_input_tokens": 531,
+          "cache_read_input_tokens": 196135,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 531,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 2070,
+              "cache_read_input_tokens": 196135,
+              "cache_creation_input_tokens": 531,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 531
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "ok\n## 5. 配置\n\n沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：\n\n（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n\n| key | 默认 | 含义 | 状态 |\n|---|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |\n| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_014ddaSuNVnkUivJTedCZnBF",
+            "type": "tool_result",
+            "content": "ok\n## 5. 配置\n\n沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：\n\n（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n\n| key | 默认 | 含义 | 状态 |\n|---|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |\n| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "ok\n## 5. 配置\n\n沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：\n\n（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n\n| key | 默认 | 含义 | 状态 |\n|---|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |\n| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_014ddaSuNVnkUivJTedCZnBF",
+            "type": "tool_result",
+            "content": "ok\n## 5. 配置\n\n沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：\n\n（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n\n| key | 默认 | 含义 | 状态 |\n|---|---|---|---|\n| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |\n| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |\n| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |\n| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |\n| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |\n\n命令行（`cola/dag.py` 的 `parse_args`）：\n`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。\n\n---",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "./venv/bin/python - <<'PY'\np = 'doc/agent-session-dag.md'\ns = open(p).read()\n\nfixes = [\n    # \"两个视图对齐\" no longer applies: the left view is deliberately untouched\n    ('M1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。',\n     'M1 就已经能回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 把它画出来。\\n'\n     '左边 DAG 全程不动。'),\n\n    # config table: say which keys exist today\n    ('| key | 默认 | 含义 |\\n|---|---|---|\\n'\n     '| `cola.dag.agentsessions` | `true` | 总开关 |',\n     '（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\\n\\n'\n     '| key | 默认 | 含义 | 状态 |\\n|---|---|---|---|\\n'\n     '| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |'),\n    ('| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |',\n     '| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |'),\n    ('| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |',\n     '| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |'),\n    ('| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |',\n     '| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |'),\n    ('| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 |',\n     '| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |'),\n    ('| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |',\n     '| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |'),\n]\nfor old, new in fixes:\n    assert old in s, old\n    s = s.replace(old, new, 1)\n\n# --- tests section: separate what exists from what is planned ---\nold = \"\"\"`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：\n\n- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值\n- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；\n  造一个 `reset --hard` 后的历史，断言 `STRAY`\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）\n- 边界：\n  - `base == tip`（session 一个 commit 都没提）\n  - base ref 缺失（只装了 Stop hook）\n  - tip 不可达（`reset --hard` 之后）\n  - 几百个 session（限流生效、不 pin 全部）\n  - 一个 session 跨多个分支\n- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作\"\"\"\n\nnew = \"\"\"`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）。\n\n**M1 已有的（11 个测试 + 7 个 doctest）：**\n\n- 解析：`parse_session_ref` / `parse_for_each_ref` / `labels_by_oid` / `label_text`\n  的 doctest；`load_agent_sessions()` 前缀查询同时拿到 base 和 tip\n- 不误判：分支、tag、以及 `refs/agent/session/<id>`（少一层，不带 `/base` `/tip`）\n  都不算 session\n- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前），\n  背靠背 session 共享同一个 commit 时两个标签都在\n- 开关：`set_agent_sessions(False)` 后不读 ref、不贴标签\n- 边界：`base == tip`（session 一个 commit 都没提）、base ref 缺失\n  （只装了 Stop hook）、tip 被 `reset --hard` 甩掉后仍能标出 base\n- 刷新：`refresh_key()` 在 tip 推进后改变\n\n**还没写的（跟着对应阶段补）：**\n\n- M2 三态：造一个中间插了别人 commit 的历史断言 `FOREIGN`；\n  造一个 rewind 后的历史断言 `STRAY`\n- M2 git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作\n- M4 限流：几百个 session 时不 pin 全部\n- 一个 session 跨多个分支\n\nQt 层（`Label` 的绘制、`alloc_cell` 预留、点击复制 session id）测试套件里没有覆盖——\n`test/` 目前完全不起 `QApplication`。这部分靠离屏渲染人工核对，\n截图存 `test/log/dag-agent-session-m1.png`。\"\"\"\nassert old in s\ns = s.replace(old, new, 1)\n\nopen(p, 'w').write(s)\nprint('ok')\nPY\nsed -n '317,335p' doc/agent-session-dag.md",
+          "description": "Stop the doc overclaiming"
+        }
+      }
+    },
+    {
+      "step_id": 190,
+      "timestamp": "2026-09-05T14:04:29.406Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "Executed Bash toolu_01Dw7iaSs7ZUiZEZd6WBy21w",
+      "tool_calls": [
+        {
+          "tool_call_id": "toolu_01Dw7iaSs7ZUiZEZd6WBy21w",
+          "function_name": "Bash",
+          "arguments": {
+            "command": "./venv/bin/python -m pytest test/dag_agent_session_test.py cola/models/agentsession.py -q 2>&1 | tail -3\necho \"=== 文档里所有 ✅ / 阶段声称 ===\"\ngrep -n \"✅\\|已实现\\|M1 已有\" doc/agent-session-dag.md",
+            "description": "Verify test count claim and list all claims"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "toolu_01Dw7iaSs7ZUiZEZd6WBy21w",
+            "content": "..................                                                       [100%]\n18 passed in 2.15s\n=== 文档里所有 ✅ / 阶段声称 ===\n321:（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n325:| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n356:| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n371:**M1 已有的（11 个测试 + 7 个 doctest）：**\n\n[stdout]\n..................                                                       [100%]\n18 passed in 2.15s\n=== 文档里所有 ✅ / 阶段声称 ===\n321:（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n325:| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n356:| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n371:**M1 已有的（11 个测试 + 7 个 doctest）：**\n[metadata] {\"noOutputExpected\": false}"
+          }
+        ]
+      },
+      "metrics": {
+        "prompt_tokens": 196668,
+        "completion_tokens": 189,
+        "cached_tokens": 196666,
+        "extra": {
+          "cache_creation_input_tokens": 2525,
+          "cache_read_input_tokens": 196666,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 2525,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 189,
+              "cache_read_input_tokens": 196666,
+              "cache_creation_input_tokens": 2525,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 2525
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "tool_use",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false,
+        "tool_use_name": "Bash",
+        "tool_result_metadata": {
+          "tool_use_result": {
+            "stdout": "..................                                                       [100%]\n18 passed in 2.15s\n=== 文档里所有 ✅ / 阶段声称 ===\n321:（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n325:| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n356:| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n371:**M1 已有的（11 个测试 + 7 个 doctest）：**",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01Dw7iaSs7ZUiZEZd6WBy21w",
+            "type": "tool_result",
+            "content": "..................                                                       [100%]\n18 passed in 2.15s\n=== 文档里所有 ✅ / 阶段声称 ===\n321:（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n325:| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n356:| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n371:**M1 已有的（11 个测试 + 7 个 doctest）：**",
+            "is_error": false
+          }
+        },
+        "tool_result_is_error": false,
+        "metadata": {
+          "tool_use_result": {
+            "stdout": "..................                                                       [100%]\n18 passed in 2.15s\n=== 文档里所有 ✅ / 阶段声称 ===\n321:（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n325:| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n356:| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n371:**M1 已有的（11 个测试 + 7 个 doctest）：**",
+            "stderr": "",
+            "interrupted": false,
+            "isImage": false,
+            "noOutputExpected": false
+          },
+          "raw_tool_result": {
+            "tool_use_id": "toolu_01Dw7iaSs7ZUiZEZd6WBy21w",
+            "type": "tool_result",
+            "content": "..................                                                       [100%]\n18 passed in 2.15s\n=== 文档里所有 ✅ / 阶段声称 ===\n321:（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）\n325:| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |\n356:| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |\n371:**M1 已有的（11 个测试 + 7 个 doctest）：**",
+            "is_error": false
+          }
+        },
+        "raw_arguments": {
+          "command": "./venv/bin/python -m pytest test/dag_agent_session_test.py cola/models/agentsession.py -q 2>&1 | tail -3\necho \"=== 文档里所有 ✅ / 阶段声称 ===\"\ngrep -n \"✅\\|已实现\\|M1 已有\" doc/agent-session-dag.md",
+          "description": "Verify test count claim and list all claims"
+        }
+      }
+    },
+    {
+      "step_id": 191,
+      "timestamp": "2026-09-05T14:04:48.039Z",
+      "source": "agent",
+      "model_name": "claude-opus-5",
+      "message": "18 = 11 + 7，文档里的数字对得上。\n\n## 我的理解（请确认）\n\n**你要的**：session 的头尾/线索画在**右边 dock**（`graphview_dock` 的 `GraphView`，节点+连线那个），**左边 dock**（`log_dock` 的 `CommitTreeWidget` + `GraphDelegate` 内联图）保持原样、一个字节都不动。\n\n代码已经是这样了（左边我用 `git diff` 逐行核过，已完全还原）。\n\n## 文档这次改了什么\n\n第一次改我只挪了章节，还留了三处「画在左边」的残留 —— 你这么一问我去 grep 才发现：\n\n1. Sessions 面板的交互写着「高亮该 session 的**边槽** + 缎带」\n2. 配置表里还有 `cola.dag.agentsessiongutter`（左图边槽开关）\n3. 性能表里还有一行「边槽 per-row 数据 / `apply_graph_result()`」\n\n都改掉了。还有一句「M3 之后**两个视图对齐**」也是错的 —— 左边全程不动，没有要对齐的东西。\n\n## 顺带发现文档在两处**过度声称**\n\n这是我上一版留下的问题，跟左右无关，但一起修了：\n\n- **配置表**列了 6 个 key，读起来像都能用，实际只有 `cola.dag.agentsessions` 实现了。现在每行标了状态（✅ M1 / M3 / M4 / M5）。\n- **测试章节**把「造 FOREIGN / STRAY 的历史」「几百个 session 限流」「git < 2.22 降级」写得像已有的测试，实际都还没写 —— 那些依赖 M2/M4 的功能。现在拆成「M1 已有的」和「还没写的」两块，并补了一句实话：Qt 层（`Label` 绘制、`alloc_cell` 预留、点击复制 session id）测试套件里**没有覆盖**，因为 `test/` 目前完全不起 `QApplication`，只能靠离屏渲染人工核对。\n\n保留的两处「左边」措辞是**故意**的（§2 开头解释为什么放弃左边方案），不是残留。\n\n有理解错的地方直接说。没有的话我接着做 M2？",
+      "metrics": {
+        "prompt_tokens": 199193,
+        "completion_tokens": 780,
+        "cached_tokens": 199191,
+        "extra": {
+          "cache_creation_input_tokens": 462,
+          "cache_read_input_tokens": 199191,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 462,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "not_available",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 780,
+              "cache_read_input_tokens": 199191,
+              "cache_creation_input_tokens": 462,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 462
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard"
+        }
+      },
+      "extra": {
+        "stop_reason": "end_turn",
+        "cwd": "/Users/luwei/work/git-cola",
+        "is_sidechain": false
+      }
     }
   ],
   "final_metrics": {
-    "total_prompt_tokens": 20997585,
-    "total_completion_tokens": 150231,
-    "total_cached_tokens": 20997243,
-    "total_steps": 175,
+    "total_prompt_tokens": 23909282,
+    "total_completion_tokens": 159970,
+    "total_cached_tokens": 23908910,
+    "total_steps": 191,
     "extra": {
       "service_tiers": [
         "standard"
       ],
-      "total_cache_creation_input_tokens": 324251,
-      "total_cache_read_input_tokens": 20997243
+      "total_cache_creation_input_tokens": 338367,
+      "total_cache_read_input_tokens": 23908910
     }
   }
 }

@@ -275,7 +275,7 @@ HEAD  main  ▶ b47c8939 tip
 
 交互：
 
-- 单击 → 高亮该 session 的边槽 + 缎带，滚到 tip
+- 单击 → 高亮该 session 的缎带，滚到 tip
 - 双击 → `revtext` 设为
   `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`，只看这一段
 - 右键：
@@ -318,14 +318,16 @@ HEAD  main  ▶ b47c8939 tip
 
 沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：
 
-| key | 默认 | 含义 |
-|---|---|---|
-| `cola.dag.agentsessions` | `true` | 总开关 |
-| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 |
-| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session |
-| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 |
-| `cola.dag.agentsessiongutter` | `true` | 左图边槽 |
-| `cola.dag.agentsessionribbon` | `true` | 右图缎带 |
+（只有 `cola.dag.agentsessions` 已实现，其余随对应 M 阶段落地。）
+
+| key | 默认 | 含义 | 状态 |
+|---|---|---|---|
+| `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |
+| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |
+| `cola.dag.agentsessionlimit` | `10` | 自动点亮最近几个 session | M4 |
+| `cola.dag.agentsessiondays` | `30` | 只自动点亮这么多天内的 | M4 |
+| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签 | M5 |
+| `cola.dag.agentsessionribbon` | `true` | 右图缎带 | M3 |
 
 命令行（`cola/dag.py` 的 `parse_args`）：
 `git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。
@@ -339,7 +341,7 @@ HEAD  main  ▶ b47c8939 tip
 | 读 session ref | 1 次 `for-each-ref`，前缀查询 |
 | trailer 归属 | 同一条 log 命令多一个格式串，**0 个额外进程** |
 | `base..tip` 范围 | 内存 BFS（parents 图现成的），**0 个额外进程** |
-| 边槽 per-row 数据 | `apply_graph_result()` 一趟算完，`paint()` 只查表 |
+| base/tip 标签 | 只多几个 `Label` 的绘制项，`alloc_cell()` 照旧预留空间 |
 | 缎带 path | 只在 `layout_commits()` 后重算一次 |
 
 唯一可能变贵的是 1.5 的 pin：多 pin 一个 session 就多一条 walk 起点。
@@ -357,22 +359,36 @@ HEAD  main  ▶ b47c8939 tip
 | **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |
 | **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |
 
-M1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」；M3 之后两个视图对齐。
+M1 就已经能回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 把它画出来。
+左边 DAG 全程不动。
 
 ---
 
 ## 8. 测试
 
-`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：
+`test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）。
 
-- 解析：`parse_session_ref` 的 doctest + 前缀查询返回值
-- 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；
-  造一个 `reset --hard` 后的历史，断言 `STRAY`
-- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）
-- 边界：
-  - `base == tip`（session 一个 commit 都没提）
-  - base ref 缺失（只装了 Stop hook）
-  - tip 不可达（`reset --hard` 之后）
-  - 几百个 session（限流生效、不 pin 全部）
-  - 一个 session 跨多个分支
-- git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作
+**M1 已有的（11 个测试 + 7 个 doctest）：**
+
+- 解析：`parse_session_ref` / `parse_for_each_ref` / `labels_by_oid` / `label_text`
+  的 doctest；`load_agent_sessions()` 前缀查询同时拿到 base 和 tip
+- 不误判：分支、tag、以及 `refs/agent/session/<id>`（少一层，不带 `/base` `/tip`）
+  都不算 session
+- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前），
+  背靠背 session 共享同一个 commit 时两个标签都在
+- 开关：`set_agent_sessions(False)` 后不读 ref、不贴标签
+- 边界：`base == tip`（session 一个 commit 都没提）、base ref 缺失
+  （只装了 Stop hook）、tip 被 `reset --hard` 甩掉后仍能标出 base
+- 刷新：`refresh_key()` 在 tip 推进后改变
+
+**还没写的（跟着对应阶段补）：**
+
+- M2 三态：造一个中间插了别人 commit 的历史断言 `FOREIGN`；
+  造一个 rewind 后的历史断言 `STRAY`
+- M2 git 版本降级：假装 git < 2.22，断言退回旧 `LOGFMT` 且 ref 归属仍然工作
+- M4 限流：几百个 session 时不 pin 全部
+- 一个 session 跨多个分支
+
+Qt 层（`Label` 的绘制、`alloc_cell` 预留、点击复制 session id）测试套件里没有覆盖——
+`test/` 目前完全不起 `QApplication`。这部分靠离屏渲染人工核对，
+截图存 `test/log/dag-agent-session-m1.png`。
