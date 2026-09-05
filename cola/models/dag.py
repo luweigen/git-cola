@@ -86,6 +86,23 @@ class DAG:
         if isolate is not None and self.set_orphan_isolate(isolate):
             self.overrides['orphan_isolate'] = bool(isolate)
 
+        enabled = getattr(args, 'agent_sessions', None)
+        if enabled is not None:
+            self.set_agent_sessions(enabled)
+            self.overrides['agent_sessions'] = bool(enabled)
+
+        # --agent-session <id> replaces the revision arguments entirely: the
+        # point is to look at that session and nothing else.
+        wanted = getattr(args, 'agent_session', None)
+        if wanted:
+            ref = ' '.join(
+                '%s%s' % (agentsession.ARG_PREFIX, session_id)
+                for session_id in wanted
+            )
+            if self.set_ref(ref):
+                self.overrides['ref'] = ref
+            return
+
         if hasattr(args, 'args') and args.args:
             ref = core.list2cmdline(args.args)
             if self.set_ref(ref):
@@ -401,6 +418,11 @@ class RepoReader:
         self.reset()
         self._read_agent_sessions()
         ref_args = utils.shell_split(self.params.ref)
+        # ``agent:<id>`` is shorthand for one session's base..tip. Expanding
+        # here, after the session refs have been read, means the shorthand
+        # accepts a short id the way agent-sessions.py does.
+        if self.sessions:
+            ref_args = agentsession.expand_ref_args(ref_args, self.sessions)
         cmd = self._log_cmd(self._cmd, ref_args, with_date=True)
         commit = None
 

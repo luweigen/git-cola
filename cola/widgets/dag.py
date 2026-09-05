@@ -89,6 +89,9 @@ def git_dag(context, args=None, existing_view=None, show=True):
     view.graphview.show_session_ribbons = _config_truthy(
         context.cfg.get('cola.dag.agentsessionribbon', default=True)
     )
+    view.graphview.show_session_labels = _config_truthy(
+        context.cfg.get('cola.dag.agentsessionlabels', default=True)
+    )
     if show:
         view.show()
     if params.ref:
@@ -512,7 +515,44 @@ class ViewerMixin:
         menu.addAction(self.menu_actions['copy_short'])
         menu.addAction(self.menu_actions['copy'])
         menu.addAction(self.menu_actions['copy_message'])
+        self._add_session_submenu(menu)
         menu.exec_(self.mapToGlobal(event.pos()))
+
+    def _add_session_submenu(self, menu):
+        """Add an "Agent Session" submenu when the commit belongs to one.
+
+        Only sessions that claim the commit are offered: a commit merely
+        caught inside somebody else's base..tip range (FOREIGN) is not this
+        commit's session, so listing it here would be misleading.
+        """
+        oid = self.clicked_oid()
+        if not oid:
+            return
+        window = self.window()
+        threads = getattr(window, 'session_threads', None) or {}
+        owning = [
+            session_id
+            for session_id, thread in threads.items()
+            if thread.marks.get(oid)
+            in (agentsession.Mark.OWN, agentsession.Mark.STRAY)
+        ]
+        if not owning:
+            return
+        menu.addSeparator()
+        submenu = menu.addMenu(N_('Agent Session'))
+        graph_view = getattr(window, 'graphview', None)
+        for session_id in sorted(owning):
+            action = submenu.addAction(session_id[: agentsession.SHORT_LEN])
+            action.setToolTip(session_id)
+            action.triggered.connect(
+                partial(self._show_session_actions, graph_view, session_id)
+            )
+
+    def _show_session_actions(self, graph_view, session_id, _checked=False):
+        """Open the shared session menu at the cursor"""
+        show_session_menu(
+            graph_view, agentsession.TIP, session_id, QtGui.QCursor.pos()
+        )
 
 
 def _diff_expression(context, widget, oid, is_root_commit):
@@ -1419,14 +1459,26 @@ class SessionsWidget(QtWidgets.QFrame):
         self.tree.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
 
+        self.rebuild_button = qtutils.create_button(
+            text=N_('Rebuild'),
+            tooltip=N_(
+                'Recreate missing session refs from the Agent-Session-Id '
+                'commit trailers. Existing refs are left alone.'
+            ),
+        )
         self.controls_layout = qtutils.hbox(
-            defs.no_margin, defs.spacing, self.filter_text, self.recent_only
+            defs.no_margin,
+            defs.spacing,
+            self.filter_text,
+            self.recent_only,
+            self.rebuild_button,
         )
         self.main_layout = qtutils.vbox(
             defs.no_margin, defs.spacing, self.controls_layout, self.tree
         )
         self.setLayout(self.main_layout)
 
+        qtutils.connect_button(self.rebuild_button, self._rebuild)
         self.filter_text.textChanged.connect(lambda _text: self.refill())
         self.recent_only.toggled.connect(lambda _checked: self.refill())
         self.tree.itemSelectionChanged.connect(self._selection_changed)
@@ -1480,7 +1532,7 @@ class SessionsWidget(QtWidgets.QFrame):
         """Own count, plus the two anomalies when they are non-zero"""
         thread = self.threads.get(session_id)
         if thread is None:
-            return N_('not classified')
+            return ''
         counts = thread.counts()
         parts = ['%d' % counts[agentsession.Mark.OWN]]
         foreign = counts[agentsession.Mark.FOREIGN]
@@ -1496,8 +1548,14 @@ class SessionsWidget(QtWidgets.QFrame):
             return N_('no commits')
         if self.head_oid and session.tip_oid == self.head_oid:
             return N_('at HEAD')
-        if session_id not in self.threads:
-            return ''
+        thread = self.threads.get(session_id)
+        if thread is None:
+            return N_('not classified')
+        if not thread.marks:
+            # Classified, but nothing landed in it: the session's commits are
+            # outside the revisions currently being shown. Double-clicking the
+            # row narrows the view to its base..tip.
+            return N_('not visible')
         if not session.base_oid:
             return N_('no base ref')
         return ''
@@ -1528,6 +1586,29 @@ class SessionsWidget(QtWidgets.QFrame):
                 agentsession.session_ref(session_id, agentsession.TIP),
             )
         )
+
+    def _rebuild(self):
+        """Recreate missing session refs from commit trailers"""
+        count = rebuild_session_refs(self.context)
+        if count < 0:
+            return
+        if count == 0:
+            Interaction.information(
+                N_('Nothing to Rebuild'),
+                message=N_(
+                    'Every session named by a commit trailer already has '
+                    'its refs.'
+                ),
+            )
+            return
+        Interaction.information(
+            N_('Rebuilt Session Refs'),
+            message=N_('Recreated refs for %d session(s).') % count,
+        )
+        window = self.window()
+        refresh = getattr(window, 'refresh', None)
+        if callable(refresh):
+            refresh()
 
     def _context_menu(self, pos):
         item = self.tree.itemAt(pos)
@@ -2896,6 +2977,9 @@ class Label(QtWidgets.QGraphicsItem):
         ``git log --decorate`` does not report, so they are carried on the
         commit separately from ``tags``.
         """
+        graph_view = self._graph_view()
+        if graph_view is not None and not graph_view.show_session_labels:
+            return []
         return [
             (agentsession.label_text(kind, session_id), kind, session_id)
             for kind, session_id in self.commit.session_labels
@@ -3403,6 +3487,45 @@ def show_session_menu(graph_view, kind, session_id, screen_pos):
         prune_session(graph_view, session_id)
 
 
+def rebuild_session_refs(context):
+    """Recreate missing session refs from commit trailers.
+
+    For repositories whose commits predate the ref layout, or whose refs were
+    pruned. Existing refs are never touched -- they come from the hooks and
+    know things the trailers cannot, such as a base that no commit records.
+    Mirrors ``agent-sessions.py rebuild``.
+
+    Returns the number of sessions that gained refs, or -1 on failure.
+    """
+    status, out, _ = context.git.log(
+        '--all',
+        '--no-patch',
+        '--pretty=format:' + agentsession.REBUILD_FORMAT,
+        _readonly=True,
+    )
+    if status != 0:
+        return -1
+    entries = agentsession.parse_rebuild_log(out.splitlines())
+    plan = agentsession.rebuild_plan(entries)
+    existing = agentsession.load_agent_sessions(context)
+    refs = agentsession.rebuild_refs(plan, existing)
+    if not refs:
+        return 0
+    # One update-ref per ref rather than --stdin: Git.execute() takes a file
+    # handle for stdin, not a string, and a rebuild is a rare explicit action
+    # whose writes are independent and idempotent anyway.
+    for refname, oid in refs:
+        status, _, err = context.git.update_ref('--create-reflog', refname, oid)
+        if status != 0:
+            Interaction.critical(
+                N_('Rebuild Failed'),
+                message=N_('Could not write "%s".') % refname,
+                details=err or None,
+            )
+            return -1
+    return len({session_id for session_id in plan if session_id not in existing})
+
+
 def show_session_reflog(graph_view, session_id, kind):
     """Show the tip ref's reflog: the session's own progress log.
 
@@ -3756,6 +3879,9 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
         # labels are drawn, which is what the view looked like before the
         # ribbon existed.
         self.show_session_ribbons = True
+        # ``cola.dag.agentsessionlabels`` -- when false the base/tip labels
+        # are left off; the ribbon and the panel still work.
+        self.show_session_labels = True
         # Live SessionRibbon items, rebuilt whenever the layout moves.
         self.session_ribbons = []
         # Populated transiently inside recompute_grid().

@@ -498,3 +498,143 @@ def test_is_recent_filters_by_tip_date(app_context):
     assert agentsession.is_recent(session, days=30, now=updated)
     assert not agentsession.is_recent(session, days=30, now=long_after)
     assert agentsession.is_recent(session, days=0, now=long_after)
+
+
+OLD_COAUTHOR = 'claude code/claude-opus-5/%s <noreply@anthropic.com>'
+
+
+def commit_old_format(session_id, message):
+    """Commit with the pre-2026.8.31 three-part Co-authored-by trailer"""
+    run_git(
+        'commit',
+        '--allow-empty',
+        '-m',
+        message,
+        '--trailer',
+        'Co-authored-by: ' + OLD_COAUTHOR % session_id,
+    )
+    return run_git('rev-parse', 'HEAD').strip()
+
+
+def test_agent_notation_narrows_to_one_session(app_context):
+    """agent:<id> in the revision arguments expands to base..tip"""
+    commit('root')
+    base = commit('base')
+    commit_for(SESSION_A, 'first')
+    tip = commit_for(SESSION_A, 'second')
+    record_session(SESSION_A, base, tip)
+    commit('later, unrelated')
+    app_context.model.update_status()
+
+    commits = read_commits(app_context, ref='agent:' + SESSION_A[:8])
+
+    assert [c.summary for c in commits] == ['first', 'second']
+
+
+def test_agent_notation_drops_unusable_ids(app_context):
+    """An id that matches nothing must not make git fail on everything"""
+    commit('root')
+    app_context.model.update_status()
+    sessions = {}
+
+    assert agentsession.expand_ref_args(['agent:nope'], sessions) == []
+    assert agentsession.expand_ref_args(['main'], sessions) == ['main']
+
+
+def test_cli_agent_session_flag_replaces_the_revision_args():
+    """--agent-session <id> means look at that session and nothing else"""
+    from cola import dag as dagmain
+
+    args = dagmain.parse_args(argv=['--agent-session', 'abc123'])
+    params = dag.DAG('main --', 100)
+    params.set_arguments(args)
+
+    assert params.ref == 'agent:abc123'
+
+
+def test_cli_no_agent_sessions_flag():
+    """--no-agent-sessions turns the whole feature off"""
+    from cola import dag as dagmain
+
+    args = dagmain.parse_args(argv=['--no-agent-sessions'])
+    params = dag.DAG('main --', 100)
+    params.set_arguments(args)
+
+    assert params.agent_sessions is False
+
+
+def test_rebuild_recreates_refs_from_new_trailers(app_context):
+    """Refs can be rebuilt after a prune, from the trailers alone"""
+    from cola.widgets import dag as dagwidget
+
+    base = commit('base')
+    commit_for(SESSION_A, 'first')
+    tip = commit_for(SESSION_A, 'second')
+    app_context.model.update_status()
+    assert agentsession.load_agent_sessions(app_context) == {}
+
+    count = dagwidget.rebuild_session_refs(app_context)
+
+    assert count == 1
+    session = agentsession.load_agent_sessions(app_context)[SESSION_A]
+    assert session.base_oid == base
+    assert session.tip_oid == tip
+
+
+def test_rebuild_reads_the_old_coauthor_format(app_context):
+    """Repositories predating Agent-Session-Id rebuild without a rewrite"""
+    from cola.widgets import dag as dagwidget
+
+    base = commit('base')
+    commit_old_format(SESSION_B, 'old style one')
+    tip = commit_old_format(SESSION_B, 'old style two')
+    app_context.model.update_status()
+
+    count = dagwidget.rebuild_session_refs(app_context)
+
+    assert count == 1
+    session = agentsession.load_agent_sessions(app_context)[SESSION_B]
+    assert session.base_oid == base
+    assert session.tip_oid == tip
+
+
+def test_rebuild_leaves_existing_refs_alone(app_context):
+    """Live refs know things the trailers do not, so they are not overwritten"""
+    from cola.widgets import dag as dagwidget
+
+    base = commit('base')
+    first = commit_for(SESSION_A, 'first')
+    commit_for(SESSION_A, 'second')
+    # A hook-written tip that deliberately lags the newest tagged commit.
+    record_session(SESSION_A, base, first)
+
+    count = dagwidget.rebuild_session_refs(app_context)
+
+    assert count == 0
+    session = agentsession.load_agent_sessions(app_context)[SESSION_A]
+    assert session.tip_oid == first
+
+
+def test_range_does_not_leak_an_offscreen_base(app_context):
+    """With base off screen the range must not pick it up as FOREIGN
+
+    ``agent:<id>`` narrows the view to ``base..tip``, which puts base one
+    commit past the edge. ancestors(base) is then empty, so anything
+    ancestors(tip) reported outside the visible set could not be subtracted.
+    """
+    base = commit('base')
+    first = commit_for(SESSION_A, 'first')
+    tip = commit_for(SESSION_A, 'second')
+    record_session(SESSION_A, base, tip)
+    app_context.model.update_status()
+
+    params = dag.DAG('agent:' + SESSION_A, 1000)
+    reader = dag.RepoReader(app_context, params)
+    oids = [c.oid for c in reader.get()]
+
+    assert base not in oids
+    marks = reader.threads[SESSION_A].marks
+    assert marks == {
+        first: agentsession.Mark.OWN,
+        tip: agentsession.Mark.OWN,
+    }

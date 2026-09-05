@@ -183,6 +183,15 @@ def range_members(commits_by_oid, base_oid, tip_oid, cache=None):
 `test_range_excludes_merged_in_ancestors_of_base` 就是钉这个的：
 造一个 merge 进来的 side 分支，断言 side 在范围里、base 的祖先不在。
 
+**还有第二个坑，是 M5 的截图暴露出来的**：`ancestors()` 最初会把
+「走到了但不在已读集合里」的 oid 也放进结果。正常视野下无所谓（两边都这么做，
+减法抵消），但 `agent:<id>` 把视野收窄到 `base..tip` 之后，**base 正好在边界外一格**：
+`ancestors(tip)` 报了 base，而 `ancestors(base)` 因为 base 不在集合里直接返回空集，
+减不掉——base 就漏进范围，还因为没 trailer 被标成 `FOREIGN`。
+面板上显示成 `2, +1 foreign`，图上却只有 2 个 commit。
+改成只收录**确实在已读集合里**的 oid，
+`test_range_does_not_leak_an_offscreen_base` 钉住。
+
 `cache` 是跨 session 共享的 `{oid: 祖先集合}`，背靠背的 session 共用端点，命中率高。
 
 **这个缓存就是为什么要限流。** 每个 session 要两个端点的祖先集合，
@@ -199,20 +208,26 @@ def range_members(commits_by_oid, base_oid, tip_oid, cache=None):
 > 这个上限原计划在 M4，提前到 M2 是因为它修的是上面这个实测出来的问题，
 > 不是新功能。
 
-### 1.5 让 session 的 commit 进入 rev walk
+### 1.5 视野外的 session：不自动 pin，给记号 ✅ M5
 
-`refs/agent/*` 不在 `--all` 里。默认的 `HEAD` 参数下，一个跑在别的分支上、
+`refs/agent/*` 不在 `--all` 里。默认的 `HEAD` / `main --` 参数下，一个跑在别的分支上、
 或者被 `reset --hard` 甩掉的 session，它的 commit 根本不会出现在 log 输出里。
 
-`RepoReader.get()` 组命令时，把**被点亮的 session** 的 base/tip ref 名追加到
-rev 参数末尾。wildcard `git log` 不展开，得自己从 for-each-ref 的结果里展开成
-具体 ref 名。
+原设计是**自动把被点亮 session 的 ref 追加到 rev 参数**。实现时否掉了：
+用户在 revtext 里打的是 `main --`，那是他提的问题；
+悄悄往里塞别的 ref 会改变答案，图上多出来的 commit 没有任何东西解释它们从哪来。
 
-限流（几百个 session 的老仓库会炸）：复用 M2 已经落地的
-`cola.dag.agentsessionlimit`（默认 10，按 tip 的 creatordate 取最新的 N 个），
-再加 `cola.dag.agentsessiondays`（默认 30）限制时间窗；
-Sessions 面板里手动勾选可以覆盖。这样这个上限同时管住三件事：
-算 thread 的成本、pin 进 rev walk 的成本、以及画多少条缎带。
+改成显式的两条路：
+
+- **`agent:<id>` 记号**（`agentsession.expand_ref_args()`）——
+  在 revtext 里直接写，展开成 `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`。
+  短 id 就行，跟 `agent-sessions.py` 一致；匹配到多个就都展开，
+  当搜索用而不是报歧义错。匹配不到、或者 session 缺 base/tip 的直接丢掉——
+  原样传给 git 会让**整条** rev 列表失败
+- **命令行 `--agent-session <id>`**（可重复），以及 Sessions 面板的双击
+
+面板的 `State` 列在 session 被分类了、但一个 commit 都没落进视野时显示
+`not visible`，告诉用户「它在，只是不在你现在看的这段历史里」，双击即可看它。
 
 ### 1.6 刷新触发
 
@@ -414,30 +429,59 @@ Create branch "agent/{session_id}.{files}" at tip
 `is_recent()` 有一条刻意的规则：**时间戳读不出来的 session 算「最近」**。
 因为时间戳解析失败而把一个 session 藏起来，比多显示一行糟糕得多。
 
-还没做（挪到 M5）：`Rebuild from trailers`——扫 `Agent-Session-Id`
-和旧三段式 `Co-authored-by` 重建 ref，对应 `agent-sessions.py rebuild`。
+顶部还有一个 `Rebuild` 按钮（M5，见 4.3）：扫 `Agent-Session-Id`
+和旧三段式 `Co-authored-by` 重建缺失的 ref，对应 `agent-sessions.py rebuild`。
 
 ---
 
-## 4. revtext 记号与右键菜单
+## 4. 记号、右键菜单与老仓库 ✅ M5
 
 ### 4.1 `agent:<id>` 记号
 
-`GitDagLineEdit` 右键菜单加一条 `Agent Session…`（和现有
-`_filter_to_current_author` / `_pickaxe_search` 那几条并列），插入 `agent:<id>`。
+在 revtext 里直接写 `agent:<id>`，`RepoReader.get()` 展开成
+`refs/agent/session/<id>/base..refs/agent/session/<id>/tip`（见 1.5）。
 
-`RepoReader.get()` 组参数时把 `agent:<id>` 展开成
-`refs/agent/session/<id>/base..refs/agent/session/<id>/tip`。
-支持前缀匹配（写前几位就行，跟 `agent-sessions.py` 一致），不唯一时弹选择框。
+原计划「不唯一时弹选择框」没做——展开发生在**reader 线程**里，
+那里不能弹模态框。改成匹配到几个就展开几个，当搜索用；
+展开完图上的标签自己会说回来的是哪几个 session。
+完整 id 永远只匹配它自己，所以不会歧义。
 
-### 4.2 commit 右键菜单
+### 4.2 commit 右键子菜单
 
-`ViewerMixin.update_menu_actions()`：选中的 commit 有 session 归属时，加一组
-`Agent Session ▸ Show this session / Copy Session Id / Diff base..tip / Reflog`。
+`ViewerMixin._add_session_submenu()`：选中的 commit 属于某个 session 时，
+在已有的 Actions 菜单末尾加一条 `Agent Session ▸ <短 id>`，
+点进去就是 2.2 那个菜单（同一个 `show_session_menu()`）。
+
+**只列「认领」这个 commit 的 session**：`OWN` 和 `STRAY` 算，`FOREIGN` 不算——
+一个 commit 只是碰巧落在别人的 `base..tip` 区间里，那不是它的 session，
+列出来会误导。
 
 这跟现有的 `_agent_branch_part()`（分支方案，`agent/{id}.{files}` 那套）**并存**：
 老仓库走分支、新仓库走 ref，菜单项来源不同但入口一致。
 `base.agent_branch_mode()` 那边就是两种方案共存的，DAG 这边保持一致。
+
+### 4.3 老仓库：Rebuild from trailers
+
+Sessions 面板上的 `Rebuild` 按钮 → `rebuild_session_refs()`：
+
+```
+git log --all --pretty=format:%H|%P|<Agent-Session-Id>|<Co-authored-by>
+```
+
+一趟同时读**新旧两种** trailer：先取 `Agent-Session-Id`，取不到再用
+`session_id_from_coauthor()` 从旧的三段式
+`Co-authored-by: claude code/{model}/{uuid} <…>` 里剥 UUID。
+然后 `rebuild_plan()` 按「tip = 该 session 最新的 commit，
+base = 最老那个的第一父提交」定出 ref，跟 `agent-sessions.py rebuild` 同一套规则。
+根提交没有父，那个 session 就只建 tip 不建 base，不编一个假的。
+
+**已经有 ref 的 session 一个都不碰。** 活的 ref 是 hook 写的，
+知道 trailer 不知道的事——比如一个没有任何 commit 记录的 base，
+或者一个刻意落后于最新 commit 的 tip。
+
+写 ref 用逐个 `git update-ref --create-reflog`，不用 `--stdin`：
+`Git.execute()` 的 `_stdin` 收的是文件句柄不是字符串，
+而 rebuild 是低频的显式操作，每次写都是独立且幂等的。
 
 ---
 
@@ -450,14 +494,24 @@ Create branch "agent/{session_id}.{files}" at tip
 | key | 默认 | 含义 | 状态 |
 |---|---|---|---|
 | `cola.dag.agentsessions` | `true` | 总开关 | ✅ M1 |
-| `cola.dag.agentsessionrefs` | `refs/agent/session/` | ref 前缀，换命名空间改这里 | M5 |
 | `cola.dag.agentsessionlimit` | `10` | 算三态/点亮的最新 session 数 | ✅ M2 |
 | `cola.dag.agentsessiondays` | `30` | 面板「Recent only」的时间窗 | ✅ M4 |
-| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签开关 | M5 |
+| `cola.dag.agentsessionlabels` | `true` | 右图 base/tip 标签开关 | ✅ M5 |
 | `cola.dag.agentsessionribbon` | `true` | 右图缎带开关 | ✅ M4 |
 
-命令行（`cola/dag.py` 的 `parse_args`）：
-`git dag --agent-session <id>`（可重复）、`--no-agent-sessions`。
+**`cola.dag.agentsessionrefs`（ref 前缀）没做，是有意的。** 它要一路穿过 reader、
+标签、菜单和面板，而换命名空间本来就得同时改 hook（`sessionstart_hook.py` /
+`stop_hook.py` 里也是写死的）。真要换的话，`agentsession.SESSION_PREFIX` 改一行就行。
+
+命令行（`cola/dag.py` 的 `parse_args`）✅ M5：
+
+```bash
+git dag --agent-session 23ecce3c     # 只看这个 session（可重复，短 id 即可）
+git dag --no-agent-sessions          # 完全不读 refs/agent/session/
+```
+
+`--agent-session` 会**替换**掉 revision 参数而不是追加——这个选项的意思就是
+「只看这个 session」。
 
 ---
 
@@ -487,10 +541,10 @@ Create branch "agent/{session_id}.{files}" at tip
 | **M2** ✅ | `base..tip` 集合减法 + 三态归属 + session 限流 + 结果送到视图层 | `agentsession.range_members/build_threads`、`RepoReader._read_trailers`、`version.py` 特性表、`ReaderThread.sessions` 信号 |
 | **M3** ✅ | 右图缎带（三态用粗细 + 实虚两个轴编码） | `SessionRibbon`(新)、`GraphView._update_session_ribbons`、`agentsession.thread_segments/session_hue` |
 | **M4** ✅ | session 菜单补齐 + Sessions 面板 + 缎带/时间窗配置项 | `show_session_menu()`(抽成模块级)、`SessionsWidget`(新)、`SessionReflogDialog`(新)、`agentsession.branch_name/is_recent` |
-| **M5** | `agent:<id>` 记号、commit 右键菜单、`Rebuild from trailers`、命令行开关、旧三段式兼容 | 各处 |
+| **M5** ✅ | `agent:<id>` 记号、commit 右键子菜单、`Rebuild from trailers`（认新旧两种 trailer）、命令行开关、标签开关 | `agentsession.expand_ref_args/rebuild_plan/rebuild_refs/session_id_from_coauthor`、`ViewerMixin._add_session_submenu`、`rebuild_session_refs()` |
 
-M1 回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 把它画出来。
-到这里核心功能齐了，M4/M5 是菜单、面板和配置。左边 DAG 全程不动。
+M1 回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 把它画出来；
+M4 加菜单和面板；M5 补上导航、老仓库兼容和开关。左边 DAG 全程不动。
 
 截图（同一个 demo 仓库、同一套布局，可以直接对比）：
 
@@ -499,6 +553,7 @@ M1 回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 �
 | `test/log/dag-agent-session-m1.png` | 只有 base/tip 标签（`cola.dag.agentsessionribbon=false` 就是这个样子） |
 | `test/log/dag-agent-session-m3.png` | 加上缎带，三态可见 |
 | `test/log/dag-agent-session-m4.png` | Sessions 面板 |
+| `test/log/dag-agent-session-m5.png` | `agent:<id>` 收窄视野，另一个 session 报 `not visible` |
 
 demo 仓库由 `mkdemo.sh` 生成：两个 session，其中一个带 2 个 FOREIGN
 和 1 个 STRAY，正好覆盖三态。
@@ -553,9 +608,15 @@ demo 仓库由 `mkdemo.sh` 生成：两个 session，其中一个带 2 个 FOREI
 - prune 之后 ref 没了、但 commit 和它的 trailer 还在（refs 是派生数据）
 - `is_recent()` 按 tip 的日期过滤，`days=0` 表示不限
 
+**M5 加的（8 个）：**
+
+- `agent:<id>` 真的收窄到 base..tip；匹配不到的 id 被丢掉而不是让 git 整条失败
+- `--agent-session` 替换 revision 参数、`--no-agent-sessions` 关掉整个功能
+- rebuild：新 trailer、**旧三段式 `Co-authored-by`**、以及「已有 ref 不覆盖」
+- **base 在视野外时不能漏进 range**（1.4 里那个 M5 截图暴露的 bug）
+
 **还没写的：**
 
-- M5 `Rebuild from trailers`
 - 一个 session 跨多个分支
 
 Qt 层（`Label` / `SessionRibbon` 的绘制、`alloc_cell` 预留、菜单和面板本身）

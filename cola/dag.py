@@ -37,6 +37,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help='number of commits to display',
     )
     parser.add_argument(
+        '--agent-session',
+        metavar='<id>',
+        action='append',
+        dest='agent_session',
+        help='show only this agent session (repeatable; a short id is enough)',
+    )
+    parser.add_argument(
+        '--no-agent-sessions',
+        dest='agent_sessions',
+        action='store_false',
+        default=None,
+        help='do not read refs/agent/session/ at all',
+    )
+    parser.add_argument(
         'args', nargs=argparse.REMAINDER, metavar='<args>', help='git log arguments'
     )
     args, rest = parser.parse_known_args(args=argv)

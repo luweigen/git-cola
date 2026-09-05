@@ -16,6 +16,7 @@ supports git 2.2.  We therefore read these refs ourselves with
 from __future__ import annotations
 import datetime
 import hashlib
+import re
 from dataclasses import dataclass
 from dataclasses import field
 from enum import Enum
@@ -229,6 +230,84 @@ def load_agent_sessions(
     return parse_for_each_ref(out.splitlines(), prefix=prefix)
 
 
+REBUILD_FORMAT = FIELD_SEP.join(
+    (
+        '%H',
+        '%P',
+        '%(trailers:key=' + TRAILER_KEY + ',valueonly,separator=%x02)',
+        '%(trailers:key=Co-authored-by,valueonly,separator=%x02)',
+    )
+)
+"""git-log format for rebuilding refs from commit trailers.
+
+Reads both the current Agent-Session-Id trailer and the pre-2026.8.31
+three-part Co-authored-by, so an old repository can be rebuilt without any
+history rewriting.
+"""
+
+
+def parse_rebuild_log(lines):
+    """Turn REBUILD_FORMAT output into ``(oid, first_parent, session_id)``.
+
+    The new trailer wins; the old three-part Co-authored-by is only consulted
+    when it is absent. Commits with neither are skipped.
+
+    >>> lines = [
+    ...     'c\x01b\x01s1\x01',
+    ...     'b\x01a\x01\x01claude code/m/'
+    ...     'b47c8939-8ae6-4c1b-b9b2-f89c387b3e77 <x@y>',
+    ...     'a\x01\x01\x01',
+    ... ]
+    >>> parse_rebuild_log(lines)
+    [('c', 'b', 's1'), ('b', 'a', 'b47c8939-8ae6-4c1b-b9b2-f89c387b3e77')]
+    """
+    entries = []
+    for line in lines:
+        if not line:
+            continue
+        fields = line.split(FIELD_SEP)
+        if len(fields) < 3:
+            continue
+        oid = fields[0]
+        parents = fields[1].split()
+        session_id = fields[2].split(TRAILER_SEP)[0].strip()
+        if not session_id and len(fields) > 3:
+            for value in fields[3].split(TRAILER_SEP):
+                session_id = session_id_from_coauthor(value) or ''
+                if session_id:
+                    break
+        if not oid or not session_id:
+            continue
+        entries.append((oid, parents[0] if parents else None, session_id))
+    return entries
+
+
+def rebuild_refs(plan, existing, prefix: str = SESSION_PREFIX):
+    """``(refname, oid)`` for the sessions whose refs are missing.
+
+    Sessions that already have refs are left alone: the live refs come from
+    the hooks and know things the trailers do not, such as a base that no
+    commit records. A session whose oldest commit is a root commit has no
+    base to point at, so it gets a tip ref only.
+
+    >>> plan = {'s1': ('a', 'c'), 's2': (None, 'd')}
+    >>> existing = {'s1': AgentSession('s1', base_oid='a', tip_oid='c')}
+    >>> for refname, oid in rebuild_refs(plan, existing):
+    ...     print(refname, oid)
+    refs/agent/session/s2/tip d
+    """
+    refs = []
+    for session_id in sorted(plan):
+        if session_id in existing:
+            continue
+        base_oid, tip_oid = plan[session_id]
+        if base_oid:
+            refs.append((session_ref(session_id, BASE, prefix), base_oid))
+        if tip_oid:
+            refs.append((session_ref(session_id, TIP, prefix), tip_oid))
+    return refs
+
+
 def labels_by_oid(sessions) -> dict[str, list[tuple[str, str]]]:
     """Map object IDs to the ``(kind, session_id)`` labels anchored there.
 
@@ -334,9 +413,16 @@ def ancestors(commits_by_oid, oid: str | None) -> set[str]:
     """Object IDs reachable from ``oid`` along parent edges, ``oid`` included.
 
     Walks the in-memory graph the DAG already read, so no ``git rev-list``
-    process is needed.  Parents outside the visible history simply stop the
-    walk: a truncated history yields a truncated ancestor set, which is the
-    right answer for what is on screen.
+    process is needed.  Only object IDs that are actually among the read
+    commits are returned -- a parent outside the visible history stops the
+    walk and is *not* included itself.
+
+    That exclusion matters for range_members(): when a session's base is off
+    screen, ``ancestors(base)`` is empty, so anything ``ancestors(tip)``
+    reported outside the visible set could not be subtracted and would leak
+    into the range. With ``agent:<id>`` narrowing the view to ``base..tip``
+    that is exactly what happens -- base is one commit past the edge -- and
+    it showed up as a phantom FOREIGN commit.
 
     >>> from collections import namedtuple
     >>> Node = namedtuple('Node', 'oid parents')
@@ -350,6 +436,12 @@ def ancestors(commits_by_oid, oid: str | None) -> set[str]:
     ['a']
     >>> sorted(ancestors(commits, None))
     []
+
+    A parent that was not read is left out rather than reported:
+
+    >>> visible = {'c': c, 'b': b}
+    >>> sorted(ancestors(visible, 'c'))
+    ['b', 'c']
     """
     seen: set[str] = set()
     if not oid or oid not in commits_by_oid:
@@ -359,10 +451,10 @@ def ancestors(commits_by_oid, oid: str | None) -> set[str]:
         current = stack.pop()
         if current in seen:
             continue
-        seen.add(current)
         commit = commits_by_oid.get(current)
         if commit is None:
             continue
+        seen.add(current)
         for parent in commit.parents:
             if parent.oid not in seen:
                 stack.append(parent.oid)
@@ -612,6 +704,139 @@ def thread_segments(thread, commits_by_oid):
             if parent.oid in covered and parent.oid in commits_by_oid:
                 segments.append((oid, parent.oid, mark))
     return segments
+
+
+ARG_PREFIX = 'agent:'
+"""Revision-argument shorthand for one session's base..tip"""
+
+OLD_TRAILER_RE = re.compile(
+    r'/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}'
+    r'-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\s*<'
+)
+"""Session id inside the pre-2026.8.31 three-part Co-authored-by trailer.
+
+``Co-authored-by: claude code/claude-opus-5/{uuid} <noreply@anthropic.com>``
+packed tool, model and session id positionally into the name field. New
+commits use a separate Agent-Session-Id trailer; this is only for reading
+history that predates that change.
+"""
+
+
+def session_id_from_coauthor(value: str) -> str | None:
+    """Pull the session id out of an old three-part Co-authored-by value.
+
+    >>> session_id_from_coauthor(
+    ...     'claude code/claude-opus-5/'
+    ...     'b47c8939-8ae6-4c1b-b9b2-f89c387b3e77 <noreply@anthropic.com>'
+    ... )
+    'b47c8939-8ae6-4c1b-b9b2-f89c387b3e77'
+    >>> session_id_from_coauthor('Claude <noreply@anthropic.com>') is None
+    True
+    >>> session_id_from_coauthor('') is None
+    True
+    """
+    match = OLD_TRAILER_RE.search(value or '')
+    if match is None:
+        return None
+    return match.group(1)
+
+
+def match_sessions(prefix: str, session_ids) -> list[str]:
+    """Session ids starting with ``prefix``, longest-match-wins on an exact hit.
+
+    An exact id always resolves to itself even if it is a prefix of another
+    id, so a full id can never be ambiguous.
+
+    >>> ids = ['b47c8939-aaaa', 'b47c8939-bbbb', '23ecce3c-cccc']
+    >>> match_sessions('23ec', ids)
+    ['23ecce3c-cccc']
+    >>> match_sessions('b47c8939', ids)
+    ['b47c8939-aaaa', 'b47c8939-bbbb']
+    >>> match_sessions('b47c8939-aaaa', ids)
+    ['b47c8939-aaaa']
+    >>> match_sessions('nope', ids)
+    []
+    """
+    session_ids = list(session_ids)
+    if prefix in session_ids:
+        return [prefix]
+    return sorted(sid for sid in session_ids if sid.startswith(prefix))
+
+
+def expand_ref_args(args, sessions, prefix: str = SESSION_PREFIX) -> list[str]:
+    """Rewrite ``agent:<id>`` arguments into ``<base>..<tip>`` ref ranges.
+
+    A short id expands to every session it matches, so the shorthand behaves
+    like a search rather than failing on ambiguity -- the labels in the graph
+    then say which sessions came back. An id that matches nothing, or a
+    session with no base or tip ref, is dropped: passing it through would
+    make git fail on the whole revision list.
+
+    >>> sessions = {
+    ...     's1': AgentSession('s1', base_oid='a', tip_oid='b'),
+    ...     's2': AgentSession('s2', base_oid='c'),
+    ... }
+    >>> expand_ref_args(['agent:s1'], sessions)
+    ['refs/agent/session/s1/base..refs/agent/session/s1/tip']
+    >>> expand_ref_args(['main', '--'], sessions)
+    ['main', '--']
+    >>> expand_ref_args(['agent:s2'], sessions)
+    []
+    >>> expand_ref_args(['agent:nope'], sessions)
+    []
+    """
+    expanded = []
+    for arg in args:
+        if not arg.startswith(ARG_PREFIX):
+            expanded.append(arg)
+            continue
+        wanted = arg[len(ARG_PREFIX) :]
+        for session_id in match_sessions(wanted, sessions):
+            session = sessions[session_id]
+            if not session.base_oid or not session.tip_oid:
+                continue
+            expanded.append(
+                '%s..%s'
+                % (
+                    session_ref(session_id, BASE, prefix=prefix),
+                    session_ref(session_id, TIP, prefix=prefix),
+                )
+            )
+    return expanded
+
+
+def rebuild_plan(entries) -> dict[str, tuple[str | None, str]]:
+    """Work out base/tip refs from commit trailers alone.
+
+    ``entries`` is ``(oid, first_parent_oid, session_id)`` in the order git
+    log produced them, newest first. For each session the tip is its newest
+    commit and the base is the first parent of its oldest one -- the same
+    rule ``agent-sessions.py rebuild`` uses. A root commit has no parent, so
+    that session gets no base ref rather than a bogus one.
+
+    >>> entries = [
+    ...     ('c', 'b', 's1'),
+    ...     ('b', 'a', 's1'),
+    ...     ('a', None, 's2'),
+    ... ]
+    >>> plan = rebuild_plan(entries)
+    >>> plan['s1']
+    ('a', 'c')
+    >>> plan['s2']
+    (None, 'a')
+    """
+    newest: dict[str, str] = {}
+    oldest_parent: dict[str, str | None] = {}
+    for oid, parent_oid, session_id in entries:
+        if not session_id or not oid:
+            continue
+        if session_id not in newest:
+            newest[session_id] = oid
+        oldest_parent[session_id] = parent_oid
+    return {
+        session_id: (oldest_parent.get(session_id), tip)
+        for session_id, tip in newest.items()
+    }
 
 
 def branch_name(session_id: str, basenames=()) -> str:
