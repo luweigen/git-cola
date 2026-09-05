@@ -638,3 +638,114 @@ def test_range_does_not_leak_an_offscreen_base(app_context):
         first: agentsession.Mark.OWN,
         tip: agentsession.Mark.OWN,
     }
+
+
+def test_session_spanning_two_branches(app_context):
+    """The Stop hook commits on whatever branch is current, so a session
+    that outlives a "git checkout -b" straddles two branches."""
+    base = commit('base')
+    on_main = commit_for(SESSION_A, 'agent work on main')
+    run_git('checkout', '-q', '-b', 'topic')
+    on_topic = commit_for(SESSION_A, 'agent work on topic')
+    record_session(SESSION_A, base, on_topic)
+    app_context.model.update_status()
+
+    marks = threads_for(app_context, ref='--all')[SESSION_A].marks
+
+    assert marks == {
+        on_main: agentsession.Mark.OWN,
+        on_topic: agentsession.Mark.OWN,
+    }
+    # The band crosses the branch point because it follows parent edges.
+    edges = {(child, parent) for child, parent, _ in
+             segments_for(app_context, SESSION_A, ref='--all')}
+    assert (on_topic, on_main) in edges
+    assert (on_main, base) in edges
+
+
+def test_session_that_moved_to_a_diverged_branch(app_context):
+    """Switching to a branch that does not descend from the session's own
+    work produces all three states at once.
+
+    ``base..tip`` then sweeps in the other branch's commits (FOREIGN) while
+    the session's earlier commits fall outside it (STRAY). This is the
+    "HEAD is not where I left it" invariant breaking, drawn.
+    """
+    root = commit('root')
+    run_git('checkout', '-q', '-b', 'topic', root)
+    theirs = commit('unrelated work on topic')
+    run_git('checkout', '-q', 'main')
+    base = commit('base on main')
+    left_behind = commit_for(SESSION_A, 'agent work on main')
+    # The agent's next turn runs with topic checked out.
+    run_git('checkout', '-q', 'topic')
+    tip = commit_for(SESSION_A, 'agent work after the switch')
+    record_session(SESSION_A, base, tip)
+    app_context.model.update_status()
+
+    marks = threads_for(app_context, ref='--all')[SESSION_A].marks
+
+    assert marks[tip] == agentsession.Mark.OWN
+    # topic's own commit is inside base..tip but nobody claims it.
+    assert marks[theirs] == agentsession.Mark.FOREIGN
+    # The commit made before the switch is no longer reachable from the tip.
+    assert marks[left_behind] == agentsession.Mark.STRAY
+    assert base not in marks
+    assert root not in marks
+
+
+def test_session_across_branches_partially_visible(app_context):
+    """A tip on another branch means "not visible", never a false STRAY
+
+    A session that simply continued on another branch is healthy. Marking
+    the half that *is* on screen STRAY would report a rewind that never
+    happened, so nothing is classified and the panel says "not visible".
+    """
+    base = commit('base')
+    on_main = commit_for(SESSION_A, 'agent work on main')
+    run_git('checkout', '-q', '-b', 'topic')
+    on_topic = commit_for(SESSION_A, 'agent work on topic')
+    record_session(SESSION_A, base, on_topic)
+    run_git('checkout', '-q', 'main')
+    app_context.model.update_status()
+
+    commits = read_commits(app_context, ref='main')
+    assert on_topic not in [c.oid for c in commits]
+
+    thread = threads_for(app_context, ref='main')[SESSION_A]
+    assert thread.marks == {}
+    assert thread.counts()[agentsession.Mark.STRAY] == 0
+    # The endpoints are still carried, so the panel can offer to show it.
+    assert thread.tip_oid == on_topic
+
+    # Asking for the session directly brings the whole thread back.
+    whole = threads_for(app_context, ref='agent:' + SESSION_A)[SESSION_A].marks
+    assert whole == {
+        on_main: agentsession.Mark.OWN,
+        on_topic: agentsession.Mark.OWN,
+    }
+
+
+def test_session_merged_back_to_main(app_context):
+    """A session whose tip is a merge covers both sides of the merge"""
+    base = commit('base')
+    run_git('checkout', '-q', '-b', 'topic')
+    on_topic = commit_for(SESSION_A, 'agent work on topic')
+    run_git('checkout', '-q', 'main')
+    on_main = commit_for(SESSION_A, 'agent work on main')
+    run_git('merge', '-q', '--no-ff', '-m', 'merge topic', 'topic')
+    tip = run_git('rev-parse', 'HEAD').strip()
+    record_session(SESSION_A, base, tip)
+    app_context.model.update_status()
+
+    marks = threads_for(app_context, ref='--all')[SESSION_A].marks
+
+    assert marks[on_topic] == agentsession.Mark.OWN
+    assert marks[on_main] == agentsession.Mark.OWN
+    # The merge commit itself carries no trailer: nobody's session made it.
+    assert marks[tip] == agentsession.Mark.FOREIGN
+
+    edges = {(child, parent) for child, parent, _ in
+             segments_for(app_context, SESSION_A, ref='--all')}
+    assert (tip, on_main) in edges
+    assert (tip, on_topic) in edges

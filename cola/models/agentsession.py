@@ -538,10 +538,15 @@ def build_thread(session, commits_by_oid, trailers, cache=None) -> SessionThread
     report trailers, in which case everything in range is reported as OWN
     because there is no evidence to say otherwise.
 
-    Two degenerate ref states get deliberate answers:
+    Three degenerate states get deliberate answers:
 
     - **no tip ref** -- the session recorded nothing, so any commit carrying
       its trailer is STRAY: the ref that should anchor it is missing.
+    - **tip ref present but off screen** -- the range cannot be computed from
+      what was read, so nothing is classified at all and the caller reports
+      the session as not visible.  Marking the visible commits STRAY instead
+      would be a false alarm: a session that simply continued on another
+      branch is not adrift, and STRAY is meant to mean a rewind or a reset.
     - **no base ref** -- there is nothing to subtract, so the range would be
       the whole history.  Fall back to trailer-only membership; FOREIGN
       cannot be detected without a base.
@@ -555,6 +560,14 @@ def build_thread(session, commits_by_oid, trailers, cache=None) -> SessionThread
         if session_id in session_ids and oid in commits_by_oid
     }
     have_trailers = bool(trailers)
+
+    if session.tip_oid and session.tip_oid not in commits_by_oid:
+        return SessionThread(
+            session_id=session_id,
+            marks={},
+            base_oid=session.base_oid,
+            tip_oid=session.tip_oid,
+        )
 
     if not session.tip_oid:
         for oid in tagged:

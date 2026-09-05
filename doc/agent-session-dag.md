@@ -159,8 +159,15 @@ DAG 能直接指出**是哪几个 commit**。
 | ref 状态 | 怎么判 | 为什么 |
 |---|---|---|
 | **没有 tip ref** | 带 trailer 的 commit 全部 `STRAY` | 该锚住它们的 ref 不存在，这本身就是异常 |
+| **有 tip ref 但 tip 不在视野里** | 什么都不判，面板报 `not visible` | 见下 |
 | **没有 base ref** | 退回只按 trailer 认成员，全是 `OWN` | 没有 base 就没得减，硬算范围会变成整部历史；也就无从判断 `FOREIGN` |
 | **git < 2.22** | 范围内全是 `OWN` | 拿不到 trailer，没有证据说别人插过队，就不能瞎标 `FOREIGN` |
+
+「tip 不在视野里」这条是补测「session 跨多个分支」时才发现的。原来的写法会把
+可见的那半边全标成 `STRAY`——但 hook 是**在当前分支上 commit** 的，用户中途
+`checkout -b` 之后 session 天然横跨两个分支，只看 `main` 时 tip 在另一头，
+这时候报 `STRAY` 就是**谎报了一次 rewind**。面板上一个完全健康的 session
+会显示 `1 stray`。改成不判，让面板说 `not visible`，双击就能看全。
 
 ### 1.4 范围计算：在内存里做，不额外起进程 ✅ M2
 
@@ -554,6 +561,7 @@ M4 加菜单和面板；M5 补上导航、老仓库兼容和开关。左边 DAG 
 | `test/log/dag-agent-session-m3.png` | 加上缎带，三态可见 |
 | `test/log/dag-agent-session-m4.png` | Sessions 面板 |
 | `test/log/dag-agent-session-m5.png` | `agent:<id>` 收窄视野，另一个 session 报 `not visible` |
+| `test/log/dag-agent-session-branches.png` | session 跨分支：缎带横跨两条 lane，三态齐全（`mkdemo-branch.sh`） |
 
 demo 仓库由 `mkdemo.sh` 生成：两个 session，其中一个带 2 个 FOREIGN
 和 1 个 STRAY，正好覆盖三态。
@@ -615,9 +623,19 @@ demo 仓库由 `mkdemo.sh` 生成：两个 session，其中一个带 2 个 FOREI
 - rebuild：新 trailer、**旧三段式 `Co-authored-by`**、以及「已有 ref 不覆盖」
 - **base 在视野外时不能漏进 range**（1.4 里那个 M5 截图暴露的 bug）
 
-**还没写的：**
+**跨分支（4 个）：**
 
-- 一个 session 跨多个分支
+hook 是在**当前分支**上 commit 的，所以用户中途 `checkout -b` 之后，
+一个 session 天然横跨两个分支。这组测的就是那些形状：
+
+| 场景 | 断言 |
+|---|---|
+| session 中途换到新分支 | 两个 commit 都是 `OWN`；缎带的边跨过分支点 |
+| session 换到一条**分叉**的分支 | 三态一次齐活：新分支上自己的 commit `OWN`、那条分支原有的 commit `FOREIGN`、换分支前提的 commit `STRAY` |
+| 只看 `main`、tip 在另一分支 | `marks` 为空、`stray == 0`（不谎报），`agent:<id>` 一问就全回来 |
+| session 以一个 merge 收尾 | merge 的两个父边都在缎带里；merge commit 自己没 trailer，所以是 `FOREIGN` |
+
+第三条就是上面说的那个假 `STRAY`——测试写出来才发现的。
 
 Qt 层（`Label` / `SessionRibbon` 的绘制、`alloc_cell` 预留、菜单和面板本身）
 测试套件里没有覆盖——
