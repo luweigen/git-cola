@@ -2910,11 +2910,6 @@ class Label(QtWidgets.QGraphicsItem):
     head_color = QtGui.QColor(Qt.green)
     other_color = QtGui.QColor(Qt.white)
     remote_color = QtGui.QColor(Qt.yellow)
-    # Agent session base/tip labels use a cyan/violet pair that stays clear of
-    # the green used for heads and the yellow used for HEAD, tags and remotes.
-    agent_tip_color = QtGui.QColor(0x7F, 0xDB, 0xFF)
-    agent_base_color = QtGui.QColor(0xC6, 0xB0, 0xF5)
-
     head_pen = QtGui.QPen()
     head_pen.setColor(QtGui.QColor(Qt.black))
     head_pen.setWidth(1)
@@ -3082,10 +3077,7 @@ class Label(QtWidgets.QGraphicsItem):
         # for, and these should not push them around.
         for text, kind, session_id in self._session_labels():
             painter.setPen(self.text_pen)
-            if kind == agentsession.TIP:
-                painter.setBrush(self.agent_tip_color)
-            else:
-                painter.setBrush(self.agent_base_color)
+            painter.setBrush(session_label_color(session_id, kind))
 
             text_rect = painter.boundingRect(
                 QRectF(current_width, 0, 0, 0), Qt.TextSingleLine, text
@@ -4846,6 +4838,29 @@ def session_ribbon_color(session_id):
     edge colors drawn on top of it.
     """
     return QtGui.QColor.fromHsv(agentsession.session_hue(session_id), 165, 225)
+
+
+def session_label_color(session_id, kind):
+    """Fill color for a session's base/tip label.
+
+    Same hue as that session's ribbon, so a label and the band it belongs to
+    are visibly one thing -- with several sessions on screen a fixed tip/base
+    pair would leave no way to tell which band a label goes with, and the
+    marker glyph already says which end it is.
+
+    Lighter and less saturated than the ribbon for two reasons: the label is
+    opaque where the band is a 110-alpha wash, and the label has black text on
+    it. At the ribbon's own saturation a blue hue comes out near
+    rgb(79, 79, 225), which black text does not read on.
+
+    The base is lighter still, so the two ends stay apart at a glance when one
+    commit carries both -- the tip of one session is very often the base of
+    the next.
+    """
+    hue = agentsession.session_hue(session_id)
+    if kind == agentsession.TIP:
+        return QtGui.QColor.fromHsv(hue, 105, 245)
+    return QtGui.QColor.fromHsv(hue, 55, 252)
 
 
 def sort_by_generation(commits):

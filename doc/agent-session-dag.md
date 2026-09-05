@@ -279,9 +279,19 @@ HEAD  main  ▶ b47c8939
              ⚑ 23ecce3c
 ```
 
-- 配色：青（tip）/ 紫（base），避开 head 的绿、HEAD/tag/remote 的黄
 - **不写 "tip" / "base" 这两个词**：`▶` / `⚑` 已经说清是哪一头，
   再加一个词等于把标签宽度翻倍换零信息量
+- 配色：**跟这个 session 的缎带同一个色相**（`session_label_color()`）。
+  最初用的是固定的青（tip）/ 紫（base）——那是 M1 的产物，当时缎带还不存在。
+  等 M3 引入「一个 session 一个色相」之后就成了同一个概念两套配色：
+  多个 session 同时在图上时，所有 tip 都是青的、所有 base 都是紫的，
+  **看不出哪个标签属于哪条缎带**。而「哪一头」这件事图标已经说了，
+  颜色这个通道花在那上面是浪费。现在一个 session 一个色相，贯穿标签、缎带、面板色块
+
+  比缎带更浅、更不饱和，有两个原因：标签是不透明的而缎带是 110 alpha 的淡色；
+  标签上有黑字，按缎带那个饱和度蓝色系会算出接近 `rgb(79, 79, 225)`，黑字读不了。
+  base 又比 tip 再浅一档——一个 commit 同时是上个 session 的 tip 和下个的 base
+  是常态，两头得能一眼分开
 - 顺序在分支/tag **之后**：分支名是主信息，session 锚点是次要信息
 - 数据存 `Commit.session_labels`，**不进 `Commit.tags`**——`tags` 被
   `GitDAG.add_commits()` 拿去做 `self.commits[tag] = commit` 的索引，
@@ -357,9 +367,14 @@ Create branch "agent/{session_id}.{files}" at tip
   `agentsession.thread_segments()` 挑出「两端都属于这个 session」的 parent 边，
   merge 的两个父边都会被画上，跨 merge 时缎带仍然如实。
   base 虽然不是 `base..tip` 的成员，但要作为端点算进去——它是缎带要够到的那一头
-- **配色**：`session_id` → `session_hue()`（sha256 前两字节映到 0-359），
-  HSV 的 S/V 固定成 165/225。哈希而不是按出现顺序分配，
-  是为了让同一个 session 每次打开、以及别的 session 来来去去时颜色都不变
+- **配色**：`session_id` → `session_hue()`（sha256 前两字节），HSV 的 S/V
+  固定成 165/225。哈希而不是按出现顺序分配，是为了让同一个 session 每次打开、
+  以及别的 session 来来去去时颜色都不变。
+
+  **色相跳过 40-140 这一段**：黄色在 DAG 里已经是 HEAD / tag / remote 的意思，
+  绿色是非当前本地分支。而 **tip 就是 HEAD 是最常见的情况**——真实仓库上一跑，
+  一个哈希到 66 度的 session，它的 tip 标签紧挨着黄色的 `HEAD` `dev`，糊成一片。
+  剩下的 260 度（青、蓝、紫、品红、红、橙）区分 session 绰绰有余
 
 ### 2.4.1 三态怎么画：两个独立的轴
 

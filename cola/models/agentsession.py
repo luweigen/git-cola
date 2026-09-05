@@ -873,23 +873,42 @@ def branch_name(session_id: str, basenames=()) -> str:
     return name
 
 
+HUE_START = 140
+"""First hue a session may be given"""
+
+HUE_SPAN = 260
+"""How many degrees of hue are available, starting at HUE_START.
+
+Hues from 40 to 140 are skipped. That band is already spoken for in the DAG:
+yellow marks HEAD, tags and remote branches, green marks non-current local
+branches. A session tip is very often HEAD itself, so a yellow session label
+would land right next to the yellow HEAD chip and read as one smear. The
+remaining 260 degrees -- cyans through blues, purples, magentas, reds and
+oranges -- are plenty to tell sessions apart.
+"""
+
+
 def session_hue(session_id: str) -> int:
-    """A stable 0-359 hue for a session id.
+    """A stable hue for a session id, avoiding the yellow/green band.
 
     Derived from the id rather than assigned in encounter order, so a session
-    keeps the same ribbon color across restarts and regardless of which other
+    keeps the same color across restarts and regardless of which other
     sessions happen to be visible.  Kept in the model, as a plain integer, so
     this file stays free of Qt.
 
     >>> session_hue('b47c8939-8ae6-4c1b-b9b2-f89c387b3e77')
-    212
+    293
     >>> session_hue('a') == session_hue('a')
     True
-    >>> 0 <= session_hue('') < 360
+    >>> all(
+    ...     not 40 <= session_hue(str(i)) < 140
+    ...     for i in range(500)
+    ... )
     True
     """
     digest = hashlib.sha256(session_id.encode('utf-8')).digest()
-    return (digest[0] << 8 | digest[1]) * 360 // 65536
+    raw = digest[0] << 8 | digest[1]
+    return (HUE_START + raw * HUE_SPAN // 65536) % 360
 
 
 DEFAULT_LIMIT = 10
