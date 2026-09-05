@@ -208,12 +208,14 @@ if self.params.agent_sessions_enabled:
 挂在现有的 `Label`（`QGraphicsItem`，Z = -1）上，画在分支/tag 标签之后：
 
 ```
-HEAD  main  ▶ b47c8939 tip
-             ▶ 23ecce3c tip  ⚑ b47c8939 base
-             ⚑ 23ecce3c base
+HEAD  main  ▶ b47c8939
+             ▶ 23ecce3c  ⚑ b47c8939
+             ⚑ 23ecce3c
 ```
 
 - 配色：青（tip）/ 紫（base），避开 head 的绿、HEAD/tag/remote 的黄
+- **不写 "tip" / "base" 这两个词**：`▶` / `⚑` 已经说清是哪一头，
+  再加一个词等于把标签宽度翻倍换零信息量
 - 顺序在分支/tag **之后**：分支名是主信息，session 锚点是次要信息
 - 数据存 `Commit.session_labels`，**不进 `Commit.tags`**——`tags` 被
   `GitDAG.add_commits()` 拿去做 `self.commits[tag] = commit` 的索引，
@@ -227,11 +229,46 @@ HEAD  main  ▶ b47c8939 tip
 | `Commit.update_summary_label()` | `if side is None or self.commit.tags: return` | 加上 `session_labels`，否则 summary 文字和标签叠在一起 |
 | `GraphView.recompute_grid()` | `alloc_cell(node.column, node.tags)` | `node.tags or node.session_labels`，否则标签框会压到邻居节点上 |
 
-点击 session 标签：复制**完整** session id 到剪贴板。
-它不是分支，没有 checkout / merge / rename 可做，所以不走 `_show_branch_menu()`；
-`_label_hits` 的元组多带一个 `session_id` 字段来区分（普通标签是 `None`）。
+### 2.2 点 session 标签弹的菜单
 
-### 2.2 整条线索：Session 缎带（ribbon）
+跟分支标签一样弹菜单，但走单独的 `_show_session_menu()`——session 锚点不是分支，
+没有 checkout / merge / push 可做。`_label_hits` 的元组多带一个 `(kind, session_id)`
+字段来区分（普通标签是 `None`）。
+
+现在有两条，对应分支菜单里那两条 `Copy`：
+
+| 菜单项 | 复制什么 | 拿去干嘛 |
+|---|---|---|
+| `Copy "b47c8939-…-f89c387b3e77"` | 完整 session id | `agent-sessions.py log/diff/reflog <id>`、比对 `Agent-Session-Id` trailer |
+| `Copy "refs/agent/session/<id>/tip"` | 完整 ref 名 | `git log <base>..<tip>`、`git reflog show <tip>` |
+
+分支菜单里的 `Copy "<full_name>"` / `Copy "<agent_part>"` 是「整个分支名」和
+「从分支名里剥出来的 session id」；这里对应的两样就是 ref 名和 session id。
+
+base 和 tip 标签用**同一个**菜单（两条内容一样，只有 ref 名的最后一段不同）。
+它们指的是同一个 session，点哪一头都该给同样的东西。
+
+### 2.3 rename 在 ref 方案里对应什么
+
+分支菜单的 `Rename to "agent/{id}.{files}"` 是把 session 分支用它改过的文件名标注一下。
+**这个操作不能照搬到 session ref 上**：session id 就是身份本身，
+commit 上的 `Agent-Session-Id` trailer、`agent-sessions.py` 的查询、
+reflog 全都按它对应。改了 ref 名，这些对应关系当场断掉，而且没有任何东西会跟着改。
+
+真正对应的意图是「给这个 session 一个人能读的名字」，实现方式是
+**在 tip 上建一个分支**：
+
+```
+Create branch "agent/{session_id}.{files}" at tip
+```
+
+`{files}` 复用现有的 `_branch_tip_basenames()`。建出来之后它就是一个普通的本地分支，
+现有的分支标签菜单（rename / push / merge to / 删远端）**全部**自动适用——
+不需要在 session 菜单里重造一套。session ref 原封不动继续指着同一个 commit。
+
+排到 **M4**（连同 `Diff base..tip`、`Show Reflog`、`Prune` 一起，见第 3 节）。
+
+### 2.4 整条线索：Session 缎带（ribbon）
 
 新增 `SessionRibbon(QtWidgets.QGraphicsItem)`：
 
@@ -249,7 +286,7 @@ HEAD  main  ▶ b47c8939 tip
 重建时机：跟 `_update_summary_labels()` 一样，挂在 `layout_commits()` 末尾——
 节点位置变了 path 必须重算。
 
-### 2.3 为什么是缎带不是别的
+### 2.5 为什么是缎带不是别的
 
 场景图里表达「一组节点属于同一件事」，加背景色块会跟 lane 打架，
 加连线会和 parent 边混淆。半透明宽带压在最底层，既圈定了范围，
@@ -284,7 +321,9 @@ HEAD  main  ▶ b47c8939 tip
   - `Show Reflog` → `git reflog show refs/agent/session/<id>/tip`，
     弹只读文本框。这就是 PLAN 里说的「`--create-reflog` 白得的一份带时间戳的
     session 进展日志」，本来就在那儿，只是没人看得到
-  - `Create Branch at tip`（走已有的 `create_branch`）
+  - `Create branch "agent/{id}.{files}" at tip`（`{files}` 复用
+    `_branch_tip_basenames()`）——这是 ref 方案里 rename 的等价物，见 2.3。
+    建出来之后现有的分支标签菜单全部适用
   - `Prune`（`update-ref -d` 两个 ref，需确认；ref 是派生数据，删了不丢信息）
   - `Rebuild from trailers`（对老仓库：扫 `Agent-Session-Id` 和旧三段式
     `Co-authored-by`，重建 ref。对应 `agent-sessions.py rebuild`）
@@ -353,10 +392,10 @@ HEAD  main  ▶ b47c8939 tip
 
 | 阶段 | 内容 | 改动范围 |
 |---|---|---|
-| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |
+| **M1** ✅ | 数据层 + 右图 base/tip 标签 + 标签上的两条 `Copy` 菜单 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |
 | **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |
 | **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |
-| **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |
+| **M4** | session 菜单补齐（`Diff base..tip` / `Show Reflog` / `Create branch at tip` / `Prune`）+ Sessions 面板 + rebuild | `Label._show_session_menu()`、`widgets/dag.py` 新 dock |
 | **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |
 
 M1 就已经能回答「头在哪、尾在哪」；M2 把「整条线索」算出来；M3 把它画出来。
@@ -380,6 +419,8 @@ M1 就已经能回答「头在哪、尾在哪」；M2 把「整条线索」算�
 - 边界：`base == tip`（session 一个 commit 都没提）、base ref 缺失
   （只装了 Stop hook）、tip 被 `reset --hard` 甩掉后仍能标出 base
 - 刷新：`refresh_key()` 在 tip 推进后改变
+- 菜单要复制的东西：`label_text()` 不含 tip/base 字样；`session_ref()` 造出来的
+  ref 名能被 `parse_session_ref()` 原样解回同一个 `(session_id, kind)`
 
 **还没写的（跟着对应阶段补）：**
 
@@ -389,6 +430,6 @@ M1 就已经能回答「头在哪、尾在哪」；M2 把「整条线索」算�
 - M4 限流：几百个 session 时不 pin 全部
 - 一个 session 跨多个分支
 
-Qt 层（`Label` 的绘制、`alloc_cell` 预留、点击复制 session id）测试套件里没有覆盖——
+Qt 层（`Label` 的绘制、`alloc_cell` 预留、菜单本身）测试套件里没有覆盖——
 `test/` 目前完全不起 `QApplication`。这部分靠离屏渲染人工核对，
 截图存 `test/log/dag-agent-session-m1.png`。

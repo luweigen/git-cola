@@ -205,13 +205,27 @@ def labels_by_oid(sessions) -> dict[str, list[tuple[str, str]]]:
 def label_text(kind: str, session_id: str) -> str:
     """Format the text drawn inside a base/tip label box.
 
+    The marker glyph already says which end this is, so the word "tip" /
+    "base" is left out: it doubles the label width for nothing.
+
     >>> label_text('tip', 'b47c8939-8ae6-4c1b')
-    '▶ b47c8939 tip'
+    '▶ b47c8939'
     >>> label_text('base', 'b47c8939-8ae6-4c1b')
-    '⚑ b47c8939 base'
+    '⚑ b47c8939'
     """
     marker = '▶' if kind == TIP else '⚑'
-    return f'{marker} {session_id[:SHORT_LEN]} {kind}'
+    return f'{marker} {session_id[:SHORT_LEN]}'
+
+
+def session_ref(session_id: str, kind: str, prefix: str = SESSION_PREFIX) -> str:
+    """Return the full ref name for one end of a session.
+
+    >>> session_ref('abc123', 'tip')
+    'refs/agent/session/abc123/tip'
+    >>> session_ref('abc123', 'base')
+    'refs/agent/session/abc123/base'
+    """
+    return f'{prefix}{session_id}/{kind}'
 
 
 def refresh_key(sessions) -> frozenset:

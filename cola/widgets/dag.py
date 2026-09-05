@@ -2664,7 +2664,7 @@ class Label(QtWidgets.QGraphicsItem):
 
             painter.drawRoundedRect(box_rect, border, border)
             painter.drawText(text_rect, Qt.TextSingleLine, text)
-            hits.append((QRectF(box_rect), text, False, None, session_id))
+            hits.append((QRectF(box_rect), text, False, None, (kind, session_id)))
             current_width += text_rect.width() + spacing
 
         self._label_hits = hits
@@ -2674,13 +2674,11 @@ class Label(QtWidgets.QGraphicsItem):
             super().mousePressEvent(event)
             return
         pos = event.pos()
-        for rect, text, is_head, original_tag, session_id in self._label_hits:
+        for rect, text, is_head, original_tag, session in self._label_hits:
             if not rect.contains(pos):
                 continue
-            if session_id is not None:
-                # A session anchor is not a branch: there is nothing to check
-                # out, merge or rename, so hand over the full session id.
-                qtutils.set_clipboard(session_id)
+            if session is not None:
+                self._show_session_menu(event, *session)
                 event.accept()
                 return
             graph_view = self._graph_view()
@@ -2730,6 +2728,25 @@ class Label(QtWidgets.QGraphicsItem):
         if model is None:
             return []
         return list(getattr(model, 'modified', None) or [])
+
+    def _show_session_menu(self, event, kind, session_id):
+        """Menu for an agent session base/tip label.
+
+        A session anchor is not a branch -- there is nothing to check out,
+        merge or push -- so this offers the two things worth copying: the
+        session id that ``Agent-Session-Id`` trailers and ``agent-sessions.py``
+        take, and the ref name for use with ``git log`` / ``git reflog``.
+        """
+        refname = agentsession.session_ref(session_id, kind)
+        menu = QtWidgets.QMenu()
+        copy_id = menu.addAction(N_('Copy "%s"') % session_id)
+        copy_ref = menu.addAction(N_('Copy "%s"') % refname)
+
+        chosen = menu.exec_(event.screenPos())
+        if chosen is copy_id:
+            qtutils.set_clipboard(session_id)
+        elif chosen is copy_ref:
+            qtutils.set_clipboard(refname)
 
     def _show_branch_menu(self, event, full_name, original_tag):
         is_local_branch = original_tag.startswith('heads/')

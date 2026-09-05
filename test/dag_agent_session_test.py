@@ -163,9 +163,24 @@ def test_refresh_key_tracks_tip_movement(app_context):
 @pytest.mark.parametrize(
     'kind,expected',
     [
-        (agentsession.TIP, '▶ b47c8939 tip'),
-        (agentsession.BASE, '⚑ b47c8939 base'),
+        # The marker glyph carries "which end", so the word is left out.
+        (agentsession.TIP, '▶ b47c8939'),
+        (agentsession.BASE, '⚑ b47c8939'),
     ],
 )
 def test_label_text(kind, expected):
     assert agentsession.label_text(kind, SESSION_A) == expected
+
+
+@pytest.mark.parametrize(
+    'kind,expected',
+    [
+        (agentsession.TIP, 'refs/agent/session/' + SESSION_A + '/tip'),
+        (agentsession.BASE, 'refs/agent/session/' + SESSION_A + '/base'),
+    ],
+)
+def test_session_ref_round_trips(kind, expected):
+    """The ref the menu copies parses back to the same session and end"""
+    refname = agentsession.session_ref(SESSION_A, kind)
+    assert refname == expected
+    assert agentsession.parse_session_ref(refname) == (SESSION_A, kind)
