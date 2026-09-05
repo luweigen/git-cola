@@ -200,10 +200,16 @@ if self.params.agent_sessions_enabled:
 ▶ 23ecce3c tip
 ```
 
-`_draw_labels()` 里加一个前缀分支（和现有 `heads/` `tags/` `remotes/` 并列），
-用 agent 专属配色（建议青/紫系，避开 head 的绿、remote 的黄）。
+`_draw_labels()` 重构成先用 `_label_entries()` 生成
+`(文字, 笔, 填充, 描边笔)` 四元组、再统一画框，agent 标签就是多加的几个 entry，
+几何逻辑一份不重复。配色用青（tip）/ 紫（base），避开 head 的绿、remote 的黄。
 tip 恰好 == HEAD 时再叠一圈金色描边（复用 `current_head_color`），
 一眼能看出「这个 session 就是当前状态」。
+
+**顺序：分支/tag 在前，session 标签在后。**
+一开始把 session 标签放最前面（想让锚点位置稳定），实测下来不行——
+SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），放前面会把 `main` 挤成 `mai…`。
+分支名才是眼睛第一时间要找的东西，被截断的应该是次要信息。
 
 合成标签存在 `Commit.session_labels` 里，不污染 `Commit.tags`——
 `tags` 被 `GitDAG.add_commits()` 拿去做 `self.commits[tag] = commit` 的索引，
@@ -363,7 +369,7 @@ session 是一个**区间**，语义不同；塞进 lane 会让 `build_graph()` 
 
 | 阶段 | 内容 | 改动范围 |
 |---|---|---|
-| **M1** | 数据层 + 左图 base/tip 两个 label | `models/agentsession.py`(新)、`models/dag.py`、`GraphDelegate._draw_labels` |
+| **M1** ✅ | 数据层 + 左图 base/tip 两个 label | `models/agentsession.py`(新)、`models/dag.py`、`GraphDelegate._draw_labels`、`test/dag_agent_session_test.py`(新) |
 | **M2** | 内存 BFS 算范围 + 左图 gutter 带（含 FOREIGN 虚线） | `GraphDelegate.paint/sizeHint`、`CommitTreeWidget.apply_graph_result` |
 | **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |
 | **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |

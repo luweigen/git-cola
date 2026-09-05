@@ -27,6 +27,7 @@ from .. import utils
 from ..compat import maxsize
 from ..i18n import N_
 from ..interaction import Interaction
+from ..models import agentsession
 from ..models import dag
 from ..models import main
 from ..models import prefs
@@ -57,6 +58,10 @@ def git_dag(context, args=None, existing_view=None, show=True):
     # ``--orphan-isolate`` (parsed below) takes precedence.
     params.set_orphan_isolate(
         context.cfg.get('cola.dag.orphanisolate', default=False)
+    )
+    # ``cola.dag.agentsessions`` controls whether refs/agent/session/ is read.
+    params.set_agent_sessions(
+        _config_truthy(context.cfg.get('cola.dag.agentsessions', default=True))
     )
     params.set_arguments(args)
 
@@ -798,6 +803,10 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
     other_color = QtGui.QColor(Qt.white)
     remote_color = QtGui.QColor(Qt.yellow)
+    # Agent session base/tip labels use a cyan/violet pair that stays clear of
+    # the green used for heads and the yellow used for remotes and tags.
+    agent_tip_color = QtGui.QColor(0x7F, 0xDB, 0xFF)
+    agent_base_color = QtGui.QColor(0xC6, 0xB0, 0xF5)
 
     text_pen = QtGui.QPen()
     text_pen.setColor(QtGui.QColor(Qt.black))
@@ -806,6 +815,12 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
     head_pen = QtGui.QPen()
     head_pen.setColor(QtGui.QColor(Qt.black))
     head_pen.setWidth(1)
+
+    # A session tip that is also the current HEAD gets a gold outline so that
+    # "this session is where the repository currently stands" reads at a glance.
+    agent_head_pen = QtGui.QPen()
+    agent_head_pen.setColor(current_head_color)
+    agent_head_pen.setWidth(2)
 
     LABEL_BORDER = 3
     LABEL_SPACING = 4
@@ -886,10 +901,18 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         label_x = rect.left() + self._graph_width(row, prev_row) + 8
         labels_width = 0
 
-        if commit and commit.tags:
+        session_labels = commit.session_labels if commit else ()
+        if commit and (commit.tags or session_labels):
             painter.setFont(option.font)
+            is_head = row is not None and row.color == GraphRowColor.HEAD
             labels_width = self._draw_labels(
-                painter, mid_y, commit.tags, label_x, option.fontMetrics
+                painter,
+                mid_y,
+                commit.tags,
+                label_x,
+                option.fontMetrics,
+                session_labels=session_labels,
+                is_head=is_head,
             )
 
         text = index.data(Qt.DisplayRole)
@@ -905,6 +928,51 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
         painter.restore()
 
+    def _label_entries(self, tags, session_labels, is_head=False):
+        """Return ``(text, pen, brush, outline_pen)`` for each label to draw.
+
+        Branch and tag labels come first: they are what the eye looks for, and
+        the SUMMARY column is width-capped, so the agent session labels are the
+        ones that should be clipped when a row runs out of room.
+        """
+        HEAD = 'HEAD'
+        remotes_prefix = 'remotes/'
+        tags_prefix = 'tags/'
+        heads_prefix = 'heads/'
+
+        entries = []
+        for tag in tags or ():
+            if tag == HEAD:
+                continue
+            pen = self.text_pen
+            brush = self.other_color
+            display_tag = tag
+            if tag.startswith(remotes_prefix):
+                display_tag = tag[len(remotes_prefix) :]
+            elif tag.startswith(tags_prefix):
+                display_tag = tag[len(tags_prefix) :]
+                brush = self.remote_color
+            elif tag.startswith(heads_prefix):
+                display_tag = tag[len(heads_prefix) :]
+                pen = self.head_pen
+                brush = self.head_color
+            entries.append((display_tag, pen, brush, None))
+
+        for kind, session_id in session_labels or ():
+            is_tip = kind == agentsession.TIP
+            brush = self.agent_tip_color if is_tip else self.agent_base_color
+            outline = self.agent_head_pen if (is_tip and is_head) else None
+            entries.append(
+                (
+                    agentsession.label_text(kind, session_id),
+                    self.text_pen,
+                    brush,
+                    outline,
+                )
+            )
+
+        return entries
+
     @perf.time_method('GraphDelegate._draw_labels')
     def _draw_labels(
         self,
@@ -913,40 +981,19 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         tags: list[str],
         start_x: int,
         font_metrics: QtGui.QFontMetrics,
+        session_labels=(),
+        is_head: bool = False,
     ):
-        """Draw branch/tag labels and return total width used."""
-        HEAD = 'HEAD'
-        remotes_prefix = 'remotes/'
-        tags_prefix = 'tags/'
-        heads_prefix = 'heads/'
-        remotes_len = len(remotes_prefix)
-        tags_len = len(tags_prefix)
-        heads_len = len(heads_prefix)
+        """Draw branch/tag/session labels and return total width used."""
+        entries = self._label_entries(tags, session_labels, is_head=is_head)
 
         current_x = start_x
         x_offset = self.LABEL_TEXT_OFFSET
         y_offset = 0
 
-        for tag in tags:
-            if tag == HEAD:
-                continue
-
-            pen = self.text_pen
-            brush = self.other_color
-            display_tag = tag
-
-            if tag.startswith(remotes_prefix):
-                display_tag = tag[remotes_len:]
-            elif tag.startswith(tags_prefix):
-                display_tag = tag[tags_len:]
-                brush = self.remote_color
-            elif tag.startswith(heads_prefix):
-                display_tag = tag[heads_len:]
-                pen = self.head_pen
-                brush = self.head_color
-
+        for display_tag, pen, brush, outline_pen in entries:
             if painter is not None:
-                painter.setPen(pen)
+                painter.setPen(outline_pen if outline_pen is not None else pen)
                 painter.setBrush(brush)
 
             # Calculate text width using font metrics for consistency
@@ -961,6 +1008,7 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
             if painter is not None:
                 painter.drawRoundedRect(box_rect, self.LABEL_BORDER, self.LABEL_BORDER)
+                painter.setPen(pen)
                 painter.drawText(text_rect, Qt.AlignCenter, display_tag)
 
             current_x += text_width + x_offset * 2 + self.LABEL_SPACING
@@ -968,9 +1016,13 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         return current_x - start_x
 
     @perf.time_method('GraphDelegate._labels_width')
-    def _labels_width(self, font_metrics: QtGui.QFontMetrics, tags: list[str]):
+    def _labels_width(
+        self, font_metrics: QtGui.QFontMetrics, tags: list[str], session_labels=()
+    ):
         """Calculate total width needed for all labels."""
-        return self._draw_labels(None, 0, tags, 0, font_metrics)
+        return self._draw_labels(
+            None, 0, tags, 0, font_metrics, session_labels=session_labels
+        )
 
     @perf.time_method('GraphDelegate._graph_width')
     def _graph_width(self, row, prev_row):
@@ -996,8 +1048,11 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         commit = index.data(COMMIT_ROLE)
 
         labels_width = 0
-        if commit and commit.tags:
-            labels_width = self._labels_width(option.fontMetrics, commit.tags)
+        session_labels = commit.session_labels if commit else ()
+        if commit and (commit.tags or session_labels):
+            labels_width = self._labels_width(
+                option.fontMetrics, commit.tags, session_labels=session_labels
+            )
 
         # Add space for text if present.
         text = index.data(Qt.DisplayRole)
@@ -1891,6 +1946,15 @@ class GitDAG(standard.MainWindow):
         # named references (branches, tags) changes so that an update is
         # triggered when new branches and tags are created.
         refs = set(model.local_branches + model.remote_branches + model.tags)
+        # Agent hooks advance refs/agent/session/<id>/tip after every commit
+        # without touching any branch, so the session refs have to take part
+        # in the change detection or the DAG never redraws for agent commits.
+        if self.params.agent_sessions:
+            try:
+                sessions = agentsession.load_agent_sessions(context)
+            except Exception:
+                sessions = {}
+            refs |= agentsession.refresh_key(sessions)
         argv = utils.shell_split(ref or 'HEAD')
         oids = gitcmds.parse_refs(context, argv)
         # Track HEAD separately so that an external "git checkout" still

@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from .. import core
 from .. import utils
 from ..i18n import N_
+from ..models import agentsession
 from ..models import prefs
 
 # put summary at the end b/c it can contain
@@ -54,6 +55,9 @@ class DAG:
         # for the rest of the layout pass so an unrelated chain cannot
         # land on the same column.
         self.orphan_isolate = False
+        # When true the ``refs/agent/session/`` refs are read and their base /
+        # tip commits are labeled in the views.
+        self.agent_sessions = True
         self.overrides = {}
 
     def set_ref(self, ref: str) -> bool:
@@ -93,6 +97,10 @@ class DAG:
         self.orphan_isolate = normalized
         return True
 
+    def set_agent_sessions(self, enabled: bool) -> None:
+        """Should we label agent session base/tip commits?"""
+        self.agent_sessions = bool(enabled)
+
     def set_display_status(self, enabled: bool) -> None:
         """Should we display the worktree status?"""
         self.display_status = enabled
@@ -119,6 +127,7 @@ class Commit:
         'children',
         'branches',
         'tags',
+        'session_labels',
         'author',
         'authdate',
         'email',
@@ -137,6 +146,10 @@ class Commit:
         self.parents: list[Commit] = []
         self.children = []
         self.tags: list[str] = []
+        # Agent session base/tip labels as (kind, session_id) tuples. Kept
+        # apart from ``tags`` because GitDAG indexes ``self.commits`` by tag
+        # name and these are not refs the user can look up by name.
+        self.session_labels: list[tuple[str, str]] = []
         self.branches = []
         self.email: str | None = None
         self.author: str | None = None
@@ -274,6 +287,10 @@ class RepoReader:
         """Indicates that all data has been read"""
         self._topo_list = []
         """List of commits objects in topological order"""
+        self.sessions: dict[str, agentsession.AgentSession] = {}
+        """Agent sessions keyed by session id, read once per get()"""
+        self._session_labels: dict[str, list[tuple[str, str]]] = {}
+        """Object ID -> agent session base/tip labels anchored on it"""
 
     cached = property(lambda self: self._cached)
     """Return True when no commits remain to be read"""
@@ -285,6 +302,24 @@ class RepoReader:
         CommitFactory.reset()
         self._cached = False
         self._topo_list = []
+        self.sessions = {}
+        self._session_labels = {}
+
+    def _read_agent_sessions(self) -> None:
+        """Read refs/agent/session/ so base/tip commits can be labeled.
+
+        These refs are not decorated by ``git log`` so they are read
+        separately and matched to commits by object ID.
+        """
+        if not self.params.agent_sessions:
+            return
+        try:
+            self.sessions = agentsession.load_agent_sessions(self.context)
+        except Exception:
+            # A repository without any session refs, or a git that cannot
+            # answer, must not take the whole DAG down.
+            self.sessions = {}
+        self._session_labels = agentsession.labels_by_oid(self.sessions)
 
     def get(self) -> Iterator[Commit]:
         """Generator function returns Commit objects found by the params"""
@@ -294,6 +329,7 @@ class RepoReader:
             return
 
         self.reset()
+        self._read_agent_sessions()
         ref_args = utils.shell_split(self.params.ref)
         cmd = (
             self._cmd
@@ -322,6 +358,9 @@ class RepoReader:
                         continue
                     self._objects[commit.oid] = commit
                     self._topo_list.append(commit)
+                    session_labels = self._session_labels.get(commit.oid)
+                    if session_labels:
+                        commit.session_labels = session_labels
                 yield commit
         else:
             # git init
