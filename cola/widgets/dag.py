@@ -803,10 +803,6 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
     other_color = QtGui.QColor(Qt.white)
     remote_color = QtGui.QColor(Qt.yellow)
-    # Agent session base/tip labels use a cyan/violet pair that stays clear of
-    # the green used for heads and the yellow used for remotes and tags.
-    agent_tip_color = QtGui.QColor(0x7F, 0xDB, 0xFF)
-    agent_base_color = QtGui.QColor(0xC6, 0xB0, 0xF5)
 
     text_pen = QtGui.QPen()
     text_pen.setColor(QtGui.QColor(Qt.black))
@@ -815,12 +811,6 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
     head_pen = QtGui.QPen()
     head_pen.setColor(QtGui.QColor(Qt.black))
     head_pen.setWidth(1)
-
-    # A session tip that is also the current HEAD gets a gold outline so that
-    # "this session is where the repository currently stands" reads at a glance.
-    agent_head_pen = QtGui.QPen()
-    agent_head_pen.setColor(current_head_color)
-    agent_head_pen.setWidth(2)
 
     LABEL_BORDER = 3
     LABEL_SPACING = 4
@@ -901,18 +891,10 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         label_x = rect.left() + self._graph_width(row, prev_row) + 8
         labels_width = 0
 
-        session_labels = commit.session_labels if commit else ()
-        if commit and (commit.tags or session_labels):
+        if commit and commit.tags:
             painter.setFont(option.font)
-            is_head = row is not None and row.color == GraphRowColor.HEAD
             labels_width = self._draw_labels(
-                painter,
-                mid_y,
-                commit.tags,
-                label_x,
-                option.fontMetrics,
-                session_labels=session_labels,
-                is_head=is_head,
+                painter, mid_y, commit.tags, label_x, option.fontMetrics
             )
 
         text = index.data(Qt.DisplayRole)
@@ -928,51 +910,6 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
         painter.restore()
 
-    def _label_entries(self, tags, session_labels, is_head=False):
-        """Return ``(text, pen, brush, outline_pen)`` for each label to draw.
-
-        Branch and tag labels come first: they are what the eye looks for, and
-        the SUMMARY column is width-capped, so the agent session labels are the
-        ones that should be clipped when a row runs out of room.
-        """
-        HEAD = 'HEAD'
-        remotes_prefix = 'remotes/'
-        tags_prefix = 'tags/'
-        heads_prefix = 'heads/'
-
-        entries = []
-        for tag in tags or ():
-            if tag == HEAD:
-                continue
-            pen = self.text_pen
-            brush = self.other_color
-            display_tag = tag
-            if tag.startswith(remotes_prefix):
-                display_tag = tag[len(remotes_prefix) :]
-            elif tag.startswith(tags_prefix):
-                display_tag = tag[len(tags_prefix) :]
-                brush = self.remote_color
-            elif tag.startswith(heads_prefix):
-                display_tag = tag[len(heads_prefix) :]
-                pen = self.head_pen
-                brush = self.head_color
-            entries.append((display_tag, pen, brush, None))
-
-        for kind, session_id in session_labels or ():
-            is_tip = kind == agentsession.TIP
-            brush = self.agent_tip_color if is_tip else self.agent_base_color
-            outline = self.agent_head_pen if (is_tip and is_head) else None
-            entries.append(
-                (
-                    agentsession.label_text(kind, session_id),
-                    self.text_pen,
-                    brush,
-                    outline,
-                )
-            )
-
-        return entries
-
     @perf.time_method('GraphDelegate._draw_labels')
     def _draw_labels(
         self,
@@ -981,19 +918,40 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         tags: list[str],
         start_x: int,
         font_metrics: QtGui.QFontMetrics,
-        session_labels=(),
-        is_head: bool = False,
     ):
-        """Draw branch/tag/session labels and return total width used."""
-        entries = self._label_entries(tags, session_labels, is_head=is_head)
+        """Draw branch/tag labels and return total width used."""
+        HEAD = 'HEAD'
+        remotes_prefix = 'remotes/'
+        tags_prefix = 'tags/'
+        heads_prefix = 'heads/'
+        remotes_len = len(remotes_prefix)
+        tags_len = len(tags_prefix)
+        heads_len = len(heads_prefix)
 
         current_x = start_x
         x_offset = self.LABEL_TEXT_OFFSET
         y_offset = 0
 
-        for display_tag, pen, brush, outline_pen in entries:
+        for tag in tags:
+            if tag == HEAD:
+                continue
+
+            pen = self.text_pen
+            brush = self.other_color
+            display_tag = tag
+
+            if tag.startswith(remotes_prefix):
+                display_tag = tag[remotes_len:]
+            elif tag.startswith(tags_prefix):
+                display_tag = tag[tags_len:]
+                brush = self.remote_color
+            elif tag.startswith(heads_prefix):
+                display_tag = tag[heads_len:]
+                pen = self.head_pen
+                brush = self.head_color
+
             if painter is not None:
-                painter.setPen(outline_pen if outline_pen is not None else pen)
+                painter.setPen(pen)
                 painter.setBrush(brush)
 
             # Calculate text width using font metrics for consistency
@@ -1008,7 +966,6 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
 
             if painter is not None:
                 painter.drawRoundedRect(box_rect, self.LABEL_BORDER, self.LABEL_BORDER)
-                painter.setPen(pen)
                 painter.drawText(text_rect, Qt.AlignCenter, display_tag)
 
             current_x += text_width + x_offset * 2 + self.LABEL_SPACING
@@ -1016,13 +973,9 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         return current_x - start_x
 
     @perf.time_method('GraphDelegate._labels_width')
-    def _labels_width(
-        self, font_metrics: QtGui.QFontMetrics, tags: list[str], session_labels=()
-    ):
+    def _labels_width(self, font_metrics: QtGui.QFontMetrics, tags: list[str]):
         """Calculate total width needed for all labels."""
-        return self._draw_labels(
-            None, 0, tags, 0, font_metrics, session_labels=session_labels
-        )
+        return self._draw_labels(None, 0, tags, 0, font_metrics)
 
     @perf.time_method('GraphDelegate._graph_width')
     def _graph_width(self, row, prev_row):
@@ -1048,11 +1001,8 @@ class GraphDelegate(QtWidgets.QStyledItemDelegate):
         commit = index.data(COMMIT_ROLE)
 
         labels_width = 0
-        session_labels = commit.session_labels if commit else ()
-        if commit and (commit.tags or session_labels):
-            labels_width = self._labels_width(
-                option.fontMetrics, commit.tags, session_labels=session_labels
-            )
+        if commit and commit.tags:
+            labels_width = self._labels_width(option.fontMetrics, commit.tags)
 
         # Add space for text if present.
         text = index.data(Qt.DisplayRole)
@@ -2416,7 +2366,7 @@ class Commit(QtWidgets.QGraphicsItem):
         self.setCursor(cursor)
         self.setToolTip(commit.oid[:12] + ': ' + commit.summary)
 
-        if commit.tags:
+        if commit.tags or commit.session_labels:
             self.label = label = Label(commit)
             label.setParentItem(self)
             label.setPos(xpos + 1, -self.commit_radius / 2.0)
@@ -2449,7 +2399,7 @@ class Commit(QtWidgets.QGraphicsItem):
                 scene.removeItem(self.summary_label)
             self.summary_label = None
         self._summary_side = side
-        if side is None or self.commit.tags:
+        if side is None or self.commit.tags or self.commit.session_labels:
             return
         summary = (self.commit.summary or '').splitlines()[0]
         summary = summary.strip()
@@ -2533,6 +2483,10 @@ class Label(QtWidgets.QGraphicsItem):
     head_color = QtGui.QColor(Qt.green)
     other_color = QtGui.QColor(Qt.white)
     remote_color = QtGui.QColor(Qt.yellow)
+    # Agent session base/tip labels use a cyan/violet pair that stays clear of
+    # the green used for heads and the yellow used for HEAD, tags and remotes.
+    agent_tip_color = QtGui.QColor(0x7F, 0xDB, 0xFF)
+    agent_base_color = QtGui.QColor(0xC6, 0xB0, 0xF5)
 
     head_pen = QtGui.QPen()
     head_pen.setColor(QtGui.QColor(Qt.black))
@@ -2576,7 +2530,10 @@ class Label(QtWidgets.QGraphicsItem):
         base_rect = base_rect.adjusted(-border_x, -border_y, border_x, border_y)
         item_shape.addRect(base_rect)
 
-        for tag in self.commit.tags:
+        texts = list(self.commit.tags) + [
+            text for text, _kind, _session_id in self._session_labels()
+        ]
+        for tag in texts:
             text_shape = QPainterPath()
             text_shape.addText(current_width, 0, font, tag)
             text_rect = text_shape.boundingRect()
@@ -2585,6 +2542,18 @@ class Label(QtWidgets.QGraphicsItem):
             current_width = item_shape.boundingRect().width() + spacing
 
         return item_shape.boundingRect()
+
+    def _session_labels(self):
+        """Return ``(text, kind, session_id)`` for each agent session anchor.
+
+        These come from ``refs/agent/session/<id>/{base,tip}``, which
+        ``git log --decorate`` does not report, so they are carried on the
+        commit separately from ``tags``.
+        """
+        return [
+            (agentsession.label_text(kind, session_id), kind, session_id)
+            for kind, session_id in self.commit.session_labels
+        ]
 
     def _edge_color(self):
         """Return the brush color of the edge leaving this commit toward
@@ -2676,7 +2645,26 @@ class Label(QtWidgets.QGraphicsItem):
 
             painter.drawRoundedRect(box_rect, border, border)
             painter.drawText(text_rect, Qt.TextSingleLine, display_tag)
-            hits.append((QRectF(box_rect), display_tag, is_head, tag))
+            hits.append((QRectF(box_rect), display_tag, is_head, tag, None))
+            current_width += text_rect.width() + spacing
+
+        # Agent session anchors come last: branch names are what the eye looks
+        # for, and these should not push them around.
+        for text, kind, session_id in self._session_labels():
+            painter.setPen(self.text_pen)
+            if kind == agentsession.TIP:
+                painter.setBrush(self.agent_tip_color)
+            else:
+                painter.setBrush(self.agent_base_color)
+
+            text_rect = painter.boundingRect(
+                QRectF(current_width, 0, 0, 0), Qt.TextSingleLine, text
+            )
+            box_rect = text_rect.adjusted(-x_offset, -y_offset, x_offset, y_offset)
+
+            painter.drawRoundedRect(box_rect, border, border)
+            painter.drawText(text_rect, Qt.TextSingleLine, text)
+            hits.append((QRectF(box_rect), text, False, None, session_id))
             current_width += text_rect.width() + spacing
 
         self._label_hits = hits
@@ -2686,9 +2674,15 @@ class Label(QtWidgets.QGraphicsItem):
             super().mousePressEvent(event)
             return
         pos = event.pos()
-        for rect, text, is_head, original_tag in self._label_hits:
+        for rect, text, is_head, original_tag, session_id in self._label_hits:
             if not rect.contains(pos):
                 continue
+            if session_id is not None:
+                # A session anchor is not a branch: there is nothing to check
+                # out, merge or rename, so hand over the full session id.
+                qtutils.set_clipboard(session_id)
+                event.accept()
+                return
             graph_view = self._graph_view()
             if graph_view is not None and graph_view.is_in_merge_mode():
                 if is_head:
@@ -3959,7 +3953,11 @@ class GraphView(QtWidgets.QGraphicsView, ViewerMixin):
                     # leave_column() can apply isolation when it ends.
                     self._orphan_columns.add(node.column)
 
-            node.row = self.alloc_cell(node.column, node.tags)
+            # A commit carrying only agent session labels still needs the
+            # cell reservation, otherwise its label overlaps its neighbors.
+            node.row = self.alloc_cell(
+                node.column, node.tags or node.session_labels
+            )
 
             # Allocate columns for children which are still without one. Also
             # propagate frontier for children.

@@ -189,69 +189,49 @@ if self.params.agent_sessions_enabled:
 
 ---
 
-## 2. 左边 DAG（log_dock：CommitTreeWidget + GraphDelegate 内联）
+## 2. 显示都做在右边 DAG（graphview_dock：GraphView / QGraphicsScene）
 
-### 2.1 头尾：label
+**左边 DAG（log_dock）不动。** 最初的方案是把头尾 label 画在左边、gutter 带也在左边，
+实际做出来之后决定全部挪到右边：
 
-复用现有 `GraphDelegate._draw_labels()`。给 tag 列表注入两个合成标签：
+- 左边是一个**列表**，SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），
+  多塞几个标签就把 `main` 挤成 `mai…`，而分支名才是眼睛第一时间要找的东西
+- 右边是**场景图**，节点周围本来就是留给标签的空地，`alloc_cell()`
+  会为带标签的 commit 预留横向空间，多一个标签不挤压任何别的信息
+- session 的「线索」是一段**连着的路径**，场景图里能顺着真实的父子连线画出来；
+  列表里只能靠边槽模拟，表达力反而更弱
 
-```
-⚑ 23ecce3c base
-▶ 23ecce3c tip
-```
+所以左边保持原样（lane + 分支/tag 标签 + summary），session 的全部可视化都在右边。
 
-`_draw_labels()` 重构成先用 `_label_entries()` 生成
-`(文字, 笔, 填充, 描边笔)` 四元组、再统一画框，agent 标签就是多加的几个 entry，
-几何逻辑一份不重复。配色用青（tip）/ 紫（base），避开 head 的绿、remote 的黄。
-tip 恰好 == HEAD 时再叠一圈金色描边（复用 `current_head_color`），
-一眼能看出「这个 session 就是当前状态」。
+### 2.1 头尾：base / tip 标签
 
-**顺序：分支/tag 在前，session 标签在后。**
-一开始把 session 标签放最前面（想让锚点位置稳定），实测下来不行——
-SUMMARY 列有宽度上限（`viewport_w * 6 // 10`），放前面会把 `main` 挤成 `mai…`。
-分支名才是眼睛第一时间要找的东西，被截断的应该是次要信息。
-
-合成标签存在 `Commit.session_labels` 里，不污染 `Commit.tags`——
-`tags` 被 `GitDAG.add_commits()` 拿去做 `self.commits[tag] = commit` 的索引，
-往里塞东西会污染按名字查 commit 的路径。
-
-### 2.2 整条线索：session 边槽（gutter）
-
-在 lane 图**左侧**再分配一条窄列，每个点亮的 session 占 10px。
-最多并排 4 条，超出的折叠成一条「多 session」灰带（点击展开面板）。
+挂在现有的 `Label`（`QGraphicsItem`，Z = -1）上，画在分支/tag 标签之后：
 
 ```
- ┌  a1b2c3  feat: 加载 session refs        ← tip 帽：实心圆角上盖
- │  d4e5f6  fix: 边槽宽度                   ← OWN，实线
- ┊  9f8e7d  chore: 同事顺手提的             ← FOREIGN，虚线 + 淡色
- │  1a2b3c  test: 三态归属                  ← OWN
- └  7f8e9d  （base 那个 commit）            ← base 帽：实心圆角下盖
- ╎  0011aa  更早的历史                      ← 不在带内，不画
+HEAD  main  ▶ b47c8939 tip
+             ▶ 23ecce3c tip  ⚑ b47c8939 base
+             ⚑ 23ecce3c base
 ```
 
-实现落点：
+- 配色：青（tip）/ 紫（base），避开 head 的绿、HEAD/tag/remote 的黄
+- 顺序在分支/tag **之后**：分支名是主信息，session 锚点是次要信息
+- 数据存 `Commit.session_labels`，**不进 `Commit.tags`**——`tags` 被
+  `GitDAG.add_commits()` 拿去做 `self.commits[tag] = commit` 的索引，
+  往里塞合成标签会污染按名字查 commit 的路径
 
-- `GraphDelegate.paint()`：画 lane 之前先画 gutter
-- `GraphDelegate._graph_width()` / `sizeHint()`：加上 `gutter_count * GUTTER_WIDTH`
-- 新 role `SESSION_BAND_ROLE = Qt.UserRole + 4`，值是
-  `list[tuple[gutter_index, SessionMark]]`
-- 在 `CommitTreeWidget.apply_graph_result()` 那一趟里一次算完存进 item；
-  `paint()` 里只查表，不做计算
+三处必须跟着改，漏一个就出 bug：
 
-为什么选边槽而不是「给 session 单独占一条 lane」：lane 是给**父子关系**用的，
-session 是一个**区间**，语义不同；塞进 lane 会让 `build_graph()` 的着色和列分配
-全部要跟着改，而边槽跟现有布局完全正交。
+| 位置 | 原来 | 改成 |
+|---|---|---|
+| `Commit.__init__`（图元） | `if commit.tags:` 才建 `Label` | `if commit.tags or commit.session_labels:` |
+| `Commit.update_summary_label()` | `if side is None or self.commit.tags: return` | 加上 `session_labels`，否则 summary 文字和标签叠在一起 |
+| `GraphView.recompute_grid()` | `alloc_cell(node.column, node.tags)` | `node.tags or node.session_labels`，否则标签框会压到邻居节点上 |
 
-### 2.3 三态的视觉
+点击 session 标签：复制**完整** session id 到剪贴板。
+它不是分支，没有 checkout / merge / rename 可做，所以不走 `_show_branch_menu()`；
+`_label_hits` 的元组多带一个 `session_id` 字段来区分（普通标签是 `None`）。
 
-`FOREIGN` 用虚线，直接回答「我的 session 是不是被打断了」。
-`STRAY` 单独用点线画在带外，并在那一行右侧加一个小警告角标。
-
----
-
-## 3. 右边 DAG（graphview_dock：GraphView / QGraphicsScene）
-
-### 3.1 Session 缎带（ribbon）
+### 2.2 整条线索：Session 缎带（ribbon）
 
 新增 `SessionRibbon(QtWidgets.QGraphicsItem)`：
 
@@ -262,23 +242,25 @@ session 是一个**区间**，语义不同；塞进 lane 会让 `build_graph()` 
 - **笔**：宽 = `Commit.commit_radius * 1.6`，`RoundCap` + `RoundJoin`，alpha ≈ 60。
   这样它是一条从 base 流到 tip 的半透明宽带，节点浮在上面
 - **分段**：`OWN` 实线、`FOREIGN` `Qt.DashLine`、`STRAY` 另起一条 item 用 `Qt.DotLine`
-- **两端**：base 节点套一个双圈「锚」环，tip 节点套一个「箭头」环，
-  各挂一个 `QGraphicsSimpleTextItem`：`base ⟨23ecce3c⟩` / `tip ⟨23ecce3c⟩`
+- **两端**：base 节点套一个双圈「锚」环，tip 节点套一个「箭头」环
 - **配色**：`session_id` 哈希到一个稳定色相（HSV，S/V 固定），
   保证同一个 session 每次打开颜色一致，且和 `EdgeColor` 的调色板分开取值
 
 重建时机：跟 `_update_summary_labels()` 一样，挂在 `layout_commits()` 末尾——
 节点位置变了 path 必须重算。
 
-### 3.2 为什么是缎带不是别的
+### 2.3 为什么是缎带不是别的
 
 场景图里表达「一组节点属于同一件事」，加背景色块会跟 lane 打架，
 加连线会和 parent 边混淆。半透明宽带压在最底层，既圈定了范围，
 又天然沿着真实的父子路径走，不需要额外的几何。
 
+`FOREIGN` 用虚线，直接回答「我的 session 是不是被打断了」；
+`STRAY` 用点线单独画一条，是「commit 被 rewind/reset 甩出区间」的图形版。
+
 ---
 
-## 4. Sessions 面板（新 dock）
+## 3. Sessions 面板（新 dock）
 
 `QTreeWidget`，放 `Qt.LeftDockWidgetArea` 和 `log_dock` tab 在一起，默认隐藏，
 `View` 菜单给 toggle（和现有 `log_dock.toggleViewAction()` 那几条并列）。
@@ -310,9 +292,9 @@ session 是一个**区间**，语义不同；塞进 lane 会让 `build_graph()` 
 
 ---
 
-## 5. revtext 记号与右键菜单
+## 4. revtext 记号与右键菜单
 
-### 5.1 `agent:<id>` 记号
+### 4.1 `agent:<id>` 记号
 
 `GitDagLineEdit` 右键菜单加一条 `Agent Session…`（和现有
 `_filter_to_current_author` / `_pickaxe_search` 那几条并列），插入 `agent:<id>`。
@@ -321,7 +303,7 @@ session 是一个**区间**，语义不同；塞进 lane 会让 `build_graph()` 
 `refs/agent/session/<id>/base..refs/agent/session/<id>/tip`。
 支持前缀匹配（写前几位就行，跟 `agent-sessions.py` 一致），不唯一时弹选择框。
 
-### 5.2 commit 右键菜单
+### 4.2 commit 右键菜单
 
 `ViewerMixin.update_menu_actions()`：选中的 commit 有 session 归属时，加一组
 `Agent Session ▸ Show this session / Copy Session Id / Diff base..tip / Reflog`。
@@ -332,7 +314,7 @@ session 是一个**区间**，语义不同；塞进 lane 会让 `build_graph()` 
 
 ---
 
-## 6. 配置
+## 5. 配置
 
 沿用现有 `cola.dag.*` 风格（`arcedges`、`legacylabelcolors`、`orphan_isolate`）：
 
@@ -350,7 +332,7 @@ session 是一个**区间**，语义不同；塞进 lane 会让 `build_graph()` 
 
 ---
 
-## 7. 性能
+## 6. 性能
 
 | 项 | 代价 |
 |---|---|
@@ -365,12 +347,12 @@ session 是一个**区间**，语义不同；塞进 lane 会让 `build_graph()` 
 
 ---
 
-## 8. 分阶段落地
+## 7. 分阶段落地
 
 | 阶段 | 内容 | 改动范围 |
 |---|---|---|
-| **M1** ✅ | 数据层 + 左图 base/tip 两个 label | `models/agentsession.py`(新)、`models/dag.py`、`GraphDelegate._draw_labels`、`test/dag_agent_session_test.py`(新) |
-| **M2** | 内存 BFS 算范围 + 左图 gutter 带（含 FOREIGN 虚线） | `GraphDelegate.paint/sizeHint`、`CommitTreeWidget.apply_graph_result` |
+| **M1** ✅ | 数据层 + 右图 base/tip 标签 | `models/agentsession.py`(新)、`models/dag.py`、`Label` / `Commit` / `recompute_grid`、`test/dag_agent_session_test.py`(新) |
+| **M2** | 内存 BFS 算 `base..tip` + 三态归属（trailer 字段） | `models/dag.py` 的 `LOGFMT`、`agentsession.range_members()` |
 | **M3** | 右图 ribbon + base/tip 特殊环 | `SessionRibbon`(新)、`GraphView.layout_commits` |
 | **M4** | Sessions 面板 + reflog 查看 + prune / rebuild | `widgets/dag.py` 新 dock |
 | **M5** | `agent:<id>` 记号、commit 右键菜单、配置项、命令行开关、旧三段式兼容 | 各处 |
@@ -379,14 +361,14 @@ M1 就已经能回答「头在哪、尾在哪」；M2 补上「整条线索」�
 
 ---
 
-## 9. 测试
+## 8. 测试
 
 `test/dag_agent_session_test.py`（`test/helper.py` 起临时仓库，`update-ref` 造 base/tip）：
 
 - 解析：`parse_session_ref` 的 doctest + 前缀查询返回值
 - 三态：造一个中间插了别人 commit 的历史，断言 `FOREIGN`；
   造一个 `reset --hard` 后的历史，断言 `STRAY`
-- 边槽数据：`SESSION_BAND_ROLE` 的值对不对
+- 标签数据：`Commit.session_labels` 的内容和顺序（tip 在 base 前）
 - 边界：
   - `base == tip`（session 一个 commit 都没提）
   - base ref 缺失（只装了 Stop hook）
