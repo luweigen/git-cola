@@ -1534,7 +1534,10 @@ class SessionsWidget(QtWidgets.QFrame):
         if thread is None:
             return ''
         counts = thread.counts()
-        parts = ['%d' % counts[agentsession.Mark.OWN]]
+        # "2 own" rather than a bare "2": with no foreign commits the row
+        # would otherwise read "2, 2 stray", two numbers with nothing telling
+        # them apart.
+        parts = [N_('%d own') % counts[agentsession.Mark.OWN]]
         foreign = counts[agentsession.Mark.FOREIGN]
         if foreign:
             parts.append(N_('+%d foreign') % foreign)
@@ -2918,6 +2921,13 @@ class Label(QtWidgets.QGraphicsItem):
     text_pen.setColor(QtGui.QColor(Qt.black))
     text_pen.setWidth(1)
 
+    # Undo points get a dashed outline, matching the ribbon's convention that
+    # dashed means "the tip ref does not reach this".
+    undone_pen = QtGui.QPen()
+    undone_pen.setColor(QtGui.QColor(0x60, 0x60, 0x60))
+    undone_pen.setWidth(1)
+    undone_pen.setStyle(Qt.DashLine)
+
     border = 1
     item_spacing = 8
     text_x_offset = 3
@@ -3076,7 +3086,8 @@ class Label(QtWidgets.QGraphicsItem):
         # Agent session anchors come last: branch names are what the eye looks
         # for, and these should not push them around.
         for text, kind, session_id in self._session_labels():
-            painter.setPen(self.text_pen)
+            is_undone = agentsession.undone_index(kind) is not None
+            painter.setPen(self.undone_pen if is_undone else self.text_pen)
             painter.setBrush(session_label_color(session_id, kind))
 
             text_rect = painter.boundingRect(
@@ -3085,6 +3096,7 @@ class Label(QtWidgets.QGraphicsItem):
             box_rect = text_rect.adjusted(-x_offset, -y_offset, x_offset, y_offset)
 
             painter.drawRoundedRect(box_rect, border, border)
+            painter.setPen(self.text_pen)
             painter.drawText(text_rect, Qt.TextSingleLine, text)
             hits.append((QRectF(box_rect), text, False, None, (kind, session_id)))
             current_width += text_rect.width() + spacing
@@ -4858,6 +4870,12 @@ def session_label_color(session_id, kind):
     the next.
     """
     hue = agentsession.session_hue(session_id)
+    if agentsession.undone_index(kind) is not None:
+        # An undo point is a former tip that was thrown away. It keeps the
+        # session hue so it is clearly part of that session, but is drained of
+        # saturation and drawn with a dashed border (see the paint code) so it
+        # never reads as a live anchor.
+        return QtGui.QColor.fromHsv(hue, 22, 250)
     if kind == agentsession.TIP:
         return QtGui.QColor.fromHsv(hue, 105, 245)
     return QtGui.QColor.fromHsv(hue, 55, 252)

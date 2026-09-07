@@ -26,6 +26,15 @@ SESSION_PREFIX = 'refs/agent/session/'
 
 BASE = 'base'
 TIP = 'tip'
+UNDONE = 'undone'
+"""``refs/agent/session/{sid}/undone/{n}`` -- where the tip stood before
+``agent-sessions.py undo`` rewound it. ``{n}`` counts up from 0, so ordering
+by it is chronological. The commits it anchors are usually reachable from
+nothing else, which is the whole point of keeping the ref.
+"""
+
+KIND_ORDER = {TIP: 0, BASE: 1}
+"""Live anchors sort before undo points on a commit that carries several"""
 
 SHORT_LEN = 8
 """Number of session-id characters shown in a label"""
@@ -88,19 +97,27 @@ class Mark(Enum):
 def parse_session_ref(refname: str, prefix: str = SESSION_PREFIX):
     """Split a session ref into its ``(session_id, kind)`` parts.
 
-    ``kind`` is either "base" or "tip".  Returns ``None`` when the ref is not a
-    session ref.  The session id may itself contain "/" so only the last path
-    component is taken as the kind.
+    ``kind`` is the whole path after the session id: "base", "tip", or
+    "undone/<n>".  Keeping the index inside ``kind`` means one 2-tuple covers
+    all three and ``session_ref()`` round-trips every one of them.
+
+    A session id may itself contain "/", so the rule is positional: the last
+    component is the kind, unless the two last components are
+    ``undone/<digits>``.  Returns ``None`` for anything else.
 
     >>> parse_session_ref('refs/agent/session/abc123/tip')
     ('abc123', 'tip')
     >>> parse_session_ref('refs/agent/session/abc123/base')
     ('abc123', 'base')
-    >>> parse_session_ref('refs/agent/session/team/abc123/tip')
-    ('team/abc123', 'tip')
+    >>> parse_session_ref('refs/agent/session/abc123/undone/0')
+    ('abc123', 'undone/0')
+    >>> parse_session_ref('refs/agent/session/team/abc123/undone/12')
+    ('team/abc123', 'undone/12')
     >>> parse_session_ref('refs/agent/session/abc123') is None
     True
     >>> parse_session_ref('refs/agent/session/abc123/head') is None
+    True
+    >>> parse_session_ref('refs/agent/session/abc123/undone/x') is None
     True
     >>> parse_session_ref('refs/heads/main') is None
     True
@@ -108,10 +125,41 @@ def parse_session_ref(refname: str, prefix: str = SESSION_PREFIX):
     if not refname.startswith(prefix):
         return None
     tail = refname[len(prefix) :]
-    session_id, sep, kind = tail.rpartition('/')
-    if not sep or not session_id or kind not in (BASE, TIP):
+    head, sep, last = tail.rpartition('/')
+    if not sep or not head:
         return None
-    return (session_id, kind)
+    if last in (BASE, TIP):
+        return (head, last)
+    session_id, sep, marker = head.rpartition('/')
+    if sep and session_id and marker == UNDONE and last.isdigit():
+        return (session_id, UNDONE + '/' + last)
+    return None
+
+
+def undone_index(kind: str) -> int | None:
+    """The ``{n}`` of an ``undone/<n>`` kind, or None for base/tip.
+
+    >>> undone_index('undone/3')
+    3
+    >>> undone_index('tip') is None
+    True
+    """
+    marker, sep, index = kind.partition('/')
+    if sep and marker == UNDONE and index.isdigit():
+        return int(index)
+    return None
+
+
+def kind_sort_key(kind: str) -> tuple:
+    """Order kinds on one commit: tip, base, then undo points by index.
+
+    >>> sorted(['undone/2', 'base', 'undone/0', 'tip'], key=kind_sort_key)
+    ['tip', 'base', 'undone/0', 'undone/2']
+    """
+    index = undone_index(kind)
+    if index is None:
+        return (KIND_ORDER.get(kind, 2), 0)
+    return (2, index)
 
 
 @dataclass(frozen=True)
@@ -127,6 +175,13 @@ class AgentSession:
     base_oid: str | None = None
     tip_oid: str | None = None
     updated: str = ''
+    undone: tuple[tuple[int, str], ...] = ()
+    """``(n, oid)`` undo points, oldest first.
+
+    Written by ``agent-sessions.py undo`` before it rewinds the tip. Their
+    commits are usually reachable from nothing else, so without these refs
+    they would be unreferenced objects waiting for gc.
+    """
 
     @property
     def short(self) -> str:
@@ -169,9 +224,19 @@ def parse_for_each_ref(lines, prefix: str = SESSION_PREFIX) -> dict[str, AgentSe
     ('aaa', 'bbb')
     >>> sessions['s1'].updated
     '2026-09-05T12:00:00+03:00'
+
+    Undo points are collected too, sorted by their index:
+
+    >>> lines += [
+    ...     'eee\\x01refs/agent/session/s1/undone/1\\x012026-09-05T11:00:00+03:00',
+    ...     'ddd\\x01refs/agent/session/s1/undone/0\\x012026-09-05T10:30:00+03:00',
+    ... ]
+    >>> parse_for_each_ref(lines)['s1'].undone
+    ((0, 'ddd'), (1, 'eee'))
     """
     base_oids: dict[str, str] = {}
     tip_oids: dict[str, str] = {}
+    undone: dict[str, list[tuple[int, str]]] = {}
     updated: dict[str, str] = {}
     order: list[str] = []
 
@@ -191,7 +256,10 @@ def parse_for_each_ref(lines, prefix: str = SESSION_PREFIX) -> dict[str, AgentSe
         if session_id not in updated:
             order.append(session_id)
             updated[session_id] = ''
-        if kind == BASE:
+        index = undone_index(kind)
+        if index is not None:
+            undone.setdefault(session_id, []).append((index, oid))
+        elif kind == BASE:
             base_oids[session_id] = oid
         else:
             tip_oids[session_id] = oid
@@ -204,6 +272,7 @@ def parse_for_each_ref(lines, prefix: str = SESSION_PREFIX) -> dict[str, AgentSe
             base_oid=base_oids.get(session_id),
             tip_oid=tip_oids.get(session_id),
             updated=updated[session_id],
+            undone=tuple(sorted(undone.get(session_id, ()))),
         )
     return sessions
 
@@ -312,8 +381,9 @@ def labels_by_oid(sessions) -> dict[str, list[tuple[str, str]]]:
     """Map object IDs to the ``(kind, session_id)`` labels anchored there.
 
     A single commit can carry several labels: the base of one session is very
-    often the tip of the previous one.  Tips sort before bases so that a commit
-    that ends one session and starts another reads "tip, base" left to right.
+    often the tip of the previous one.  Live anchors sort before undo points,
+    and tips before bases, so a commit that ends one session and starts the
+    next reads "tip, base" left to right.
 
     >>> sessions = {
     ...     's1': AgentSession('s1', base_oid='aaa', tip_oid='bbb'),
@@ -324,6 +394,10 @@ def labels_by_oid(sessions) -> dict[str, list[tuple[str, str]]]:
     [('tip', 's1'), ('base', 's2')]
     >>> labels['aaa']
     [('base', 's1')]
+
+    >>> undone = {'s3': AgentSession('s3', tip_oid='x', undone=((0, 'y'),))}
+    >>> labels_by_oid(undone)['y']
+    [('undone/0', 's3')]
     """
     labels: dict[str, list[tuple[str, str]]] = {}
     for session in sessions.values():
@@ -331,8 +405,12 @@ def labels_by_oid(sessions) -> dict[str, list[tuple[str, str]]]:
             labels.setdefault(session.tip_oid, []).append((TIP, session.session_id))
         if session.base_oid:
             labels.setdefault(session.base_oid, []).append((BASE, session.session_id))
+        for index, oid in session.undone:
+            labels.setdefault(oid, []).append(
+                ('%s/%d' % (UNDONE, index), session.session_id)
+            )
     for entries in labels.values():
-        entries.sort(key=lambda entry: (entry[0] != TIP, entry[1]))
+        entries.sort(key=lambda entry: (kind_sort_key(entry[0]), entry[1]))
     return labels
 
 
@@ -346,7 +424,16 @@ def label_text(kind: str, session_id: str) -> str:
     '▶ b47c8939'
     >>> label_text('base', 'b47c8939-8ae6-4c1b')
     '⚑ b47c8939'
+
+    An undo point keeps its index: it is real information, and one session can
+    have several.
+
+    >>> label_text('undone/0', 'b47c8939-8ae6-4c1b')
+    '↶ b47c8939 #0'
     """
+    index = undone_index(kind)
+    if index is not None:
+        return f'↶ {session_id[:SHORT_LEN]} #{index}'
     marker = '▶' if kind == TIP else '⚑'
     return f'{marker} {session_id[:SHORT_LEN]}'
 
@@ -375,7 +462,7 @@ def refresh_key(sessions) -> frozenset:
     False
     """
     return frozenset(
-        (session.session_id, session.base_oid, session.tip_oid)
+        (session.session_id, session.base_oid, session.tip_oid, session.undone)
         for session in sessions.values()
     )
 
@@ -785,12 +872,25 @@ def expand_ref_args(args, sessions, prefix: str = SESSION_PREFIX) -> list[str]:
     session with no base or tip ref, is dropped: passing it through would
     make git fail on the whole revision list.
 
+    Undo points are added as extra positive refs. ``^base tip undone/0`` is
+    still bounded by base, and without them the undone commits would never
+    appear at all: nothing else reaches them, which is exactly why the ref
+    exists.
+
     >>> sessions = {
     ...     's1': AgentSession('s1', base_oid='a', tip_oid='b'),
     ...     's2': AgentSession('s2', base_oid='c'),
+    ...     's3': AgentSession(
+    ...         's3', base_oid='a', tip_oid='b', undone=((0, 'd'), (1, 'e'))
+    ...     ),
     ... }
     >>> expand_ref_args(['agent:s1'], sessions)
     ['refs/agent/session/s1/base..refs/agent/session/s1/tip']
+    >>> for arg in expand_ref_args(['agent:s3'], sessions):
+    ...     print(arg)
+    refs/agent/session/s3/base..refs/agent/session/s3/tip
+    refs/agent/session/s3/undone/0
+    refs/agent/session/s3/undone/1
     >>> expand_ref_args(['main', '--'], sessions)
     ['main', '--']
     >>> expand_ref_args(['agent:s2'], sessions)
@@ -815,6 +915,12 @@ def expand_ref_args(args, sessions, prefix: str = SESSION_PREFIX) -> list[str]:
                     session_ref(session_id, TIP, prefix=prefix),
                 )
             )
+            for index, _oid in session.undone:
+                expanded.append(
+                    session_ref(
+                        session_id, '%s/%d' % (UNDONE, index), prefix=prefix
+                    )
+                )
     return expanded
 
 

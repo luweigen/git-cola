@@ -1,11 +1,12 @@
 # 在 DAG 里显示 agent session 的头、尾和整条线索
 
 配套方案：`~/work/sources/doc/agent-session-refs.md`（2026-09-05 实现）。
-那边把 session 与 commit 的对应关系从「一个 session 一个分支」改成了两个 ref：
+那边把 session 与 commit 的对应关系从「一个 session 一个分支」改成了 ref：
 
 ```
-refs/agent/session/{session_id}/base    session 起点，一次写定
-refs/agent/session/{session_id}/tip     每次 commit 后立刻推进
+refs/agent/session/{session_id}/base       session 起点，一次写定
+refs/agent/session/{session_id}/tip        每次 commit 后立刻推进
+refs/agent/session/{session_id}/undone/{n} 撤回点：undo 前 tip 站的地方，n 从 0 起
 ```
 
 再加上 commit trailer `Agent-Session-Id: {session_id}`。
@@ -217,8 +218,15 @@ def range_members(commits_by_oid, base_oid, tip_oid, cache=None):
 
 ### 1.5 视野外的 session：不自动 pin，给记号 ✅ M5
 
-`refs/agent/*` 不在 `--all` 里。默认的 `HEAD` / `main --` 参数下，一个跑在别的分支上、
-或者被 `reset --hard` 甩掉的 session，它的 commit 根本不会出现在 log 输出里。
+默认的 `HEAD` / `main --` 参数下，一个跑在别的分支上、或者被 `reset --hard` 甩掉的
+session，它的 commit 根本不会出现在 log 输出里。
+
+> **一处更正**：这一节原来写的是「`refs/agent/*` 不在 `--all` 里」，**这是错的**。
+> `git log --all` 的定义是「refs/ 下的所有 ref」，`refs/agent/` 当然在内——
+> 补 undone 标签时测出来的。我把「`--decorate` 不装饰 `refs/agent/*`」（§0.1，
+> 那条是真的、实测过）和「`--all` 够不到」混成了一件事。
+> 所以 `--all` 视图下 session 的 commit 是看得见的，缺的只是**分支视图**。
+> 下面的结论不变：分支视图下不该悄悄塞 ref。
 
 原设计是**自动把被点亮 session 的 ref 追加到 rev 参数**。实现时否掉了：
 用户在 revtext 里打的是 `main --`，那是他提的问题；
@@ -274,9 +282,10 @@ if self.params.agent_sessions_enabled:
 挂在现有的 `Label`（`QGraphicsItem`，Z = -1）上，画在分支/tag 标签之后：
 
 ```
-HEAD  main  ▶ b47c8939
-             ▶ 23ecce3c  ⚑ b47c8939
-             ⚑ 23ecce3c
+HEAD  main  ▶ b47c8939            tip
+             ▶ 23ecce3c  ⚑ b47c8939   一个 commit 同时是上个的 tip、下个的 base
+             ⚑ 23ecce3c            base
+        ┌ ↶ b47c8939 #0 ┐         撤回点（虚线框）
 ```
 
 - **不写 "tip" / "base" 这两个词**：`▶` / `⚑` 已经说清是哪一头，
@@ -304,6 +313,33 @@ HEAD  main  ▶ b47c8939
 | `Commit.__init__`（图元） | `if commit.tags:` 才建 `Label` | `if commit.tags or commit.session_labels:` |
 | `Commit.update_summary_label()` | `if side is None or self.commit.tags: return` | 加上 `session_labels`，否则 summary 文字和标签叠在一起 |
 | `GraphView.recompute_grid()` | `alloc_cell(node.column, node.tags)` | `node.tags or node.session_labels`，否则标签框会压到邻居节点上 |
+
+### 2.1.1 撤回点：`undone/{n}`
+
+`agent-sessions.py undo` 回移 tip 之前，会把当时的位置存成
+`refs/agent/session/{sid}/undone/{n}`（`n` 从 0 递增）。
+**那个 commit 通常只有这个 ref 够得到**——这正是留这个 ref 的意义，
+不然它就是等着被 gc 的游离对象。
+
+画法：`↶ b47c8939 #0`，**虚线框** + 同 session 色相但几乎抽干饱和度（S=22）。
+
+- `↶` 是撤回符号，跟 `▶`(tip) / `⚑`(base) 并列
+- **`#n` 保留**，不像 tip/base 那样省掉——一个 session 可以有好几个撤回点，
+  编号是真信息（这也是判断哪个更晚的唯一依据）
+- 虚线框跟缎带的约定一致：**虚线 = tip ref 够不到**
+- 色相仍是这个 session 的，所以一眼知道它属于谁
+
+`kind` 这个字段现在是「session id 之后的整段路径」——`base` / `tip` / `undone/0`。
+一个二元组覆盖三种，`session_ref()` 也就三种都能原样拼回去。
+session id 本身可以含 `/`，所以解析规则是位置式的：最后一段是 kind，
+除非最后两段长得像 `undone/<数字>`。
+
+撤回点在 `base..tip` 之外，所以三态判定自然把它算成 `STRAY`——
+缎带上就是一段粗虚线。这是对的：trailer 说它属于这个 session，
+但 tip ref 确实够不到它。`↶ #n` 标签补上「为什么」。
+
+**`agent:<id>` 会把撤回点一起拉进来**（`^base tip undone/0 undone/1 …`），
+否则它们根本不会被读到，标签也就无从画起。
 
 ### 2.2 点 session 标签弹的菜单 ✅ M1 / M4
 
@@ -577,6 +613,7 @@ M4 加菜单和面板；M5 补上导航、老仓库兼容和开关。左边 DAG 
 | `test/log/dag-agent-session-m4.png` | Sessions 面板 |
 | `test/log/dag-agent-session-m5.png` | `agent:<id>` 收窄视野，另一个 session 报 `not visible` |
 | `test/log/dag-agent-session-branches.png` | session 跨分支：缎带横跨两条 lane，三态齐全（`mkdemo-branch.sh`） |
+| `test/log/dag-agent-session-undone.png` | 两个撤回点，虚线框的 `↶ #0` / `↶ #1`（`mkdemo-undone.sh`，撤回点是真跑 `agent-sessions.py undo` 造出来的） |
 
 demo 仓库由 `mkdemo.sh` 生成：两个 session，其中一个带 2 个 FOREIGN
 和 1 个 STRAY，正好覆盖三态。
@@ -651,6 +688,16 @@ hook 是在**当前分支**上 commit 的，所以用户中途 `checkout -b` 之
 | session 以一个 merge 收尾 | merge 的两个父边都在缎带里；merge commit 自己没 trailer，所以是 `FOREIGN` |
 
 第三条就是上面说的那个假 `STRAY`——测试写出来才发现的。
+
+**撤回点（6 个）：**
+
+- `undone/{n}` 按索引排序读出来；`session_ref()` / `parse_session_ref()` /
+  `undone_index()` / `label_text()` 四个函数在 `undone/3` 上闭环
+- 撤回点被标上标签，且三态是 `STRAY`
+- **`agent:<id>` 能拉到一个别处够不到的撤回点**——`undo --hard` 之后它不在任何
+  分支上，不把 undone ref 加进 rev 参数就永远读不到
+- 一个 commit 同时是某 session 的 tip 和另一个的撤回点时，live 的排在前面
+- undo 之后 `refresh_key()` 变化，DAG 会重画
 
 Qt 层（`Label` / `SessionRibbon` 的绘制、`alloc_cell` 预留、菜单和面板本身）
 测试套件里没有覆盖——

@@ -749,3 +749,117 @@ def test_session_merged_back_to_main(app_context):
              segments_for(app_context, SESSION_A, ref='--all')}
     assert (tip, on_main) in edges
     assert (tip, on_topic) in edges
+
+
+def record_undone(session_id, index, oid):
+    """Write the undo point agent-sessions.py saves before rewinding a tip"""
+    run_git(
+        'update-ref',
+        '--create-reflog',
+        '%s%s/undone/%d' % (agentsession.SESSION_PREFIX, session_id, index),
+        oid,
+    )
+
+
+def test_undone_refs_are_read_in_order(app_context):
+    """Undo points come back sorted by index, oldest first"""
+    base = commit('base')
+    tip = commit_for(SESSION_A, 'kept')
+    first_undo = commit_for(SESSION_A, 'undone first')
+    second_undo = commit_for(SESSION_A, 'undone second')
+    record_session(SESSION_A, base, tip)
+    record_undone(SESSION_A, 1, second_undo)
+    record_undone(SESSION_A, 0, first_undo)
+
+    session = agentsession.load_agent_sessions(app_context)[SESSION_A]
+
+    assert session.undone == ((0, first_undo), (1, second_undo))
+
+
+def test_undone_ref_round_trips(app_context):
+    """The kind carries the index, so session_ref() rebuilds the ref name"""
+    refname = agentsession.session_ref(SESSION_A, 'undone/3')
+
+    assert refname == 'refs/agent/session/' + SESSION_A + '/undone/3'
+    assert agentsession.parse_session_ref(refname) == (SESSION_A, 'undone/3')
+    assert agentsession.undone_index('undone/3') == 3
+    assert agentsession.label_text('undone/3', SESSION_A) == '↶ b47c8939 #3'
+
+
+def test_undone_commit_is_labeled_and_stray(app_context):
+    """An undo point is labeled where it stands, and is outside base..tip"""
+    base = commit('base')
+    tip = commit_for(SESSION_A, 'kept')
+    undone = commit_for(SESSION_A, 'thrown away')
+    record_session(SESSION_A, base, tip)
+    record_undone(SESSION_A, 0, undone)
+    app_context.model.update_status()
+
+    params = dag.DAG('agent:' + SESSION_A, 1000)
+    reader = dag.RepoReader(app_context, params)
+    commits = {c.oid: c for c in reader.get()}
+
+    assert commits[undone].session_labels == [('undone/0', SESSION_A)]
+    assert reader.threads[SESSION_A].marks[undone] == agentsession.Mark.STRAY
+    assert reader.threads[SESSION_A].marks[tip] == agentsession.Mark.OWN
+
+
+def test_agent_notation_reaches_an_otherwise_unreachable_undo_point(app_context):
+    """Nothing but the undone ref reaches the commit, which is its purpose
+
+    After ``agent-sessions.py undo --hard`` the discarded commit is on no
+    branch. Without adding the undone refs to the revision arguments the label
+    could never be drawn, because the commit would not be read at all.
+
+    (``--all`` does reach it -- it means every ref under ``refs/``, which
+    includes ``refs/agent/`` -- but the default view is a branch.)
+    """
+    base = commit('base')
+    tip = commit_for(SESSION_A, 'kept')
+    undone = commit_for(SESSION_A, 'thrown away')
+    record_session(SESSION_A, base, tip)
+    record_undone(SESSION_A, 0, undone)
+    run_git('reset', '--hard', tip)
+    app_context.model.update_status()
+
+    # On no branch, so the ordinary branch view does not show it.
+    assert undone not in [c.oid for c in read_commits(app_context, ref='main')]
+    # Asking for the session brings it back.
+    assert undone in [
+        c.oid for c in read_commits(app_context, ref='agent:' + SESSION_A)
+    ]
+    # --all reaches every ref under refs/, session refs included.
+    assert undone in [c.oid for c in read_commits(app_context, ref='--all')]
+
+
+def test_undone_label_sorts_after_the_live_anchors(app_context):
+    """A commit that is both a tip and an undo point reads live-first"""
+    sessions = {
+        SESSION_A: agentsession.AgentSession(
+            SESSION_A, base_oid='a', tip_oid='shared'
+        ),
+        SESSION_B: agentsession.AgentSession(
+            SESSION_B, base_oid='b', tip_oid='c', undone=((0, 'shared'),)
+        ),
+    }
+
+    labels = agentsession.labels_by_oid(sessions)
+
+    assert labels['shared'] == [
+        (agentsession.TIP, SESSION_A),
+        ('undone/0', SESSION_B),
+    ]
+
+
+def test_refresh_key_notices_a_new_undo_point(app_context):
+    """Undoing changes the refresh key, so the DAG redraws"""
+    base = commit('base')
+    tip = commit_for(SESSION_A, 'kept')
+    undone = commit_for(SESSION_A, 'thrown away')
+    record_session(SESSION_A, base, tip)
+    before = agentsession.refresh_key(agentsession.load_agent_sessions(app_context))
+
+    record_undone(SESSION_A, 0, undone)
+    after = agentsession.refresh_key(agentsession.load_agent_sessions(app_context))
+
+    assert before != after
