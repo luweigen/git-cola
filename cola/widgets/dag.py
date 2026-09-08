@@ -16,6 +16,7 @@ from qtpy.QtCore import Signal
 from .. import cmds
 from .. import core
 from .. import difftool
+from .. import git
 from .. import gitcmds
 from .. import guicmds
 from .. import hotkeys
@@ -1827,6 +1828,11 @@ class GitDAG(standard.MainWindow):
         self.open_recent_menu = self.file_menu.addMenu(N_('Open Recent'))
         self.open_recent_menu.setIcon(icons.folder())
         self.open_recent_menu.aboutToShow.connect(self._build_open_recent_menu)
+        self.open_path_action = self.file_menu.addAction(
+            N_('Open...'), self._open_repo_from_dialog
+        )
+        self.open_path_action.setIcon(icons.folder())
+        self.open_path_action.setShortcut(hotkeys.OPEN)
 
         # View Menu
         self.view_menu = qtutils.add_menu(N_('View'), self.menubar)
@@ -1958,6 +1964,20 @@ class GitDAG(standard.MainWindow):
         if not added:
             empty_action = menu.addAction(N_('No recent repositories'))
             empty_action.setEnabled(False)
+
+    def _open_repo_from_dialog(self):
+        """Prompt for a repository directory and open it in a new dag window."""
+        worktree = self.context.git.worktree() or core.getcwd()
+        directory = qtutils.opendir_dialog(N_('Open Git Repository'), worktree)
+        if not directory:
+            return
+        if not git.is_git_worktree(directory) and not git.is_git_dir(directory):
+            Interaction.critical(
+                N_('Error'),
+                N_('"%s" is not a Git repository.') % directory,
+            )
+            return
+        self._open_repo_in_new_dag(directory)
 
     def _open_repo_in_new_dag(self, repo_path):
         """Launch a new dag process for ``repo_path`` reusing current argv."""

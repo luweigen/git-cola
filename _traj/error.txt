@@ -1,0 +1,24 @@
+===== 2026-09-08 13:27:52 session=2e9b3bc7-6a91-49d0-9f73-47d757524c95 source=sessionstart_hook.main =====
+Traceback (most recent call last):
+  File "/Users/luwei/work/sources/sessionstart_hook.py", line 549, in main
+    _main()
+    ~~~~~^^
+  File "/Users/luwei/work/sources/sessionstart_hook.py", line 626, in _main
+    handle_main_flow(cwd, session_id, target_branch, source)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/luwei/work/sources/sessionstart_hook.py", line 370, in handle_main_flow
+    run_embedded_terminal(session_id, cwd, current_branch, target_branch, executed_cmds)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/luwei/work/sources/sessionstart_hook.py", line 170, in run_embedded_terminal
+    term = EmbeddedTerminal(
+        session_id=session_id,
+    ...<6 lines>...
+        traj_output_path=None
+    )
+  File "/Users/luwei/work/sources/base.py", line 1605, in __init__
+    self.draw = AnsiDraw()
+                ~~~~~~~~^^
+  File "/Users/luwei/work/sources/base.py", line 1514, in __init__
+    self.tty = open('/dev/tty', 'w')
+               ~~~~^^^^^^^^^^^^^^^^^
+OSError: [Errno 6] Device not configured: '/dev/tty'
